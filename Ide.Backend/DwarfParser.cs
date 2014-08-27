@@ -8,7 +8,6 @@ namespace ArduinoIDE.net
     public class DwarfParser
     {
         private DwarfNode mCurrentNode;
-        private DwarfAttribute mCurrentAttribute;
 
         private string mElfFile;
 
@@ -44,8 +43,8 @@ namespace ArduinoIDE.net
             var att = DwarfAttribute.Get(s);
             if (att != null)
             {
-                AddAttributeToNode(mCurrentNode, att);
-                mCurrentAttribute = att;
+                if (mCurrentNode == null) throw new Exception("Orphan attribute");
+                mCurrentNode.Attributes.Add(att.Name, att);
                 return true;
             }
 
@@ -90,28 +89,19 @@ namespace ArduinoIDE.net
 
             parent.Children.Add(node);
         }
-
-        private void AddAttributeToNode(DwarfNode node, DwarfAttribute att)
-        {
-            if (node == null) return;
-
-            if (node.Attributes == null) node.Attributes = new List<DwarfAttribute>();
-
-            node.Attributes.Add(att);
-        }
     }
 
-
+    [System.Diagnostics.DebuggerDisplay("{Id} {TagType}")]
     public class DwarfNode
     {
-        private static Regex RegExpr = new Regex(@"<([0-9a-f]+)><([0-9a-f]+)>: Abbrev Number: ([0-9]+) \((DW_TAG_[a-z]+)\)");
+        private static Regex RegExpr = new Regex(@"<([0-9a-f]+)><([0-9a-f]+)>: Abbrev Number: ([0-9]+) \((DW_TAG_[a-z_]+)\)");
 
         public int Id;
         public string TagType;
         public int Depth;
         public int AbbrevNumber;
-        public List<DwarfAttribute> Attributes;
         public List<DwarfNode> Children;
+        public Dictionary<string, DwarfAttribute> Attributes = new Dictionary<string, DwarfAttribute>();
 
         public static DwarfNode Get(string s)
         {
@@ -122,48 +112,24 @@ namespace ArduinoIDE.net
 
             return new DwarfNode()
             {
-                Id = groups[1].GetIntValue(),
-                Depth = groups[0].GetIntValue(),
-                TagType = groups[3].Value,
-                AbbrevNumber = groups[2].GetIntValue()
+                Id = groups[2].GetIntValue(),
+                Depth = groups[1].GetIntValue(),
+                TagType = groups[4].Value,
+                AbbrevNumber = groups[3].GetIntValue()
             };
         }
     }
 
+    [System.Diagnostics.DebuggerDisplay("{Id} {Name}: {RawValue}")]
     public class DwarfAttribute
     {
-        private static Regex RegExpr = new Regex(@"<([0-9a-f]+)> + (DW_AT_[a-z_]+)[ \t]*: *([<>\(\)A-z, \t_\.\\:;0-9]+)");
+        private static Regex RegExpr = new Regex(@"<[ ]*([0-9a-f]+)> + DW_AT_([a-z_]+)[ \t]*: *([<>\(\)A-z, \t_\.\\:;0-9]+)");
 
         public int Id;
         public string Name;
         public string RawValue;
 
-        public virtual string Value
-        {
-            get { return RawValue; }
-        }
-
         public static DwarfAttribute Get(string s)
-        {
-            DwarfAttribute result;
-
-            result = DwarfNameAtt.Get(s);
-            if (result != null) return result;
-
-            result = DwarfLocationListAtt.Get(s);
-            if (result != null) return result;
-
-            result = DwarfLocationtAtt.Get(s);
-            if (result != null) return result;
-
-            result = DwarfFrameBasetAtt.Get(s);
-            if (result != null) return result;
-
-            return GetImpl(s);
-        }
-
-
-        private static DwarfAttribute GetImpl(string s)
         {
             var match = RegExpr.Match(s);
             if (!match.Success) return null;
@@ -172,123 +138,13 @@ namespace ArduinoIDE.net
 
             return new DwarfAttribute()
             {
-                Id = groups[0].GetIntValue(),
-                Name = groups[1].Value,
-                RawValue = groups[2].Value
+                Id = groups[1].GetIntValue(),
+                Name = groups[2].Value,
+                RawValue = groups[3].Value
             };
         }
     }
 
-    public class DwarfNameAtt: DwarfAttribute
-    {
-        private static Regex RegExpr = new Regex(@"<([a-f0-9]+)> +(DW_AT_name)[ \t]*: *\(indirect string, offset: 0x([a-f0-9]+)\): ([<>\(\)A-z, \t_:;0-9]+)");
-
-        public string NameValue;
-        public int Offset;
-
-        public override string Value
-        {
-            get { return NameValue; }
-        }
-
-        public static DwarfAttribute Get(string s)
-        {
-            var match = RegExpr.Match(s);
-            if (!match.Success) return null;
-
-            var groups = match.Groups;
-
-            return new DwarfNameAtt()
-            {
-                Id = groups[0].GetIntValue(),
-                Name = groups[1].Value,
-                Offset = groups[2].GetIntValue(),
-                NameValue = groups[3].Value
-            };
-        }
-    }
-
-
-    public class DwarfLocationListAtt : DwarfAttribute
-    {
-        private static Regex RegExpr = new Regex(@"<([a-f0-9]+)> +(DW_AT_location)[ \t]+: +([a-z0-9 :]*)[ \t]+\(location list\)");
-
-        public int LocationListIndex;
-        
-        public static DwarfAttribute Get(string s)
-        {
-            var match = RegExpr.Match(s);
-            if (!match.Success) return null;
-
-            var groups = match.Groups;
-
-            return new DwarfLocationListAtt()
-            {
-                Id = groups[0].GetIntValue(),
-                Name = groups[1].Value,
-                RawValue = groups[2].Value,
-                LocationListIndex = groups[2].GetIntValue()
-            };
-        }
-    }
-
-
-    public class DwarfLocationtAtt : DwarfAttribute
-    {
-        private static Regex RegExpr = new Regex(@"<([a-f0-9]+)> +(DW_AT_location)[ \t]+: +([a-z0-9 :]*)[ \t]+\(([_A-Za-z0-9: ]+)\)");
-
-        public string LocationOpcodes;
-
-        public override string Value
-        {
-            get { return LocationOpcodes; }
-        }
-
-        public static DwarfAttribute Get(string s)
-        {
-            var match = RegExpr.Match(s);
-            if (!match.Success) return null;
-
-            var groups = match.Groups;
-
-            return new DwarfLocationtAtt()
-            {
-                Id = groups[0].GetIntValue(),
-                Name = groups[1].Value,
-                RawValue = groups[2].Value,
-                LocationOpcodes = groups[3].Value
-            };
-        }
-    }
-
-
-    public class DwarfFrameBasetAtt : DwarfAttribute
-    {
-        private static Regex RegExpr = new Regex(@"<([a-f0-9]+)> +(DW_AT_frame_base)[ \t]+: +([a-z0-9 :]*)[ \t]+\(([_A-Za-z0-9: ]+)\)");
-
-        public string FrameBaseOpcode;
-
-        public override string Value
-        {
-            get { return FrameBaseOpcode; }
-        }
-
-        public static DwarfAttribute Get(string s)
-        {
-            var match = RegExpr.Match(s);
-            if (!match.Success) return null;
-
-            var groups = match.Groups;
-
-            return new DwarfFrameBasetAtt()
-            {
-                Id = groups[0].GetIntValue(),
-                Name = groups[1].Value,
-                RawValue = groups[2].Value,
-                FrameBaseOpcode = groups[3].Value
-            };
-        }
-    }
 
 
 
@@ -299,7 +155,17 @@ namespace ArduinoIDE.net
             int result;
             if (Int32.TryParse(group.Value, out result)) return result;
 
-            return -1;
+            try
+            {
+                return Convert.ToInt32(group.Value, 16);
+            }
+            catch
+            {
+                return -1;
+            }
+
+            //if (Int32.TryParse(group.Value, System.Globalization.NumberStyles.AllowHexSpecifier, null, out result)) return result;
+            //return -1;
         }
     }
 }
