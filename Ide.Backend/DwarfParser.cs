@@ -94,7 +94,7 @@ namespace ArduinoIDE.net
     [System.Diagnostics.DebuggerDisplay("{Id} {TagType}")]
     public class DwarfNode
     {
-        private static Regex RegExpr = new Regex(@"<([0-9a-f]+)><([0-9a-f]+)>: Abbrev Number: ([0-9]+) \((DW_TAG_[a-z_]+)\)");
+        private static Regex RegExpr = new Regex(@"<([0-9a-f]+)><([0-9a-f]+)>: Abbrev Number: ([0-9]+) \(DW_TAG_([a-z_]+)\)");
 
         public int Id;
         public string TagType;
@@ -102,6 +102,11 @@ namespace ArduinoIDE.net
         public int AbbrevNumber;
         public List<DwarfNode> Children;
         public Dictionary<string, DwarfAttribute> Attributes = new Dictionary<string, DwarfAttribute>();
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1}", Id, TagType);
+        }
 
         public static DwarfNode Get(string s)
         {
@@ -128,6 +133,8 @@ namespace ArduinoIDE.net
         public int Id;
         public string Name;
         public string RawValue;
+        public int ReferencedId = -1;
+
 
         public static DwarfAttribute Get(string s)
         {
@@ -136,12 +143,27 @@ namespace ArduinoIDE.net
 
             var groups = match.Groups;
 
+            string rawValue = groups[3].Value;
+
             return new DwarfAttribute()
             {
                 Id = groups[1].GetIntValue(),
                 Name = groups[2].Value,
-                RawValue = groups[3].Value
+                RawValue = rawValue,
+                ReferencedId = GetReference(rawValue)
             };
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1} {2}", Id, Name, RawValue);
+        }
+
+        private static int GetReference(string s)
+        {
+            if (!s.StartsWith("<")) return -1;
+
+            return DwarfExtensionMethods.GetInt(s.Trim('<', '>', '\t'));
         }
     }
 
@@ -152,20 +174,22 @@ namespace ArduinoIDE.net
     { 
         public static int GetIntValue(this Group group)
         {
+            return GetInt(group.Value);
+        }
+
+        public static int GetInt(string s)
+        {
             int result;
-            if (Int32.TryParse(group.Value, out result)) return result;
+            if (Int32.TryParse(s, out result)) return result;
 
             try
             {
-                return Convert.ToInt32(group.Value, 16);
+                return Convert.ToInt32(s, 16);
             }
             catch
             {
                 return -1;
-            }
-
-            //if (Int32.TryParse(group.Value, System.Globalization.NumberStyles.AllowHexSpecifier, null, out result)) return result;
-            //return -1;
+            }            
         }
     }
 }
