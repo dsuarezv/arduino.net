@@ -129,10 +129,6 @@ namespace ArduinoIDE.net
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            Editor.Core.ObjectExplorerControl.ShowDialog(mDwarfParser, "Dwarf tree");
-        }
     }
 
 

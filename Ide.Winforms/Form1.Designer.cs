@@ -34,7 +34,6 @@
             this.SerialOutputTextbox = new System.Windows.Forms.TextBox();
             this.DisassemblyTextbox = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.button1 = new System.Windows.Forms.Button();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.panel2 = new System.Windows.Forms.Panel();
             this.splitter2 = new System.Windows.Forms.Splitter();
@@ -56,7 +55,6 @@
             this.ContinueButton.Enabled = false;
             this.ContinueButton.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             this.ContinueButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.ContinueButton.Image = global::ArduinoIDE.net.Properties.Resources.play_40x40;
             this.ContinueButton.Location = new System.Drawing.Point(5, 4);
             this.ContinueButton.Name = "ContinueButton";
             this.ContinueButton.Size = new System.Drawing.Size(70, 56);
@@ -109,7 +107,6 @@
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.button1);
             this.panel1.Controls.Add(this.ContinueButton);
             this.panel1.Controls.Add(this.StatusLabel);
             this.panel1.Controls.Add(this.BreakpointDetailsLabel);
@@ -119,18 +116,6 @@
             this.panel1.Padding = new System.Windows.Forms.Padding(5, 5, 0, 0);
             this.panel1.Size = new System.Drawing.Size(1028, 65);
             this.panel1.TabIndex = 5;
-            // 
-            // button1
-            // 
-            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
-            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button1.Location = new System.Drawing.Point(589, 8);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(70, 29);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "Inspect";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // splitter1
             // 
@@ -263,7 +248,6 @@
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader3;
-        private System.Windows.Forms.Button button1;
     }
 }
 
