@@ -25,7 +25,8 @@ namespace ArduinoIDE.net
 
         public static List<string> GetDisassembly(string elfFile)
         {
-            return RunObjectDumper("-S -l -C -w -F " + elfFile);
+            //return RunObjectDumper("-S -l -C -w -F " + elfFile);
+            return RunObjectDumper(" -d -w -C " + elfFile);
         }
 
         public static List<string> GetDwarf(string elfFile)

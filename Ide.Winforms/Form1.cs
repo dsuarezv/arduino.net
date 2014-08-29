@@ -12,6 +12,9 @@ namespace ArduinoIDE.net
 {
     public partial class Form1 : Form
     {
+        const string ElfFile = @"C:\Users\dave\AppData\Local\Temp\build5092726759323454303.tmp\Debugger.cpp.elf";
+
+
         private DebuggerTransport mDebugger = new DebuggerTransport("COM3");
         private SymbolTableParser mSymbolTable;
         private DwarfParser mDwarfParser;
@@ -72,8 +75,8 @@ namespace ArduinoIDE.net
 
         // __ Symbols _________________________________________________________
 
+
         
-        const string ElfFile = @"C:\Users\dave\AppData\Local\Temp\build8447241043521974941.tmp\Debugger.cpp.elf";
 
 
         private void InitSymbols()
@@ -99,10 +102,7 @@ namespace ArduinoIDE.net
 
         private void InitSource()
         {
-            //foreach (string s in ObjectDumper.GetDwarf(ElfFile))
-            //{
-            //    DisassemblyTextbox.AppendText(s + "\r\n");
-            //}
+            DisassemblyTextbox.Lines = ObjectDumper.GetDisassembly(ElfFile).ToArray();
         }
 
 

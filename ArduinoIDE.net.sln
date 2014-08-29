@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArduinoIDE.net", "Ide.Winfo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ide.Backend", "Ide.Backend\Ide.Backend.csproj", "{4CB8F184-05FF-4CC9-9CD6-41F68589A5B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "arduino.net", "arduino.net\arduino.net.csproj", "{0986F160-80EA-4031-9F48-67C65D6CB2D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{4CB8F184-05FF-4CC9-9CD6-41F68589A5B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CB8F184-05FF-4CC9-9CD6-41F68589A5B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CB8F184-05FF-4CC9-9CD6-41F68589A5B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0986F160-80EA-4031-9F48-67C65D6CB2D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0986F160-80EA-4031-9F48-67C65D6CB2D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0986F160-80EA-4031-9F48-67C65D6CB2D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0986F160-80EA-4031-9F48-67C65D6CB2D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

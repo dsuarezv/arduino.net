@@ -34,6 +34,7 @@
             this.SerialOutputTextbox = new System.Windows.Forms.TextBox();
             this.DisassemblyTextbox = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.panel2 = new System.Windows.Forms.Panel();
             this.splitter2 = new System.Windows.Forms.Splitter();
@@ -44,7 +45,6 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.splitter3 = new System.Windows.Forms.Splitter();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.button1 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -89,7 +89,7 @@
             this.SerialOutputTextbox.Multiline = true;
             this.SerialOutputTextbox.Name = "SerialOutputTextbox";
             this.SerialOutputTextbox.ReadOnly = true;
-            this.SerialOutputTextbox.Size = new System.Drawing.Size(661, 123);
+            this.SerialOutputTextbox.Size = new System.Drawing.Size(1018, 123);
             this.SerialOutputTextbox.TabIndex = 3;
             // 
             // DisassemblyTextbox
@@ -103,7 +103,7 @@
             this.DisassemblyTextbox.Name = "DisassemblyTextbox";
             this.DisassemblyTextbox.ReadOnly = true;
             this.DisassemblyTextbox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.DisassemblyTextbox.Size = new System.Drawing.Size(395, 406);
+            this.DisassemblyTextbox.Size = new System.Drawing.Size(703, 507);
             this.DisassemblyTextbox.TabIndex = 4;
             this.DisassemblyTextbox.WordWrap = false;
             // 
@@ -117,94 +117,8 @@
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
             this.panel1.Padding = new System.Windows.Forms.Padding(5, 5, 0, 0);
-            this.panel1.Size = new System.Drawing.Size(671, 65);
+            this.panel1.Size = new System.Drawing.Size(1028, 65);
             this.panel1.TabIndex = 5;
-            // 
-            // splitter1
-            // 
-            this.splitter1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.splitter1.Location = new System.Drawing.Point(0, 65);
-            this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(671, 3);
-            this.splitter1.TabIndex = 6;
-            this.splitter1.TabStop = false;
-            // 
-            // panel2
-            // 
-            this.panel2.Controls.Add(this.SerialOutputTextbox);
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel2.Location = new System.Drawing.Point(0, 477);
-            this.panel2.Name = "panel2";
-            this.panel2.Padding = new System.Windows.Forms.Padding(5, 0, 5, 5);
-            this.panel2.Size = new System.Drawing.Size(671, 128);
-            this.panel2.TabIndex = 7;
-            // 
-            // splitter2
-            // 
-            this.splitter2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.splitter2.Location = new System.Drawing.Point(0, 474);
-            this.splitter2.Name = "splitter2";
-            this.splitter2.Size = new System.Drawing.Size(671, 3);
-            this.splitter2.TabIndex = 8;
-            this.splitter2.TabStop = false;
-            // 
-            // panel3
-            // 
-            this.panel3.Controls.Add(this.WatchesListView);
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel3.Location = new System.Drawing.Point(403, 68);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(268, 406);
-            this.panel3.TabIndex = 9;
-            // 
-            // WatchesListView
-            // 
-            this.WatchesListView.CheckBoxes = true;
-            this.WatchesListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3});
-            this.WatchesListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.WatchesListView.FullRowSelect = true;
-            this.WatchesListView.Location = new System.Drawing.Point(0, 0);
-            this.WatchesListView.Name = "WatchesListView";
-            this.WatchesListView.Size = new System.Drawing.Size(268, 406);
-            this.WatchesListView.TabIndex = 0;
-            this.WatchesListView.UseCompatibleStateImageBehavior = false;
-            this.WatchesListView.View = System.Windows.Forms.View.Details;
-            // 
-            // columnHeader1
-            // 
-            this.columnHeader1.Text = "Name";
-            this.columnHeader1.Width = 110;
-            // 
-            // columnHeader2
-            // 
-            this.columnHeader2.Text = "Address";
-            this.columnHeader2.Width = 74;
-            // 
-            // columnHeader3
-            // 
-            this.columnHeader3.Text = "Value";
-            // 
-            // splitter3
-            // 
-            this.splitter3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.splitter3.Location = new System.Drawing.Point(400, 68);
-            this.splitter3.Name = "splitter3";
-            this.splitter3.Size = new System.Drawing.Size(3, 406);
-            this.splitter3.TabIndex = 10;
-            this.splitter3.TabStop = false;
-            // 
-            // panel4
-            // 
-            this.panel4.Controls.Add(this.DisassemblyTextbox);
-            this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel4.Location = new System.Drawing.Point(0, 68);
-            this.panel4.Name = "panel4";
-            this.panel4.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
-            this.panel4.Size = new System.Drawing.Size(400, 406);
-            this.panel4.TabIndex = 11;
             // 
             // button1
             // 
@@ -218,12 +132,98 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // splitter1
+            // 
+            this.splitter1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.splitter1.Location = new System.Drawing.Point(0, 65);
+            this.splitter1.Name = "splitter1";
+            this.splitter1.Size = new System.Drawing.Size(1028, 3);
+            this.splitter1.TabIndex = 6;
+            this.splitter1.TabStop = false;
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.SerialOutputTextbox);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel2.Location = new System.Drawing.Point(0, 578);
+            this.panel2.Name = "panel2";
+            this.panel2.Padding = new System.Windows.Forms.Padding(5, 0, 5, 5);
+            this.panel2.Size = new System.Drawing.Size(1028, 128);
+            this.panel2.TabIndex = 7;
+            // 
+            // splitter2
+            // 
+            this.splitter2.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.splitter2.Location = new System.Drawing.Point(0, 575);
+            this.splitter2.Name = "splitter2";
+            this.splitter2.Size = new System.Drawing.Size(1028, 3);
+            this.splitter2.TabIndex = 8;
+            this.splitter2.TabStop = false;
+            // 
+            // panel3
+            // 
+            this.panel3.Controls.Add(this.WatchesListView);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel3.Location = new System.Drawing.Point(711, 68);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(317, 507);
+            this.panel3.TabIndex = 9;
+            // 
+            // WatchesListView
+            // 
+            this.WatchesListView.CheckBoxes = true;
+            this.WatchesListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2,
+            this.columnHeader3});
+            this.WatchesListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.WatchesListView.FullRowSelect = true;
+            this.WatchesListView.Location = new System.Drawing.Point(0, 0);
+            this.WatchesListView.Name = "WatchesListView";
+            this.WatchesListView.Size = new System.Drawing.Size(317, 507);
+            this.WatchesListView.TabIndex = 0;
+            this.WatchesListView.UseCompatibleStateImageBehavior = false;
+            this.WatchesListView.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "Name";
+            this.columnHeader1.Width = 158;
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "Address";
+            this.columnHeader2.Width = 74;
+            // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "Value";
+            // 
+            // splitter3
+            // 
+            this.splitter3.Dock = System.Windows.Forms.DockStyle.Right;
+            this.splitter3.Location = new System.Drawing.Point(708, 68);
+            this.splitter3.Name = "splitter3";
+            this.splitter3.Size = new System.Drawing.Size(3, 507);
+            this.splitter3.TabIndex = 10;
+            this.splitter3.TabStop = false;
+            // 
+            // panel4
+            // 
+            this.panel4.Controls.Add(this.DisassemblyTextbox);
+            this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel4.Location = new System.Drawing.Point(0, 68);
+            this.panel4.Name = "panel4";
+            this.panel4.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
+            this.panel4.Size = new System.Drawing.Size(708, 507);
+            this.panel4.TabIndex = 11;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(671, 605);
+            this.ClientSize = new System.Drawing.Size(1028, 706);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.splitter3);
             this.Controls.Add(this.panel3);
