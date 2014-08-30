@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Syntax name="assembler">
+  <HighlightWordsRule name="Reserved language words">
+    <Words>
+      ADC ADD ADIW AND ANDI ASR BCLR BLD BRBC BRBS BRCC BRCS BREAK BREQ BRGE BRHC BRHS BRID BRIE BRLO BRLT BRMI BRNE BRPL BRSH BRTC BRTS BRVC BRVS BSET BST CALL CBI CBR CLC CLH CLI CLN CLR CLS CLT CLV CLZ COM CPC CPI CPI CPSE Data DEC DES EICALL EIJMP EIND EOR FMUL FMULS FMULSU ICALL IJMP IN INC JMP LAC LAS LD LDI LDS LSL LSR MCU MOV MOVW MUL MULS MULSU NEG NOP OR ORI OUT POP PUSH RCALL RET RETI RJMP ROL ROR SBC SBCI SBI SBIC SBIS SBIW SBR SBRC SBRS SEC SEH SEI SEN SER SES SET SEV SEZ SLEEP ST SUB SUBI SWAP TST WDR XCH
+    </Words>
+    <IgnoreCase>true</IgnoreCase>
+    <Foreground>#0080FF</Foreground>
+    <FontWeight>Bold</FontWeight>
+    <FontStyle>Normal</FontStyle>
+  </HighlightWordsRule>
+
+  <HighlightWordsRule name="Registers">
+    <Words>
+      r1 r2 r3 r4 r5 r6 r7 r8 r9 r10
+      r11 r12 r13 r14 r15 r16 r17 r18 r19 r20
+      r21 r22 r23 r24 r25 r26 r27 r28 r29 r30
+      r31
+    </Words>
+    <IgnoreCase>true</IgnoreCase>
+    <Foreground>#C00080</Foreground>
+    <FontWeight>Normal</FontWeight>
+    <FontStyle>Normal</FontStyle>
+  </HighlightWordsRule>
+
+  <HighlightWordsRule name="Standard types">
+    <Words>
+      CSEG DSEG
+    </Words>
+    <IgnoreCase>true</IgnoreCase>
+    <Foreground>#8000FF</Foreground>
+    <FontWeight>Normal</FontWeight>
+    <FontStyle>Normal</FontStyle>
+  </HighlightWordsRule>
+
+  <HighlightWordsRule name="Standard functions">
+    <Words>
+      high low extern global
+    </Words>
+    <IgnoreCase>true</IgnoreCase>
+    <Foreground>#0080FF</Foreground>
+    <FontWeight>Normal</FontWeight>
+    <FontStyle>Normal</FontStyle>
+  </HighlightWordsRule>
+
+  <HighlightLineRule name="Comments">
+    <LineStart>;</LineStart>
+    <IgnoreCase>false</IgnoreCase>
+    <Foreground>#009933</Foreground>
+    <FontWeight>Normal</FontWeight>
+    <FontStyle>Normal</FontStyle>
+  </HighlightLineRule>
+
+  <AdvancedHighlightRule name="Numbers">
+    <Expression>\b([0-9a-fA-Fx]+)\b</Expression>
+    <IgnoreCase>false</IgnoreCase>
+    <Foreground>#F68A1B</Foreground>
+    <FontWeight>Normal</FontWeight>
+    <FontStyle>Normal</FontStyle>
+  </AdvancedHighlightRule>
+</Syntax>

@@ -1,9 +1,101 @@
-﻿<Window x:Class="arduino.net.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="525"
-        WindowStyle="None" AllowsTransparency="False" ResizeMode="CanResizeWithGrip">
-    <Grid>
+        xmlns:local="clr-namespace:arduino.net" x:Class="arduino.net.MainWindow"
+        Title="MainWindow" Height="609" Width="809"
+        WindowStyle="None" AllowsTransparency="False" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded">
+    <Grid Width="auto">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
         
+            <TextBlock x:Name="TitleLabel" 
+                Grid.Row="0"
+			    Grid.Column="0" 
+
+                Padding="10,5"
+			    FontWeight="Light"
+			    FontSize="36"
+			    Foreground="#FFA1A1A1" ><Run Text="Blink sample - arduino.net"/></TextBlock>
+
+        <local:SystemButtons
+            Grid.Row="0"
+			Grid.Column="0" 
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"/>
+            
+
+        <Border Grid.Row="1" Padding="10,0,10,10">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="BuildButton" Content="build"/>
+                <Button x:Name="DeployButton" Content="deploy"/>
+                <Button x:Name="DebugButton" Content="debug"/>
+            </StackPanel>
+        </Border>
+
+        <Border 
+			Grid.Row="2" 
+			Grid.Column="0">
+            <Border 
+				Height="50px" 
+				Width="1700" 
+				Padding="10px">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#688835" Offset="0.0" />
+                        <GradientStop Color="#a2c5fb" Offset="0.45" />
+                        <GradientStop Color="#f2aea1" Offset="0.55" />
+                        <GradientStop Color="#f2d5a3" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Foreground="White" VerticalAlignment="Center" FontSize="18"><Run Text="Build successful"/></TextBlock>
+                    <TextBlock Grid.Column="1" Foreground="#9e0303" VerticalAlignment="Center" FontSize="18"><Run Text="Running with debug - Stopped at breakpoint"/></TextBlock>
+                </Grid>
+            </Border>
+        </Border>
+
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280px"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <GridSplitter 
+				Grid.Column="0"
+				HorizontalAlignment="Right"
+				VerticalAlignment="Stretch"
+				Background="#b6b6b6" 
+				ShowsPreview="True"
+				Width="1"/>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="150px"/>
+                </Grid.RowDefinitions>
+
+                <GridSplitter
+					Grid.Row="0"
+					HorizontalAlignment="Stretch"
+					VerticalAlignment="Bottom"
+					Background="#b6b6b6" 
+					ShowsPreview="True"
+					Height="1"/>
+
+
+
+                <local:CodeTextBox x:Name="SampleCodeBox" Grid.Row="0" />
+
+
+
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

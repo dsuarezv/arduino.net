@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Shell;
+using AurelienRibon.Ui.SyntaxHighlightBox;
 
 namespace arduino.net
 {
@@ -25,7 +26,29 @@ namespace arduino.net
         {
             InitializeComponent();
 
-            WindowChrome.SetWindowChrome(this, new WindowChrome());
+            // Remove the window border.
+            WindowChrome.SetWindowChrome(this, new WindowChrome() { UseAeroCaptionButtons = false });
+
+            // Register syntax highlight XMLs in this assembly
+            HighlighterManager.Instance.RegisterDefinitions(this.GetType().Assembly);
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            { 
+                SampleCodeBox.OpenFile(@"C:\Users\dave\Documents\develop\Arduino\Debugger\soft_debugger.s");
+            }
+            catch (Exception ex)
+            {
+                DisplayException(ex);
+            }
+        }
+
+
+        private void DisplayException(Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error");
         }
     }
 }
