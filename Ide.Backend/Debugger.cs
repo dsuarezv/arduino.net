@@ -7,10 +7,11 @@ using System.Threading;
 
 namespace arduino.net
 {
-    public class DebuggerTransport: IDisposable
+    public class Debugger: IDisposable
     {
         private SerialPort mSerialPort;
         private List<BreakpointInfo> mBreakpoints = new List<BreakpointInfo>();
+        private List<TracepointInfo> mTracepoints = new List<TracepointInfo>();
         private byte[] mTraceQueryBuffer;
 
         public event BreakpointHitDelegate BreakPointHit;
@@ -21,8 +22,13 @@ namespace arduino.net
             get { return mBreakpoints; }
         }
 
+        public List<TracepointInfo> TracePoints
+        {
+            get { return mTracepoints; }
+        }
 
-        public DebuggerTransport(string comPort)
+
+        public Debugger(string comPort)
         {
             mSerialPort = new SerialPort(comPort, 115200);
         }

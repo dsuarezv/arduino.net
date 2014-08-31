@@ -56,6 +56,9 @@
     <Compile Include="ProjectExplorer.xaml.cs">
       <DependentUpon>ProjectExplorer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="StatusHeaderControl.xaml.cs">
+      <DependentUpon>StatusHeaderControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SystemButtons.xaml.cs">
       <DependentUpon>SystemButtons.xaml</DependentUpon>
     </Compile>
@@ -79,6 +82,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="ProjectExplorer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="StatusHeaderControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

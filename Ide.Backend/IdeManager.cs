@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace arduino.net
 {
-    public class BreakpointInfo
+    public class IdeManager
     {
-        public int HitCount = 0;
-        public int LineNumber = 1;
-        public string SourceFileName = "default.cpp";
+        public static Project CurrentProject;
+        public static Debugger Debugger;
     }
 }

@@ -8,7 +8,7 @@
              d:DesignHeight="399" d:DesignWidth="475" >
 
     <SyntaxHighlightBox:SyntaxHighlightBox Name="MainTextBox" 
-                                           Width="auto" BorderThickness="0" FontFamily="Consolas"
+                                           Width="auto" BorderThickness="0" FontFamily="Consolas" KeyDown="MainTextBox_KeyDown"
                                            />
 
 

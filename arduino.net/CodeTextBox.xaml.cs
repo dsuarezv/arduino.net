@@ -36,7 +36,7 @@ namespace arduino.net
 
             mFileName = fileName;
 
-            ApplySyntaxHighligth();
+            ApplySyntaxHighlight();
         }
 
         public void SaveFile()
@@ -92,7 +92,7 @@ namespace arduino.net
             return true;
         }
 
-        private void ApplySyntaxHighligth()
+        private void ApplySyntaxHighlight()
         {
             string ext = Path.GetExtension(mFileName);
             string hl = null;
@@ -114,5 +114,31 @@ namespace arduino.net
 
             MainTextBox.CurrentHighlighter = HighlighterManager.Instance.Highlighters[hl];
         }
+
+
+        // __ Keyboard shortcuts ______________________________________________
+
+
+        private void MainTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
+            { 
+                switch (e.Key)
+                {
+                    case Key.S: break;
+                    case Key.W: break;
+                    case Key.F5: break; // run without debug (compile first)
+                }
+            }
+
+            switch (e.Key)
+            {
+                case Key.F9: break;  // Toggle breakpoint
+                case Key.F5: break;  // Debug run (compile first)
+            }
+            
+        }
+
+
     }
 }

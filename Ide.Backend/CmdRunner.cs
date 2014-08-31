@@ -9,11 +9,11 @@ namespace arduino.net
 {
     public class CmdRunner
     {
-        public static List<string> Run(string program, string arguments)
+        public static void Run(Command cmd)
         {
             Process p = new Process();
 
-            p.StartInfo = new ProcessStartInfo(program, arguments)
+            p.StartInfo = new ProcessStartInfo(cmd.Program, cmd.Arguments)
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -22,16 +22,14 @@ namespace arduino.net
                 WindowStyle = ProcessWindowStyle.Hidden
             };
 
-            var output = new List<string>();
-
             p.OutputDataReceived += (s, e) =>
             {
-                if (e.Data != null) output.Add(e.Data);
+                if (e.Data != null) cmd.Output.Add(e.Data);
             };
 
             p.ErrorDataReceived += (s, e) =>
             {
-                //var w = e.Data;
+                if (e.Data != null) cmd.Output.Add(e.Data);
             };
 
 
@@ -39,8 +37,19 @@ namespace arduino.net
             p.BeginOutputReadLine();
             p.BeginErrorReadLine();
             p.WaitForExit();
+        }
+    }
 
-            return output;
+    public class Command
+    {
+        public string Program;
+        public string Arguments;
+
+        public List<string> Output = new List<string>();
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1}", Program, Arguments);
         }
     }
 }

@@ -35,7 +35,9 @@ namespace arduino.net
         {
             string objDumpCommand = Path.Combine(Configuration.ToolsPath, ObjDumpCommand);
 
-            return CmdRunner.Run(objDumpCommand, arguments);
+            var cmd = new Command() { Program = objDumpCommand, Arguments = arguments };
+            CmdRunner.Run(cmd);
+            return cmd.Output;
         }
 
     }

@@ -12,6 +12,16 @@ namespace arduino.net
 
         private string mSdkPath;
 
+        public string SketchFile
+        {
+            get { return mSketchFile; }
+        }
+
+        public string PorjectPath
+        {
+            get { return mProjectPath; }
+        }
+
         public Project(string sketchFile, string sdkPath = null)
         {
             mProjectPath = Path.GetDirectoryName(sketchFile);

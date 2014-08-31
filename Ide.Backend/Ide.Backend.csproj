@@ -33,12 +33,13 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BreakpointInfo.cs" />
+    <Compile Include="ControlPoints.cs" />
     <Compile Include="CmdRunner.cs" />
     <Compile Include="Compiler.cs" />
-    <Compile Include="DebuggerTransport.cs" />
+    <Compile Include="Debugger.cs" />
     <Compile Include="DwarfParser.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="IdeManager.cs" />
     <Compile Include="ObjectDumper.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

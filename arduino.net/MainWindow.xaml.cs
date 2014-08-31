@@ -43,7 +43,7 @@ namespace arduino.net
 
                 var list = p.GetFileList();
 
-                SampleCodeBox.OpenFile(@"C:\Users\dave\Documents\develop\Arduino\Debugger\soft_debugger.s");
+                SampleCodeBox.OpenFile(@"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino");
             }
             catch (Exception ex)
             {
@@ -55,6 +55,21 @@ namespace arduino.net
         private void DisplayException(Exception ex)
         {
             MessageBox.Show(ex.Message, "Error");
+        }
+
+        private void BuildButton_Click(object sender, RoutedEventArgs e)
+        {
+            StatusControl.State = 1;
+        }
+
+        private void DeployButton_Click(object sender, RoutedEventArgs e)
+        {
+            StatusControl.State = 0;
+        }
+
+        private void DebugButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

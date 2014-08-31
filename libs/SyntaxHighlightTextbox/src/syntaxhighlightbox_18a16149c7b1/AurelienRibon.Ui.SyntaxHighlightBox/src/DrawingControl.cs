@@ -5,29 +5,35 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 
-namespace AurelienRibon.Ui.SyntaxHighlightBox {
-	public class DrawingControl : FrameworkElement {
-		private VisualCollection visuals;
-		private DrawingVisual visual;
+namespace AurelienRibon.Ui.SyntaxHighlightBox
+{
+    public class DrawingControl : FrameworkElement
+    {
+        private VisualCollection mVisuals;
+        private DrawingVisual mVisual;
 
-		public DrawingControl() {
-			visual = new DrawingVisual();
-			visuals = new VisualCollection(this);
-			visuals.Add(visual);
-		}
+        public DrawingControl()
+        {
+            mVisual = new DrawingVisual();
+            mVisuals = new VisualCollection(this);
+            mVisuals.Add(mVisual);
+        }
 
-		public DrawingContext GetContext() {
-			return visual.RenderOpen();
-		}
+        public DrawingContext GetContext()
+        {
+            return mVisual.RenderOpen();
+        }
 
-		protected override int VisualChildrenCount {
-			get { return visuals.Count; }
-		}
+        protected override int VisualChildrenCount
+        {
+            get { return mVisuals.Count; }
+        }
 
-		protected override Visual GetVisualChild(int index) {
-			if (index < 0 || index >= visuals.Count)
-				throw new ArgumentOutOfRangeException();
-			return visuals[index];
-		}
-	}
+        protected override Visual GetVisualChild(int index)
+        {
+            if (index < 0 || index >= mVisuals.Count)
+                throw new ArgumentOutOfRangeException();
+            return mVisuals[index];
+        }
+    }
 }
