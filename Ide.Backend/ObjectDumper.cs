@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 
 
-namespace ArduinoIDE.net
+namespace arduino.net
 {
     public class ObjectDumper
     {

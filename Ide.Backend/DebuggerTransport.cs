@@ -5,7 +5,7 @@ using System.IO.Ports;
 using System.Threading;
 
 
-namespace ArduinoIDE.net
+namespace arduino.net
 {
     public class DebuggerTransport: IDisposable
     {

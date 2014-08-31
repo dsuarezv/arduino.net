@@ -6,10 +6,16 @@ using System.Threading.Tasks;
 
 namespace arduino.net
 {
-    public class BreakpointInfo
+    public class Compiler
     {
-        public int HitCount = 0;
-        public int LineNumber = 1;
-        public string SourceFileName = "default.cpp";
+        public Compiler(Project project)
+        { 
+
+        }
+
+        public void Build()
+        { 
+        
+        }
     }
 }

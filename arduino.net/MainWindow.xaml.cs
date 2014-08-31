@@ -27,7 +27,7 @@ namespace arduino.net
             InitializeComponent();
 
             // Remove the window border.
-            WindowChrome.SetWindowChrome(this, new WindowChrome() { UseAeroCaptionButtons = false });
+            WindowChrome.SetWindowChrome(this, new WindowChrome());
 
             // Register syntax highlight XMLs in this assembly
             HighlighterManager.Instance.RegisterDefinitions(this.GetType().Assembly);
@@ -36,7 +36,9 @@ namespace arduino.net
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             try
-            { 
+            {
+                Configuration.Initialize(@"C:\Program Files (x86)\Arduino");
+
                 SampleCodeBox.OpenFile(@"C:\Users\dave\Documents\develop\Arduino\Debugger\soft_debugger.s");
             }
             catch (Exception ex)

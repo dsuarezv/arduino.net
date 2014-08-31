@@ -111,6 +111,10 @@
     <Resource Include="resources\assembler.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Ide.Backend\Ide.Backend.csproj">
+      <Project>{4cb8f184-05ff-4cc9-9cd6-41f68589a5b3}</Project>
+      <Name>Ide.Backend</Name>
+    </ProjectReference>
     <ProjectReference Include="..\libs\SyntaxHighlightTextbox\src\syntaxhighlightbox_18a16149c7b1\AurelienRibon.Ui.SyntaxHighlightBox\AurelienRibon.Ui.SyntaxHighlightBox.csproj">
       <Project>{10a9ecd3-ae1e-494d-9a27-8a32dd581759}</Project>
       <Name>AurelienRibon.Ui.SyntaxHighlightBox</Name>
