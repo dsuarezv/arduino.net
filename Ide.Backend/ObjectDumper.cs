@@ -9,7 +9,6 @@ namespace arduino.net
     public class ObjectDumper
     {
         public const string ObjDumpCommand = "avr-objdump.exe";
-        //-S Debugger.cpp.elf 
 
 
         public static List<string> GetHelp()
@@ -20,12 +19,10 @@ namespace arduino.net
         public static List<string> GetSymbolTable(string elfFile)
         {
             return RunObjectDumper("-t " + elfFile);
-            
         }
 
         public static List<string> GetDisassembly(string elfFile)
         {
-            //return RunObjectDumper("-S -l -C -w -F " + elfFile);
             return RunObjectDumper(" -d -w -C " + elfFile);
         }
 
@@ -36,40 +33,9 @@ namespace arduino.net
 
         private static List<string> RunObjectDumper(string arguments)
         {
-            Process p = new Process();
-            
             string objDumpCommand = Path.Combine(Configuration.ToolsPath, ObjDumpCommand);
 
-            p.StartInfo = new ProcessStartInfo(objDumpCommand, arguments)
-            {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden
-            };
-
-
-            var output = new List<string>();
-
-            p.OutputDataReceived += (s, e) =>
-                {
-                    if (e.Data != null) 
-                        output.Add(e.Data);
-                };
-
-            p.ErrorDataReceived += (s, e) =>
-                {
-                    //var w = e.Data;
-                };
-
-
-            p.Start();
-            p.BeginOutputReadLine();
-            p.BeginErrorReadLine();
-            p.WaitForExit();
-
-            return output;
+            return CmdRunner.Run(objDumpCommand, arguments);
         }
 
     }

@@ -39,6 +39,10 @@ namespace arduino.net
             {
                 Configuration.Initialize(@"C:\Program Files (x86)\Arduino");
 
+                Project p = new Project(@"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino");
+
+                var list = p.GetFileList();
+
                 SampleCodeBox.OpenFile(@"C:\Users\dave\Documents\develop\Arduino\Debugger\soft_debugger.s");
             }
             catch (Exception ex)
