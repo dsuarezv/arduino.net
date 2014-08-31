@@ -24,5 +24,24 @@ namespace arduino.net
         {
             InitializeComponent();
         }
+
+        private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            var w = this.Parent as Window;
+
+            if (w == null) return;
+
+            w.Close();
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

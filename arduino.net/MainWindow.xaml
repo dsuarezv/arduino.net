@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:arduino.net" x:Class="arduino.net.MainWindow"
         Title="MainWindow" Height="609" Width="809"
-        WindowStyle="None" AllowsTransparency="False" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded">
+        WindowStyle="None" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded">
     <Grid Width="auto">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

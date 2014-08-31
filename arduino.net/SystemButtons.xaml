@@ -6,7 +6,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="25" d:DesignWidth="90">
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Width="90">
-        <Button Name="MinimizeButton" Width="auto">
+        <Button Name="MinimizeButton" Width="auto" Click="MinimizeButton_Click">
             <Button.Template>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid>
@@ -27,7 +27,7 @@
                 </ControlTemplate>
             </Button.Template>
         </Button>
-        <Button Name="MaximizeButton" Width="auto">
+        <Button Name="MaximizeButton" Width="auto" Click="MaximizeButton_Click">
             <Button.Template>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid>
@@ -48,7 +48,7 @@
                 </ControlTemplate>
             </Button.Template>
         </Button>
-        <Button Name="CloseButton" Width="auto">
+        <Button Name="CloseButton" Width="auto" Click="CloseButton_Click">
             <Button.Template>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid>
