@@ -9,6 +9,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -21,27 +22,79 @@ namespace arduino.net
     public partial class StatusHeaderControl : UserControl
     {
         private int mState = 0;
+        private ThicknessAnimation mBarAnimation;
+        private Storyboard mBarStoryboard;
+
+        private ThicknessAnimation mTextAnimation;
+        
 
         public int State
         {
             get { return mState; }
-            set
-            {
-                mState = value;
-                InternalBar.Margin = new Thickness(-this.ActualWidth * mState, 0, 0, 0);
-            }
+            set { SetState(value); }
         }
 
         public StatusHeaderControl()
         {
             InitializeComponent();
 
+            SetupAnimations();
+
             SizeChanged += StatusHeaderControl_SizeChanged;
         }
 
-        void StatusHeaderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void StatusHeaderControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             InternalBar.Width = this.ActualWidth * 2.1;
+            mBarAnimation.From = GetMarginForState(0);
+            mBarAnimation.To = GetMarginForState(1);
+        }
+
+        private void SetupAnimations()
+        {
+            mBarAnimation = new ThicknessAnimation() 
+            { 
+                From = GetMarginForState(0), 
+                To = GetMarginForState(1),
+                Duration = TimeSpan.FromSeconds(0.15),
+                FillBehavior = FillBehavior.HoldEnd
+            };
+
+            Storyboard.SetTarget(mBarAnimation, InternalBar);
+            Storyboard.SetTargetProperty(mBarAnimation, new PropertyPath(Border.MarginProperty));
+            
+            mBarStoryboard = new Storyboard();
+            mBarStoryboard.Children.Add(mBarAnimation);
+        }
+
+        private void SetState(int state)
+        { 
+            if (state == 0)
+            {
+                if (mState == 0) return;
+
+                mBarStoryboard.AutoReverse = true;
+                mBarStoryboard.Begin();
+                
+                mBarStoryboard.Seek(mBarAnimation.Duration.TimeSpan);
+                mBarStoryboard.Resume();
+                
+                mState = 0;
+            }
+            else
+            {
+                if (mState == 1) return;
+
+                mBarStoryboard.AutoReverse = false;
+                mBarStoryboard.Begin();
+
+                mState = 1;
+            }
+        }
+
+        private Thickness GetMarginForState(int state)
+        {
+            return new Thickness(-this.ActualWidth * 1.1 * state, 0, 0, 0);
         }
 
         

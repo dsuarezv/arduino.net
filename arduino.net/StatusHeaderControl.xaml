@@ -5,28 +5,33 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="50" d:DesignWidth="300">
-    
+
     <Border Name="InternalBar">
-        <Border 
-				Height="50px" 
-				
-				Padding="10px">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#688835" Offset="0.0" />
-                        <GradientStop Color="#a2c5fb" Offset="0.45" />
-                        <GradientStop Color="#f2aea1" Offset="0.55" />
-                        <GradientStop Color="#f2d5a3" Offset="1.0" />
-                    </LinearGradientBrush>
-                </Border.Background>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Foreground="White" VerticalAlignment="Center" FontSize="18"><Run Text="Build successful"/></TextBlock>
-                    <TextBlock Grid.Column="1" Foreground="#9e0303" VerticalAlignment="Center" FontSize="18"><Run Text="Running with debug - Stopped at breakpoint"/></TextBlock>
-                </Grid>
-            </Border>
+        <Border Height="50px" Padding="10px">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#688835" Offset="0.0" />
+                    <GradientStop Color="#a2c5fb" Offset="0.45" />
+                    <GradientStop Color="#f2aea1" Offset="0.55" />
+                    <GradientStop Color="#f2d5a3" Offset="1.0" />
+                </LinearGradientBrush>
+            </Border.Background>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="11*"/>
+                    <ColumnDefinition Width="10*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Name="GreenMessageLabel" Grid.Column="0" Foreground="White" VerticalAlignment="Center" FontSize="18">
+                    <Run Text="Build successful"/>
+                </TextBlock>
+
+                <TextBlock Name="OrangeMessageLabel" Grid.Column="1" Foreground="#9e0303" VerticalAlignment="Center" FontSize="18">
+                    <Run Text="Running with debug - Stopped at breakpoint"/>
+                </TextBlock>
+            </Grid>
+
         </Border>
+    </Border>
 </UserControl>
