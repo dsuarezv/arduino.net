@@ -13,6 +13,7 @@ namespace arduino.net
         public string SourceFile;
         public bool CopyToTmp = false;
         public Command BuildCommand;
+        public bool TargetUpToDate = false;
 
         protected string EffectiveSourceFile;
 
@@ -31,42 +32,47 @@ namespace arduino.net
 
         public virtual void SetupSources(string tempDir)
         {
-            CopyFiles(tempDir);
+            CopySourceToTemp(tempDir);
         }
 
         public virtual void Build(string tempDir)
         {
             if (BuildCommand == null) return;
 
-            if (!File.Exists(TargetFile))
-            {
-                CmdRunner.Run(BuildCommand);
-            }
-            else
+            if (File.Exists(TargetFile))
             {
                 if (File.GetLastWriteTime(SourceFile) > File.GetLastWriteTime(TargetFile))
                 {
                     CmdRunner.Run(BuildCommand);
                 }
+                else
+                { 
+                    TargetUpToDate = true;
+                }
+            }
+            else
+            {
+                CmdRunner.Run(BuildCommand);
             }
         }
 
-        protected void CopyFiles(string tempDir)
+        protected void CopySourceToTemp(string tempDir, string destFileName = null)
         {
             EffectiveSourceFile = SourceFile;
 
             if (!CopyToTmp) return;
 
-            var fileName = Path.GetFileName(SourceFile);
-            var destFile = Path.Combine(tempDir, fileName);
+            if (destFileName == null) destFileName = Path.GetFileName(SourceFile);
+            var destFullPath = Path.Combine(tempDir, destFileName);
 
-            File.Copy(SourceFile, destFile, true);
+            File.Copy(SourceFile, destFullPath, true);
 
-            EffectiveSourceFile = destFile;
+            EffectiveSourceFile = destFullPath;
         }
 
         public override string ToString()
         {
+            if (TargetUpToDate) return string.Format("* \"{0}\" is up to date", TargetFile);
             if (BuildCommand == null) return "";
 
             return BuildCommand.ToString();
@@ -186,6 +192,21 @@ namespace arduino.net
                     EffectiveSourceFile,
                     TargetFile)
             };
+        }
+    }
+
+    public class InoBuildTarget : CppBuildTarget
+    {
+        public override void SetupSources(string tempDir)
+        {
+            base.SetupSources(tempDir);
+        }
+
+        public override void SetupCommand(string boardName)
+        {
+
+
+            base.SetupCommand(boardName);
         }
     }
 }
