@@ -17,7 +17,7 @@ namespace arduino.net
             get { return mSketchFile; }
         }
 
-        public string PorjectPath
+        public string ProjectPath
         {
             get { return mProjectPath; }
         }

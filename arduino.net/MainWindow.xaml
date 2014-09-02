@@ -1,7 +1,7 @@
 ﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="clr-namespace:arduino.net" x:Class="arduino.net.MainWindow"
+        xmlns:local="clr-namespace:arduino.net" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="arduino.net.MainWindow"
         Title="MainWindow" Height="609" Width="809"
         WindowStyle="None" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded">
     <Grid Width="auto">
@@ -14,34 +14,34 @@
 
 
         <TextBlock x:Name="TitleLabel" 
-                Grid.Row="0"
-			    Grid.Column="0" 
+			Grid.Row="0"
+			Grid.Column="0" 
 
-                Padding="10,5"
-			    FontWeight="Light"
-			    FontSize="36"
-			    Foreground="#FFA1A1A1" ><Run Text="Blink sample - arduino.net"/></TextBlock>
+			Padding="10,5"
+			FontWeight="Light"
+			FontSize="36"
+			Foreground="#FFA1A1A1" ><Run Text="Blink sample - arduino.net"/></TextBlock>
 
         <local:SystemButtons
-            Grid.Row="0"
+			Grid.Row="0"
 			Grid.Column="0" 
-            HorizontalAlignment="Right"
-            VerticalAlignment="Top"/>
+			HorizontalAlignment="Right"
+			VerticalAlignment="Top"/>
 
 
         <Border Grid.Row="1" Padding="10,0,10,10">
             <StackPanel Orientation="Horizontal">
-                <Button x:Name="BuildButton" Content="build" Click="BuildButton_Click"/>
-                <Button x:Name="DeployButton" Content="deploy" Click="DeployButton_Click"/>
-                <Button x:Name="DebugButton" Content="debug" Click="DebugButton_Click"/>
+                <Button x:Name="BuildButton" Template="{StaticResource ActionButton}" Content="build" Click="BuildButton_Click"/>
+                <Button x:Name="DeployButton" Template="{StaticResource ActionButton}" Content="deploy" Click="DeployButton_Click"/>
+                <Button x:Name="DebugButton" Template="{StaticResource ActionButton}" Content="debug" Click="DebugButton_Click"/>
             </StackPanel>
         </Border>
 
         <local:StatusHeaderControl 
-            x:Name="StatusControl"
-            Width="auto"
-            Grid.Row="2" 
-            HorizontalAlignment="Left"/>
+			x:Name="StatusControl"
+			Width="auto"
+			Grid.Row="2" 
+			HorizontalAlignment="Left"/>
 
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
@@ -69,12 +69,9 @@
 					ShowsPreview="True"
 					Height="1"/>
 
+                <local:CodeTextBox x:Name="SampleCodeBox" Grid.Row="0" Margin="0,-1,0,2" Padding="0,5"/>
 
-
-                <local:CodeTextBox x:Name="SampleCodeBox" Grid.Row="0" Margin="0, 0, 0, 1"/>
-
-
-
+                <TextBox Grid.Row="1" FontFamily="Consolas" FontSize="11px" Padding="5" Text="Output"/>
             </Grid>
         </Grid>
     </Grid>

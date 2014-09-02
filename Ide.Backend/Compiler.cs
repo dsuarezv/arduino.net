@@ -11,7 +11,9 @@ namespace arduino.net
     {
         private Project mProject;
         private Debugger mDebugger;
-        private List<Command> mCompilationCommands = new List<Command>();
+        private List<BuildTarget> mBuildCommands = new List<BuildTarget>();
+        private List<BuildTarget> mCoreBuildCommands = new List<BuildTarget>();
+        private string mBoardName;
 
         public Compiler(Project p, Debugger d)
         {
@@ -21,20 +23,14 @@ namespace arduino.net
 
         public void Build(string boardName, bool debug)
         {
-            CreateTempDirectory();
+            var tempDir = CreateTempDirectory();
 
-            // Create list of files to compile, including system. 
+            if (mBoardName != boardName) Clean();
+            mBoardName = boardName;
 
-            // if debug is enabled, go through the list of breakpoints and 
-            // create modified files for them.
+            CreateCompileCommands(tempDir);
 
-            // Modify main sketch file
-
-            // Copy all project and core files to temp. We need to copy so that the right arduino_pins.h is used by project and core.
-
-            
-
-            
+            RunBuildCommands(tempDir);
         }
 
         public void Clean()
@@ -46,54 +42,72 @@ namespace arduino.net
         { 
             
         }
-        
 
-        private void ClearCommands()
+
+        private void RunBuildCommands(string tempDir)
+        { 
+            foreach (var cmd in mBuildCommands) RunBuildTarget(cmd, tempDir);
+            foreach (var cmd in mCoreBuildCommands) RunBuildTarget(cmd, tempDir);
+        }
+
+        private void RunBuildTarget(BuildTarget cmd, string tempDir)
         {
-            mCompilationCommands.Clear();
-        }
-
-        private void RunQueuedCommands()
-        { 
+            cmd.SetupSources(tempDir);
+            cmd.SetupCommand(mBoardName);
+            cmd.Build(tempDir);
             
+            Console.WriteLine(cmd);
+            if (cmd.BuildCommand == null) return;
+            foreach (var s in cmd.BuildCommand.Output) Console.WriteLine("    " + s);
         }
 
-        private void CreateCompilationCommands()
+
+        private void CreateCompileCommands(string tempDir)
         { 
-            // Compile files only if source is newer than existing .o file on destination
+            var inputFiles = new List<string>();
+
+            // project files
+            foreach (var sourceFile in mProject.GetFileList())
+            {
+                var targetFile = Path.Combine(tempDir, Path.GetFileName(sourceFile) + ".o");
+
+                if (IsCodeFile(sourceFile))
+                {
+                    mBuildCommands.Add(new CppBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, CopyToTmp = true });
+                }
+                else
+                {
+                    mBuildCommands.Add(new CopyBuildTarget() { SourceFile = sourceFile });
+                }
+            }
+
+            // core files
+            foreach (var sourceFile in GetCoreFiles())
+            {
+                var targetFile = Path.Combine(tempDir, Path.GetFileName(sourceFile) + ".o");
+                mCoreBuildCommands.Add(new CppBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile });
+            }
         }
 
-        private void CreateLibraryCommands()
-        { 
-        
+        private string[] GetCoreFiles()
+        {
+            return Directory.GetFiles(GetBoardCoreDirectory(), "*.c*", SearchOption.AllDirectories);
         }
 
-        private void CreateLinkCommand()
-        { 
-        
+        private bool IsCodeFile(string fileName)
+        {   
+            var ext = Path.GetExtension(fileName).ToLower();
+            return ext.StartsWith(".c") || ext == ".ino";
         }
 
-        private void CreateBinaryCommands()
-        { 
-            
+        private string GetBoardCoreDirectory()
+        {
+            var config = Configuration.Boards[mBoardName]["build"];
+
+            return Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config.Get("core"));
         }
 
-        private void CreateFinalSketchFile(bool debug)
-        { 
-            
-            // Insert function headers and #include <Arduino.h>
-            
-            // If debug is defined:
-            // - insert #include <soft_debugger.h> and 
-            // - insert breakpoint and tracepoint calls in the needed places. 
-            // - Add compilation of soft_debugger.s to the output
-        }
-
-        private void CopyProjectFilesToTemp(bool debug)
-        { 
-            
-            
-        }
+       
 
         private string CreateTempDirectory()
         {
@@ -107,31 +121,9 @@ namespace arduino.net
         private string GetTempDirectory()
         {
             string tempDir = Path.GetTempPath();
+            string dirName = string.Format("build-{0}.tmp", mProject.SketchFile);
 
-            return Path.Combine(tempDir, mProject.SketchFile.GetHashCode().ToString());
+            return Path.Combine(tempDir, dirName);
         }
     }
-
-
-
-    public class BuildTarget
-    {
-        public string TargetFile;
-        public string SourceFile;
-        public bool NeedsCopy = false;
-
-        public Command BuildCommand;
-
-        public BuildTarget(string targetFile, string sourceFile)
-        {
-            TargetFile = targetFile;
-            SourceFile = sourceFile;
-        }
-
-        public void CreateCommand()
-        { 
-            
-        }
-    }
-    
 }

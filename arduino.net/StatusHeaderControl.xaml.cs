@@ -24,15 +24,7 @@ namespace arduino.net
         private int mState = 0;
         private ThicknessAnimation mBarAnimation;
         private Storyboard mBarStoryboard;
-
-        private ThicknessAnimation mTextAnimation;
         
-
-        public int State
-        {
-            get { return mState; }
-            set { SetState(value); }
-        }
 
         public StatusHeaderControl()
         {
@@ -67,8 +59,13 @@ namespace arduino.net
             mBarStoryboard.Children.Add(mBarAnimation);
         }
 
-        private void SetState(int state)
-        { 
+        public void SetState(int state, string caption)
+        {
+            MessageLabel.Text = caption;
+            var key = (state == 0) ? "SuccessColor" : "FailColor";
+            var color = this.FindResource(key);
+            MessageLabel.Foreground = (SolidColorBrush)color;
+
             if (state == 0)
             {
                 if (mState == 0) return;

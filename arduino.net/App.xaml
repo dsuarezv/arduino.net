@@ -3,6 +3,27 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+
+        <ControlTemplate TargetType="Button" x:Key="ActionButton">
+            <Grid 
+                Width="{TemplateBinding Width}" 
+                Height="{TemplateBinding Height}" 
+                ClipToBounds="True">
+
+                <Rectangle x:Name="outerRectangle"  
+                    Margin="5, 0"
+                    Stroke="#000000"  
+                    StrokeThickness="1"
+                    RadiusX="5" RadiusY="5" 
+                    Fill="Transparent" />
+                <DockPanel>
+                    <ContentPresenter 
+                        Content="{TemplateBinding  Content}"
+                        Margin="25,4"/>
+                </DockPanel>
+            </Grid>
+        </ControlTemplate>
+
+
     </Application.Resources>
 </Application>

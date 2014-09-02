@@ -27,7 +27,7 @@ namespace arduino.net
             InitializeComponent();
 
             // Remove the window border.
-            WindowChrome.SetWindowChrome(this, new WindowChrome());
+            //WindowChrome.SetWindowChrome(this, new WindowChrome());
 
             // Register syntax highlight XMLs in this assembly
             HighlighterManager.Instance.RegisterDefinitions(this.GetType().Assembly);
@@ -39,11 +39,16 @@ namespace arduino.net
             {
                 Configuration.Initialize(@"C:\Program Files (x86)\Arduino");
 
-                Project p = new Project(@"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino");
+                IdeManager.CurrentProject = new Project(@"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino");
+                IdeManager.Debugger = new Debugger("COM3");
 
-                var list = p.GetFileList();
+                
 
                 SampleCodeBox.OpenFile(@"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino");
+
+                Compiler c = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
+                c.Build("atmega328", true);
+                c.Deploy("atmega328", "usbasp");
             }
             catch (Exception ex)
             {
@@ -59,12 +64,12 @@ namespace arduino.net
 
         private void BuildButton_Click(object sender, RoutedEventArgs e)
         {
-            StatusControl.State = 1;
+            StatusControl.SetState(0, "Build succeeded");
         }
 
         private void DeployButton_Click(object sender, RoutedEventArgs e)
         {
-            StatusControl.State = 0;
+            StatusControl.SetState(1, "Deploy failed");
         }
 
         private void DebugButton_Click(object sender, RoutedEventArgs e)

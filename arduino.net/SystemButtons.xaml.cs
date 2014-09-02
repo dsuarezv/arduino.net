@@ -27,13 +27,15 @@ namespace arduino.net
 
         private void MaximizeButton_Click(object sender, RoutedEventArgs e)
         {
+            var w = GetParentWindow(this);
+            if (w == null) return;
 
+            w.WindowState = (w.WindowState == WindowState.Maximized) ? WindowState.Normal : WindowState.Maximized;
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            var w = this.Parent as Window;
-
+            var w = GetParentWindow(this);
             if (w == null) return;
 
             w.Close();
@@ -41,7 +43,17 @@ namespace arduino.net
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
+            var w = GetParentWindow(this);
+            if (w == null) return;
 
+            w.WindowState = WindowState.Minimized;
+        }
+
+        private Window GetParentWindow(FrameworkElement c)
+        {
+            if (c.Parent is Window) return c.Parent as Window;
+
+            return GetParentWindow(c.Parent as FrameworkElement);
         }
     }
 }

@@ -33,6 +33,8 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompilerBuildTarget.cs" />
+    <Compile Include="ConfigurationFile.cs" />
     <Compile Include="ControlPoints.cs" />
     <Compile Include="CmdRunner.cs" />
     <Compile Include="Compiler.cs" />
