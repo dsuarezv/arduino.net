@@ -14,6 +14,7 @@ namespace arduino.net
         public bool CopyToTmp = false;
         public Command BuildCommand;
         public bool TargetUpToDate = false;
+        public bool FinishedSuccessfully = true;
 
         protected string EffectiveSourceFile;
 
@@ -43,7 +44,7 @@ namespace arduino.net
             {
                 if (File.GetLastWriteTime(SourceFile) > File.GetLastWriteTime(TargetFile))
                 {
-                    CmdRunner.Run(BuildCommand);
+                    FinishedSuccessfully = (CmdRunner.Run(BuildCommand) == 0);
                 }
                 else
                 { 
@@ -52,7 +53,7 @@ namespace arduino.net
             }
             else
             {
-                CmdRunner.Run(BuildCommand);
+                FinishedSuccessfully = (CmdRunner.Run(BuildCommand) == 0);
             }
         }
 
@@ -139,7 +140,7 @@ namespace arduino.net
         {
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "avr-ar"),
+                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-ar"),
                 Arguments = string.Format("rcs \"{0}\" \"{1}\"",
                     TargetFile, SourceFile)
             };
@@ -155,7 +156,7 @@ namespace arduino.net
 
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "avr-gcc"),
+                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-gcc"),
                 Arguments = string.Format("-Os -Wl,--gc-sections -mmcu={0} -o {1} {2} -L{3} -lm",
                     config.Get("mcu"),
                     TargetFile,
@@ -172,7 +173,7 @@ namespace arduino.net
         {
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "avr-objcopy"),
+                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-objcopy"),
                 Arguments = string.Format("-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0 {0} {1}",
                     EffectiveSourceFile,
                     TargetFile)
@@ -187,7 +188,7 @@ namespace arduino.net
         {
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "avr-objcopy"),
+                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-objcopy"),
                 Arguments = string.Format("-O ihex -R .eeprom {0} {1}",
                     EffectiveSourceFile,
                     TargetFile)

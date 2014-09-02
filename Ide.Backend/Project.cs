@@ -38,7 +38,7 @@ namespace arduino.net
 
             foreach (var ext in extensions)
             {
-                result.AddRange(Directory.GetFileSystemEntries(mProjectPath, "*." + ext));
+                result.AddRange(Directory.GetFileSystemEntries(mProjectPath, "*." + ext, SearchOption.TopDirectoryOnly));
             }
 
             return result;

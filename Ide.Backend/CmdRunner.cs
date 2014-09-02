@@ -9,7 +9,7 @@ namespace arduino.net
 {
     public class CmdRunner
     {
-        public static void Run(Command cmd)
+        public static int Run(Command cmd)
         {
             Process p = new Process();
 
@@ -37,6 +37,8 @@ namespace arduino.net
             p.BeginOutputReadLine();
             p.BeginErrorReadLine();
             p.WaitForExit();
+
+            return p.ExitCode;
         }
     }
 
