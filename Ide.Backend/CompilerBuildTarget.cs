@@ -12,6 +12,7 @@ namespace arduino.net
         public string TargetFile;
         public string SourceFile;
         public bool CopyToTmp = false;
+        public string FileExtensionOnTmp;
         public Command BuildCommand;
         public bool TargetUpToDate = false;
         public bool FinishedSuccessfully = true;
@@ -23,17 +24,12 @@ namespace arduino.net
             
         }
 
-        public BuildTarget(string targetFile, string sourceFile)
-        {
-            TargetFile = targetFile;
-            SourceFile = sourceFile;
-        }
-
         public abstract void SetupCommand(string boardName);
 
         public virtual void SetupSources(string tempDir)
         {
-            CopySourceToTemp(tempDir);
+            CalculateEffectiveSourceFile(tempDir);
+            CopySourceToTemp();
         }
 
         public virtual void Build(string tempDir)
@@ -57,18 +53,37 @@ namespace arduino.net
             }
         }
 
-        protected void CopySourceToTemp(string tempDir, string destFileName = null)
+        protected void CalculateEffectiveSourceFile(string tempDir)
         {
-            EffectiveSourceFile = SourceFile;
+            if (!CopyToTmp) 
+            {
+                EffectiveSourceFile = SourceFile;
+                return;
+            }
 
+            if (FileExtensionOnTmp != null)
+            {
+                var newFileName = Path.GetFileNameWithoutExtension(SourceFile) + FileExtensionOnTmp;
+                EffectiveSourceFile = Path.Combine(tempDir, newFileName);
+                return;
+            }
+
+            var newFileName2 = Path.GetFileName(SourceFile);
+            EffectiveSourceFile = Path.Combine(tempDir, newFileName2);
+        }
+
+        protected void CopySourceToTemp()
+        {
             if (!CopyToTmp) return;
 
+            File.Copy(SourceFile, EffectiveSourceFile, true);
+        }
+
+        protected string GetTmpFileName(string tempDir, string destFileName)
+        {
             if (destFileName == null) destFileName = Path.GetFileName(SourceFile);
             var destFullPath = Path.Combine(tempDir, destFileName);
-
-            File.Copy(SourceFile, destFullPath, true);
-
-            EffectiveSourceFile = destFullPath;
+            return destFullPath;
         }
 
         public override string ToString()
@@ -127,7 +142,7 @@ namespace arduino.net
             };
         }
 
-        public static bool IsCFile(string file)
+        private static bool IsCFile(string file)
         {
             return (Path.GetExtension(file).ToLower() == ".c");
         }
@@ -196,17 +211,121 @@ namespace arduino.net
         }
     }
 
-    public class InoBuildTarget : CppBuildTarget
+    public class DebugBuildTarget: CppBuildTarget
     {
+        public Debugger Debugger = null;
+
         public override void SetupSources(string tempDir)
         {
-            base.SetupSources(tempDir);
+            var brs = GetMyBreakpoints();
+
+            if (Debugger == null || brs.Count == 0) 
+            {
+                base.SetupSources(tempDir);
+                return;
+            }
+
+            CalculateEffectiveSourceFile(tempDir);
+            ProcessFile(brs);
+        }
+
+        protected void ProcessFile(List<BreakPointInfo> breakpoints)
+        { 
+            using (var reader = new StreamReader(SourceFile))
+            { 
+                using (var writer = new StreamWriter(EffectiveSourceFile))
+                {
+                    string line; int lineNumber = 1;
+
+                    while ( (line = reader.ReadLine()) != null)
+                    {
+                        foreach (var s in ProcessLine(lineNumber++, line, breakpoints)) writer.WriteLine(s);
+                    }
+                }
+            }
+        }
+
+        protected virtual string[] ProcessLine(int lineNumber, string line, List<BreakPointInfo> breakpoints)
+        {
+            if (lineNumber == 1 && Debugger != null)
+            {
+                return new string[] {
+                    "#include \"soft_debugger.h\"",
+                    "#line 2",
+                    line
+                };
+            }
+
+            return ProcessLineForBreakpoints(lineNumber, line, breakpoints);
+        }
+
+        protected string[] ProcessLineForBreakpoints(int lineNumber, string line, List<BreakPointInfo> breakpoints)
+        {
+            if (breakpoints != null)
+            { 
+                foreach (var br in breakpoints)
+                {
+                    if (br.LineNumber == lineNumber)
+                    {
+                        return new string[] { string.Format("    SOFTDEBUGGER_BREAK({0}); {1}", br.Id, line) };
+                    }
+                }
+            }
+
+            return new string[] { line };
+        }
+
+        protected List<BreakPointInfo> GetMyBreakpoints()
+        {
+            if (Debugger == null) return null;
+
+            List<BreakPointInfo> result = new List<BreakPointInfo>();
+
+            foreach (var br in Debugger.BreakPoints)
+            {
+                if (br.SourceFileName == SourceFile) result.Add(br);
+            }
+
+            return result;
+        }
+    }
+
+    public class InoBuildTarget : DebugBuildTarget
+    {
+        protected override string[] ProcessLine(int lineNumber, string line, List<BreakPointInfo> breakpoints)
+        {
+            // Hay que poner las declaraciones de las funciones después de los includes porque aquellas pueden usar algún tipo declarado en éstos.
+
+            if (lineNumber == 1)
+            {
+                if (Debugger != null)
+                {
+                    return new string[] {
+                        "#include \"soft_debugger.h\"",
+                        "#include \"Arduino.h\"",
+                        "void setup();",
+                        "void loop();",
+                        "#line 2",
+                        line
+                    };
+                }
+                else
+                {
+                    return new string[] {
+                        "#include \"Arduino.h\"",
+                        "void setup();",
+                        "void loop();",
+                        "#line 2",
+                        line
+                    };
+                }
+            }
+
+            return ProcessLineForBreakpoints(lineNumber, line, breakpoints);
         }
 
         public override void SetupCommand(string boardName)
         {
-
-
             base.SetupCommand(boardName);
         }
     }

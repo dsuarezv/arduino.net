@@ -19,55 +19,61 @@ namespace arduino.net
             mDebugger = d;
         }
 
-        public void Build(string boardName, bool debug)
+        public bool Build(string boardName, bool debug)
         {
             var tempDir = CreateTempDirectory();
 
             if (mBoardName != boardName) Clean();
             mBoardName = boardName;
 
-            var projectCmds = CreateProjectCompileCommands(tempDir);
+            var projectCmds = CreateProjectCompileCommands(tempDir, debug);
             var coreCmds = CreateCoreCompileCommands(tempDir);
             var coreLibCmds = CreateLibraryCommands(tempDir, coreCmds);
             var linkCmds = CreateLinkCommand(tempDir, projectCmds);
             var elfCmds = CreateImageCommands(tempDir);
 
-            if (!RunCommands(projectCmds, tempDir)) return;
-            if (!RunCommands(coreCmds, tempDir)) return;
-            if (!RunCommands(coreLibCmds, tempDir)) return;
-            if (!RunCommands(linkCmds, tempDir)) return;
-            if (!RunCommands(elfCmds, tempDir)) return;
+            if (!RunCommands(projectCmds, tempDir)) return false;
+            if (!RunCommands(coreCmds, tempDir)) return false;
+            if (!RunCommands(coreLibCmds, tempDir)) return false;
+            if (!RunCommands(linkCmds, tempDir)) return false;
+            if (!RunCommands(elfCmds, tempDir)) return false;
+
+            return true;
         }
 
         public void Clean()
         {
-
+            
         }
 
-        public void Deploy(string boardName, string programmerName)
-        { 
-            
+        public bool Deploy(string boardName, string programmerName)
+        {
+            throw new NotImplementedException();
         }
         
 
         // __ Command generation ______________________________________________
 
+        
+        private enum FileType { Sketch, Code, Include, Assembler, Other };
 
-        private List<BuildTarget> CreateProjectCompileCommands(string tempDir)
+
+        private List<BuildTarget> CreateProjectCompileCommands(string tempDir, bool debug)
         {
             var result = new List<BuildTarget>();
+            var debugger = debug ? mDebugger : null;
 
             foreach (var sourceFile in mProject.GetFileList())
             {
                 var targetFile = Path.Combine(tempDir, Path.GetFileName(sourceFile) + ".o");
 
-                if (IsCodeFile(sourceFile))
+                switch (GetFileType(sourceFile))
                 {
-                    result.Add(new CppBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, CopyToTmp = true });
-                }
-                else
-                {
-                    result.Add(new CopyBuildTarget() { SourceFile = sourceFile });
+                    case FileType.Code: result.Add(new DebugBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, CopyToTmp = true }); break;
+                    case FileType.Sketch: result.Add(new InoBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, FileExtensionOnTmp = ".cpp", CopyToTmp = true }); break;
+                    case FileType.Assembler: break;
+                    default: 
+                         result.Add(new CopyBuildTarget() { SourceFile = sourceFile }); break;
                 }
             }
 
@@ -150,12 +156,12 @@ namespace arduino.net
             cmd.SetupSources(tempDir);
             cmd.SetupCommand(mBoardName);
 
-            Console.WriteLine(cmd);
+            Logger.LogCompiler(cmd.ToString());
 
             cmd.Build(tempDir);
             
             if (cmd.BuildCommand == null) return true;
-            foreach (var s in cmd.BuildCommand.Output) Console.WriteLine("    " + s);
+            foreach (var s in cmd.BuildCommand.Output) Logger.LogCompiler("    " + s);
 
             return cmd.FinishedSuccessfully;
         }
@@ -207,10 +213,16 @@ namespace arduino.net
             return Directory.GetFiles(GetBoardCoreDirectory(), "*.c*", SearchOption.AllDirectories);
         }
 
-        private bool IsCodeFile(string fileName)
+        private FileType GetFileType(string fileName)
         {
             var ext = Path.GetExtension(fileName).ToLower();
-            return ext.StartsWith(".c") || ext == ".ino";
+
+            if (ext.StartsWith(".c")) return FileType.Code;
+            else if (ext == ".ino") return FileType.Sketch;
+            else if (ext.StartsWith(".h")) return FileType.Include;
+            else if (ext == ".s") return FileType.Assembler;
+
+            return FileType.Other;
         }
 
         private string GetBoardCoreDirectory()

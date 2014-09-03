@@ -42,6 +42,7 @@
     <Compile Include="DwarfParser.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="IdeManager.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="ObjectDumper.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

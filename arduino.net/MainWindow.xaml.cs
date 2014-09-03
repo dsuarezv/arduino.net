@@ -39,16 +39,17 @@ namespace arduino.net
             {
                 Configuration.Initialize(@"C:\Program Files (x86)\Arduino");
 
-                IdeManager.CurrentProject = new Project(@"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino");
+                var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
+
+                IdeManager.CurrentProject = new Project(sketch);
                 IdeManager.Debugger = new Debugger("COM3");
+                IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
 
-                
+                SampleCodeBox.OpenFile(sketch);
 
-                SampleCodeBox.OpenFile(@"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino");
+                IdeManager.Debugger.AddBreakpoint(sketch, 38);
 
-                Compiler c = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
-                c.Build("atmega328", true);
-                c.Deploy("atmega328", "usbasp");
+                StatusControl.SetState(0, "");
             }
             catch (Exception ex)
             {
@@ -56,6 +57,20 @@ namespace arduino.net
             }
         }
 
+        protected override void OnPreviewKeyDown(KeyEventArgs e)
+        {
+            bool ctrl = (Keyboard.GetKeyStates(Key.LeftCtrl) == KeyStates.Down) || (Keyboard.GetKeyStates(Key.RightCtrl) == KeyStates.Down);
+            bool shift = (Keyboard.GetKeyStates(Key.LeftShift) == KeyStates.Down) || (Keyboard.GetKeyStates(Key.RightShift) == KeyStates.Down);
+
+
+            switch (e.Key)
+            {
+                case Key.F5: break;
+                case Key.B: if (ctrl && shift) LaunchBuild(); break;
+            }
+
+            base.OnPreviewKeyDown(e);
+        }
 
         private void DisplayException(Exception ex)
         {
@@ -64,7 +79,16 @@ namespace arduino.net
 
         private void BuildButton_Click(object sender, RoutedEventArgs e)
         {
-            StatusControl.SetState(0, "Build succeeded");
+            var success = LaunchBuild();
+            
+            if (success)
+            { 
+                StatusControl.SetState(0, "Build succeeded");
+            }
+            else
+            {
+                StatusControl.SetState(1, "Build failed");
+            }
         }
 
         private void DeployButton_Click(object sender, RoutedEventArgs e)
@@ -75,6 +99,16 @@ namespace arduino.net
         private void DebugButton_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+
+        // __ Actions _________________________________________________________
+
+
+        private bool LaunchBuild()
+        {
+            OutputTextBox1.ClearText();
+            return IdeManager.Compiler.Build("atmega328", true);
         }
     }
 }

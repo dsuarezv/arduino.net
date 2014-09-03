@@ -10,14 +10,16 @@ namespace arduino.net
     public class Debugger: IDisposable
     {
         private SerialPort mSerialPort;
-        private List<BreakpointInfo> mBreakpoints = new List<BreakpointInfo>();
+        private List<BreakPointInfo> mBreakpoints = new List<BreakPointInfo>();
         private List<TracepointInfo> mTracepoints = new List<TracepointInfo>();
         private byte[] mTraceQueryBuffer;
 
-        public event BreakpointHitDelegate BreakPointHit;
+        public event BreakPointDelegate BreakPointHit;
+        public event BreakPointDelegate BreakPointAdded;
+        public event BreakPointDelegate BreakPointRemoved;
         public event ByteDelegate SerialCharReceived;
 
-        public List<BreakpointInfo> BreakPoints
+        public List<BreakPointInfo> BreakPoints
         {
             get { return mBreakpoints; }
         }
@@ -40,13 +42,30 @@ namespace arduino.net
             LaunchReadingThread();
         }
 
-        
-
         public void Dispose()
         {
             mSerialPort.Dispose();
         }
 
+        public BreakPointInfo AddBreakpoint(string sourceFile, int lineNumber)
+        {
+            var result = new BreakPointInfo() { LineNumber = lineNumber, SourceFileName = sourceFile, Id = mBreakpoints.Count };
+
+            mBreakpoints.Add(result);
+
+            if (BreakPointAdded != null) BreakPointAdded(this, result);
+
+            return result;
+        }
+
+        public void RemoveBreakPoint(BreakPointInfo br)
+        {
+            if (!mBreakpoints.Contains(br)) return;
+
+            mBreakpoints.Remove(br);
+
+            if (BreakPointRemoved != null) BreakPointRemoved(this, br);
+        }
 
         // __ Debugger commands _______________________________________________
 
@@ -197,7 +216,7 @@ namespace arduino.net
         }
     }
 
-    public delegate void BreakpointHitDelegate(object sender, BreakpointInfo breakpoint);
+    public delegate void BreakPointDelegate(object sender, BreakPointInfo breakpoint);
 
     public delegate void ByteDelegate(object sender, byte b);
 }

@@ -8,11 +8,12 @@ namespace arduino.net
 {
     public class ControlPointInfo
     {
+        public int Id = 0;
         public int LineNumber = 1;
         public string SourceFileName = "default.cpp";        
     }
 
-    public class BreakpointInfo: ControlPointInfo
+    public class BreakPointInfo: ControlPointInfo
     {
         public int HitCount = 0;
     }

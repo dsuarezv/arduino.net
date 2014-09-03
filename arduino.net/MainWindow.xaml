@@ -1,7 +1,7 @@
 ﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="clr-namespace:arduino.net" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="arduino.net.MainWindow"
+        xmlns:local="clr-namespace:arduino.net" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:SyntaxHighlightBox="clr-namespace:AurelienRibon.Ui.SyntaxHighlightBox;assembly=AurelienRibon.Ui.SyntaxHighlightBox" mc:Ignorable="d" x:Class="arduino.net.MainWindow"
         Title="MainWindow" Height="609" Width="809"
         WindowStyle="None" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded">
     <Grid Width="auto">
@@ -70,8 +70,10 @@
 					Height="1"/>
 
                 <local:CodeTextBox x:Name="SampleCodeBox" Grid.Row="0" Margin="0,-1,0,2" Padding="0,5"/>
+                <local:OutputTextBox x:Name="OutputTextBox1" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch"/>
 
-                <TextBox Grid.Row="1" FontFamily="Consolas" FontSize="11px" Padding="5" Text="Output"/>
+
+
             </Grid>
         </Grid>
     </Grid>
