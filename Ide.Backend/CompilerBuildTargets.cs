@@ -36,21 +36,25 @@ namespace arduino.net
         {
             if (BuildCommand == null) return;
 
-            if (File.Exists(TargetFile))
-            {
-                if (File.GetLastWriteTime(SourceFile) > File.GetLastWriteTime(TargetFile))
-                {
-                    FinishedSuccessfully = (CmdRunner.Run(BuildCommand) == 0);
-                }
-                else
-                { 
-                    TargetUpToDate = true;
-                }
-            }
-            else
+            if (!IsTargetUpToDate())
             {
                 FinishedSuccessfully = (CmdRunner.Run(BuildCommand) == 0);
             }
+        }
+
+        protected bool IsTargetUpToDate()
+        {
+            if (File.Exists(TargetFile))
+            {
+                if (File.GetLastWriteTime(SourceFile) <= File.GetLastWriteTime(TargetFile))
+                {
+                    TargetUpToDate = true;
+                    return true;
+                }
+            }
+
+            TargetUpToDate = false;
+            return false;
         }
 
         protected void CalculateEffectiveSourceFile(string tempDir)
