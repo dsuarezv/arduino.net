@@ -46,7 +46,7 @@ namespace arduino.net
         {
             if (File.Exists(TargetFile))
             {
-                if (File.GetLastWriteTime(SourceFile) <= File.GetLastWriteTime(TargetFile))
+                if (File.GetLastWriteTime(SourceFile) < File.GetLastWriteTime(TargetFile))
                 {
                     TargetUpToDate = true;
                     return true;
