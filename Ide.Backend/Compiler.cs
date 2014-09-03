@@ -19,6 +19,11 @@ namespace arduino.net
             mDebugger = d;
         }
 
+        public Task<bool> BuildAsync(string boardName, bool debug)
+        {
+            return Task.Run<bool>(() => Build(boardName, debug));
+        }
+
         public bool Build(string boardName, bool debug)
         {
             var tempDir = CreateTempDirectory();

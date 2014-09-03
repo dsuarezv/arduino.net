@@ -15,6 +15,7 @@ namespace arduino.net
         public string FileExtensionOnTmp;
         public Command BuildCommand;
         public bool TargetUpToDate = false;
+        public bool DisableTargetDateCheck = false;
         public bool FinishedSuccessfully = true;
 
         protected string EffectiveSourceFile;
@@ -36,7 +37,7 @@ namespace arduino.net
         {
             if (BuildCommand == null) return;
 
-            if (!IsTargetUpToDate())
+            if (DisableTargetDateCheck || !IsTargetUpToDate())
             {
                 FinishedSuccessfully = (CmdRunner.Run(BuildCommand) == 0);
             }
@@ -157,6 +158,8 @@ namespace arduino.net
     {
         public override void SetupCommand(string boardName)
         {
+            DisableTargetDateCheck = true;
+
             BuildCommand = new Command()
             {
                 Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-ar"),

@@ -8,7 +8,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
 
-        <SyntaxHighlightBox:SyntaxHighlightBox x:Name="ContentTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" IsLineNumbersMarginVisible="False" BorderThickness="0"/>
+        <SyntaxHighlightBox:SyntaxHighlightBox x:Name="ContentTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" IsLineNumbersMarginVisible="False" BorderThickness="0" IsReadOnly="True"/>
 
     </Grid>
 </UserControl>

@@ -127,18 +127,26 @@ namespace arduino.net
                 {
                     case Key.S: break;
                     case Key.W: break;
-                    case Key.F5: break; // run without debug (compile first)
                 }
             }
 
             switch (e.Key)
             {
-                case Key.F9: break;  // Toggle breakpoint
-                case Key.F5: break;  // Debug run (compile first)
+                case Key.F9:
+                    var lineNumber = MainTextBox.GetLineIndexFromCharacterIndex(MainTextBox.CaretIndex);
+                    break;  // Toggle breakpoint
             }
-            
         }
 
+
+
+        private void MainTextBox_BeforeDrawingLineNumber(int lineNumber, DrawingContext dc, Rect lineRect)
+        {
+            // This controls how we draw the breakpoints and current line.
+            if (lineNumber != 38) return;
+
+            dc.DrawRectangle(Brushes.Red, null, lineRect);
+        }
 
     }
 }

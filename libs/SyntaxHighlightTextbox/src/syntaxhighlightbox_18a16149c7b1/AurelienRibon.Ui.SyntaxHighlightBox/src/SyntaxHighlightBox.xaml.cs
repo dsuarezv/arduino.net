@@ -276,18 +276,22 @@ namespace AurelienRibon.Ui.SyntaxHighlightBox
                         {
                             try
                             {
-                                //var finalTop = block.Position.Y - VerticalOffset;
+                                UserLineDrawEvent(block, top, bottom, dc);
 
                                 dc.DrawText(block.FormattedText, new Point(2 - HorizontalOffset, top));
 
                                 if (IsLineNumbersMarginVisible)
                                 {
                                     var p = new Point(mLineNumbersCanvas.ActualWidth, top + 1);
+
+                                    UserLineNumberDrawEvent(block, top + 1, bottom, dc2);
+
                                     dc2.DrawText(block.LineNumbers, p);
                                 }
                             }
                             catch
                             {
+                                var a = 0;
                                 // Don't know why this exception is raised sometimes.
                                 // Reproduce steps:
                                 // - Sets a valid syntax highlighter on the box.
@@ -301,11 +305,33 @@ namespace AurelienRibon.Ui.SyntaxHighlightBox
         }
 
 
+        private void UserLineDrawEvent(InnerTextBlock block, double top, double bottom, DrawingContext dc)
+        { 
+            if (BeforeDrawingTextLine == null) return;
+
+            for (int i = 0; i < block.NumLines; ++i)
+            {
+                var y = top + i * mLineHeight;
+                BeforeDrawingTextLine(block.LineStartIndex + i, dc, new Rect(0, y, ViewportWidth, mLineHeight));
+            }
+        }
+
+        private void UserLineNumberDrawEvent(InnerTextBlock block, double top, double bottom, DrawingContext dc)
+        { 
+            if (BeforeDrawingLineNumber == null) return;
+
+            for (int i = 0; i < block.NumLines; ++i)
+            {
+                var y = top + i * mLineHeight;
+                BeforeDrawingLineNumber(block.LineStartIndex + i, dc, new Rect(0, y, mLineNumbersCanvas.ActualWidth, mLineHeight));
+            }
+        }
+
 
         /// <summary>
         /// Returns the index of the first visible text line.
         /// </summary>
-        public int GetIndexOfFirstVisibleLine()
+        private int GetIndexOfFirstVisibleLine()
         {
             int guessedLine = (int)(VerticalOffset / mLineHeight);
             return guessedLine > mTotalLineCount ? mTotalLineCount : guessedLine;
@@ -314,7 +340,7 @@ namespace AurelienRibon.Ui.SyntaxHighlightBox
         /// <summary>
         /// Returns the index of the last visible text line.
         /// </summary>
-        public int GetIndexOfLastVisibleLine()
+        private int GetIndexOfLastVisibleLine()
         {
             double height = VerticalOffset + ViewportHeight;
             int guessedLine = (int)(height / mLineHeight);

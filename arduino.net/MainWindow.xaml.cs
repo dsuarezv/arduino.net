@@ -77,9 +77,9 @@ namespace arduino.net
             MessageBox.Show(ex.Message, "Error");
         }
 
-        private void BuildButton_Click(object sender, RoutedEventArgs e)
+        private async void BuildButton_Click(object sender, RoutedEventArgs e)
         {
-            var success = LaunchBuild();
+            var success = await LaunchBuild();
             
             if (success)
             { 
@@ -105,10 +105,11 @@ namespace arduino.net
         // __ Actions _________________________________________________________
 
 
-        private bool LaunchBuild()
+        private async Task<bool> LaunchBuild()
         {
             OutputTextBox1.ClearText();
-            return IdeManager.Compiler.Build("atmega328", true);
+            bool result = await IdeManager.Compiler.BuildAsync("atmega328", true);
+            return result;
         }
     }
 }
