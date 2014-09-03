@@ -18,12 +18,37 @@ namespace arduino.net
 {
     public partial class CodeTextBox : UserControl
     {
-        private string mFileName;   
+        private string mFileName;
+        private Dictionary<int, BreakPointInfo> mBreakpoints = new Dictionary<int, BreakPointInfo>();
+
+        public string FullFileName
+        {
+            get { return mFileName; }
+        }
+
+        public string FileName
+        {
+            get 
+            {
+                if (mFileName == null) return "New file";
+
+                return Path.GetFileName(mFileName); 
+            }
+        }
+
 
         public CodeTextBox()
         {
             InitializeComponent();
         }
+
+        private void MainTextBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            IdeManager.Debugger.BreakPointAdded += Debugger_BreakPointAdded;
+            IdeManager.Debugger.BreakPointRemoved += Debugger_BreakPointRemoved;
+        }
+
+
 
         public void OpenFile(string fileName)
         {
@@ -41,7 +66,11 @@ namespace arduino.net
 
         public void SaveFile()
         {
-            if (mFileName == null) return;
+            if (mFileName == null) 
+            {
+                // Display a SaveAs dialog box and set the name to that.
+                return;
+            }
 
             using (var w = new StreamWriter(mFileName))
             {
@@ -125,16 +154,25 @@ namespace arduino.net
             { 
                 switch (e.Key)
                 {
-                    case Key.S: break;
+                    case Key.S: SaveFile(); break;
                     case Key.W: break;
                 }
             }
 
             switch (e.Key)
             {
-                case Key.F9:
-                    var lineNumber = MainTextBox.GetLineIndexFromCharacterIndex(MainTextBox.CaretIndex);
-                    break;  // Toggle breakpoint
+                case Key.F9:  // Toggle breakpoint
+                    var lineNumber = MainTextBox.GetLineIndexFromCharacterIndex(MainTextBox.CaretIndex) + 1;
+                    
+                    if (mBreakpoints.ContainsKey(lineNumber))
+                    {
+                        IdeManager.Debugger.RemoveBreakPoint(mBreakpoints[lineNumber]);
+                    }
+                    else
+                    {
+                        IdeManager.Debugger.AddBreakpoint(mFileName, lineNumber);
+                    }
+                    break;  
             }
         }
 
@@ -142,11 +180,36 @@ namespace arduino.net
 
         private void MainTextBox_BeforeDrawingLineNumber(int lineNumber, DrawingContext dc, Rect lineRect)
         {
-            // This controls how we draw the breakpoints and current line.
-            if (lineNumber != 38) return;
-
-            dc.DrawRectangle(Brushes.Red, null, lineRect);
+            foreach (int i in mBreakpoints.Keys)
+            { 
+                if (i == lineNumber + 1)
+                {
+                    dc.DrawRectangle(Brushes.Red, null, lineRect);
+                    return;
+                }
+            }
         }
 
+
+        // __ Breakpoint handling _____________________________________________
+
+
+        void Debugger_BreakPointRemoved(object sender, BreakPointInfo breakpoint)
+        {
+            if (breakpoint.SourceFileName != mFileName) return;
+
+            mBreakpoints.Remove(breakpoint.LineNumber);
+
+            MainTextBox.InvalidateVisual();
+        }
+
+        void Debugger_BreakPointAdded(object sender, BreakPointInfo breakpoint)
+        {
+            if (breakpoint.SourceFileName != mFileName) return;
+
+            mBreakpoints.Add(breakpoint.LineNumber, breakpoint);
+            
+            MainTextBox.InvalidateVisual();
+        }
     }
 }

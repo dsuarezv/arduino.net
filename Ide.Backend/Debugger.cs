@@ -10,7 +10,7 @@ namespace arduino.net
     public class Debugger: IDisposable
     {
         private SerialPort mSerialPort;
-        private List<BreakPointInfo> mBreakpoints = new List<BreakPointInfo>();
+        private List<BreakPointInfo> mBreakPoints = new List<BreakPointInfo>();
         private List<TracepointInfo> mTracepoints = new List<TracepointInfo>();
         private byte[] mTraceQueryBuffer;
 
@@ -21,7 +21,7 @@ namespace arduino.net
 
         public List<BreakPointInfo> BreakPoints
         {
-            get { return mBreakpoints; }
+            get { return mBreakPoints; }
         }
 
         public List<TracepointInfo> TracePoints
@@ -49,9 +49,9 @@ namespace arduino.net
 
         public BreakPointInfo AddBreakpoint(string sourceFile, int lineNumber)
         {
-            var result = new BreakPointInfo() { LineNumber = lineNumber, SourceFileName = sourceFile, Id = mBreakpoints.Count };
+            var result = new BreakPointInfo() { LineNumber = lineNumber, SourceFileName = sourceFile, Id = mBreakPoints.Count };
 
-            mBreakpoints.Add(result);
+            mBreakPoints.Add(result);
 
             if (BreakPointAdded != null) BreakPointAdded(this, result);
 
@@ -60,12 +60,23 @@ namespace arduino.net
 
         public void RemoveBreakPoint(BreakPointInfo br)
         {
-            if (!mBreakpoints.Contains(br)) return;
-
-            mBreakpoints.Remove(br);
+            if (!mBreakPoints.Remove(br)) return;
 
             if (BreakPointRemoved != null) BreakPointRemoved(this, br);
         }
+
+        public List<BreakPointInfo> GetBreakpointsForFile(string fileName)
+        {
+            List<BreakPointInfo> result = new List<BreakPointInfo>();
+
+            foreach (var br in mBreakPoints)
+            {
+                if (br.SourceFileName == fileName) result.Add(br);
+            }
+
+            return result;
+        }
+
 
         // __ Debugger commands _______________________________________________
 
@@ -196,9 +207,9 @@ namespace arduino.net
 
         private void OnTargetBreak(int breakpointIndex)
         {
-            if (breakpointIndex >= mBreakpoints.Count) return;
+            if (breakpointIndex >= mBreakPoints.Count) return;
 
-            var br = mBreakpoints[breakpointIndex];
+            var br = mBreakPoints[breakpointIndex];
             
             br.HitCount++;
 

@@ -69,7 +69,11 @@
 					ShowsPreview="True"
 					Height="1"/>
 
-                <local:CodeTextBox x:Name="SampleCodeBox" Grid.Row="0" Margin="0,-1,0,2" Padding="0,5"/>
+                <TabControl>
+                    <TabItem Header="">
+                        <local:CodeTextBox x:Name="SampleCodeBox" Grid.Row="0" Margin="0,-1,0,2" Padding="0,5"/>
+                    </TabItem>
+                </TabControl>
                 <local:OutputTextBox x:Name="OutputTextBox1" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch" Padding="5"/>
 
 

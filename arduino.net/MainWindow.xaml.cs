@@ -47,7 +47,7 @@ namespace arduino.net
 
                 SampleCodeBox.OpenFile(sketch);
 
-                IdeManager.Debugger.AddBreakpoint(sketch, 38);
+                //IdeManager.Debugger.AddBreakpoint(sketch, 38);
 
                 StatusControl.SetState(0, "");
             }

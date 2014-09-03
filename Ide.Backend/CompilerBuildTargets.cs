@@ -224,16 +224,20 @@ namespace arduino.net
 
         public override void SetupSources(string tempDir)
         {
-            var brs = GetMyBreakpoints();
-
-            if (Debugger == null || brs.Count == 0) 
+            if (Debugger != null)
             {
-                base.SetupSources(tempDir);
-                return;
+                var brs = Debugger.GetBreakpointsForFile(SourceFile);
+
+                if (brs.Count > 0)
+                {
+                    CalculateEffectiveSourceFile(tempDir);
+                    ProcessFile(brs);
+                    return;
+                }
             }
 
-            CalculateEffectiveSourceFile(tempDir);
-            ProcessFile(brs);
+            base.SetupSources(tempDir);
+            return;
         }
 
         protected void ProcessFile(List<BreakPointInfo> breakpoints)
@@ -280,20 +284,6 @@ namespace arduino.net
             }
 
             return new string[] { line };
-        }
-
-        protected List<BreakPointInfo> GetMyBreakpoints()
-        {
-            if (Debugger == null) return null;
-
-            List<BreakPointInfo> result = new List<BreakPointInfo>();
-
-            foreach (var br in Debugger.BreakPoints)
-            {
-                if (br.SourceFileName == SourceFile) result.Add(br);
-            }
-
-            return result;
         }
     }
 
