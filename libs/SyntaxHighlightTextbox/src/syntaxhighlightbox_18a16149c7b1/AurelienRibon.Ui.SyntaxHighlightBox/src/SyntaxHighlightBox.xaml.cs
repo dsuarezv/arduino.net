@@ -82,14 +82,6 @@ namespace AurelienRibon.Ui.SyntaxHighlightBox
 
             Loaded += (s, e) =>
             {
-                mRenderCanvas = (DrawingControl)Template.FindName("PART_RenderCanvas", this);
-                mLineNumbersCanvas = (DrawingControl)Template.FindName("PART_LineNumbersCanvas", this);
-                mScrollViewer = (ScrollViewer)Template.FindName("PART_ContentHost", this);
-
-                mLineNumbersCanvas.Width = GetFormattedTextWidth(string.Format("{0:0000}", mTotalLineCount)) + 5;
-
-                mScrollViewer.ScrollChanged += OnScrollChanged;
-
                 InvalidateBlocks(0);
                 InvalidateVisual();
             };
@@ -108,6 +100,22 @@ namespace AurelienRibon.Ui.SyntaxHighlightBox
                 InvalidateBlocks(e.Changes.First().Offset);
                 InvalidateVisual();
             };
+        }
+
+        public override void OnApplyTemplate()
+        {
+            base.OnApplyTemplate();
+
+            mRenderCanvas = (DrawingControl)Template.FindName("PART_RenderCanvas", this);
+            mLineNumbersCanvas = (DrawingControl)Template.FindName("PART_LineNumbersCanvas", this);
+            mScrollViewer = (ScrollViewer)Template.FindName("PART_ContentHost", this);
+
+            mLineNumbersCanvas.Width = GetFormattedTextWidth(string.Format("{0:0000}", mTotalLineCount)) + 5;
+
+            mScrollViewer.ScrollChanged += OnScrollChanged;
+
+            InvalidateBlocks(0);
+            InvalidateVisual();
         }
 
         protected override void OnRender(DrawingContext drawingContext)

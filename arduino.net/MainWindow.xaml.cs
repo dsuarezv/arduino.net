@@ -44,10 +44,9 @@ namespace arduino.net
                 IdeManager.CurrentProject = new Project(sketch);
                 IdeManager.Debugger = new Debugger("COM3");
                 IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
+                IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
 
-                SampleCodeBox.OpenFile(sketch);
-
-                //IdeManager.Debugger.AddBreakpoint(sketch, 38);
+                foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
 
                 StatusControl.SetState(0, "");
             }
@@ -57,16 +56,16 @@ namespace arduino.net
             }
         }
 
-        protected override void OnPreviewKeyDown(KeyEventArgs e)
-        {
-            bool ctrl = (Keyboard.GetKeyStates(Key.LeftCtrl) == KeyStates.Down) || (Keyboard.GetKeyStates(Key.RightCtrl) == KeyStates.Down);
-            bool shift = (Keyboard.GetKeyStates(Key.LeftShift) == KeyStates.Down) || (Keyboard.GetKeyStates(Key.RightShift) == KeyStates.Down);
 
+        protected async override void OnPreviewKeyDown(KeyEventArgs e)
+        {
+            bool ctrl = ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control);
+            bool shift = ((e.KeyboardDevice.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift);
 
             switch (e.Key)
             {
                 case Key.F5: break;
-                case Key.B: if (ctrl && shift) LaunchBuild(); break;
+                case Key.B: if (ctrl && shift) await LaunchBuild(); break;
             }
 
             base.OnPreviewKeyDown(e);
@@ -98,7 +97,44 @@ namespace arduino.net
 
         private void DebugButton_Click(object sender, RoutedEventArgs e)
         {
+            IdeManager.Debugger.TargetContinue();
+        }
 
+
+        private void OpenFile(string fileName)
+        {
+            var ti = GetTabForFileName(fileName);
+
+            if (ti != null)
+            {
+                ti.IsSelected = true;
+                return;
+            }
+
+            CreateTabItemForFile(fileName);
+        }
+
+        private void CreateTabItemForFile(string fileName)
+        {
+            var codeEditor = new CodeTextBox() { Padding = new Thickness(0, 5, 0, 5) };
+            codeEditor.OpenFile(fileName);
+
+            TabItem t = new TabItem() { Header = System.IO.Path.GetFileName(fileName), Tag = fileName, Content = codeEditor };
+
+            OpenFilesTab.Items.Add(t);
+
+            t.IsSelected = true;
+        }
+
+
+        private TabItem GetTabForFileName(string fileName)
+        { 
+            foreach (TabItem ti in OpenFilesTab.Items)
+            {
+                if (ti.Tag as string == fileName) return ti;
+            }
+
+            return null;
         }
 
 
@@ -111,5 +147,12 @@ namespace arduino.net
             bool result = await IdeManager.Compiler.BuildAsync("atmega328", true);
             return result;
         }
+
+
+        void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
+        {
+            StatusControl.SetState(1, "Breakpoint hit on line {0} ({1})", breakpoint.LineNumber, breakpoint.SourceFileName);
+        }
+
     }
 }

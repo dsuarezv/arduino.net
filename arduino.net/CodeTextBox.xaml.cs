@@ -44,6 +44,8 @@ namespace arduino.net
 
         private void MainTextBox_Loaded(object sender, RoutedEventArgs e)
         {
+            if (IdeManager.Debugger == null) return;
+
             IdeManager.Debugger.BreakPointAdded += Debugger_BreakPointAdded;
             IdeManager.Debugger.BreakPointRemoved += Debugger_BreakPointRemoved;
         }

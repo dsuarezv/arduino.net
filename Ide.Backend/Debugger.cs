@@ -33,6 +33,8 @@ namespace arduino.net
         public Debugger(string comPort)
         {
             mSerialPort = new SerialPort(comPort, 115200);
+
+            Initialize();
         }
 
         public void Initialize()

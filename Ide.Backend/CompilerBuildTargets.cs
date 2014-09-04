@@ -174,6 +174,8 @@ namespace arduino.net
     {
         public override void SetupCommand(string boardName)
         {
+            DisableTargetDateCheck = true;
+
             var config = Configuration.Boards[boardName]["build"];
 
             BuildCommand = new Command()
@@ -291,7 +293,8 @@ namespace arduino.net
     {
         protected override string[] ProcessLine(int lineNumber, string line, List<BreakPointInfo> breakpoints)
         {
-            // Hay que poner las declaraciones de las funciones después de los includes porque aquellas pueden usar algún tipo declarado en éstos.
+            // DAVE: Hay que poner las declaraciones de las funciones después de los includes porque aquellas pueden usar algún tipo declarado en éstos.
+            // Todo esto hay que rescribirlo para que coloque las definiciones en su sitio y procese los breakpoints.
 
             if (lineNumber == 1)
             {
@@ -320,6 +323,20 @@ namespace arduino.net
 
             return ProcessLineForBreakpoints(lineNumber, line, breakpoints);
         }
+
+        public override void SetupSources(string tempDir)
+        {
+            List<BreakPointInfo> brs = null;
+
+            if (Debugger != null)
+            {
+                brs = Debugger.GetBreakpointsForFile(SourceFile);
+            }
+
+            CalculateEffectiveSourceFile(tempDir);
+            ProcessFile(brs);
+        }
+
 
         public override void SetupCommand(string boardName)
         {

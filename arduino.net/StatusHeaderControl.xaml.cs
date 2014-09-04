@@ -59,9 +59,9 @@ namespace arduino.net
             mBarStoryboard.Children.Add(mBarAnimation);
         }
 
-        public void SetState(int state, string caption)
+        public void SetState(int state, string msg, params object[] args)
         {
-            MessageLabel.Text = caption;
+            MessageLabel.Text = string.Format(msg, args);
             var key = (state == 0) ? "SuccessColor" : "FailColor";
             var color = this.FindResource(key);
             MessageLabel.Foreground = (SolidColorBrush)color;
