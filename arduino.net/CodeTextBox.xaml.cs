@@ -136,7 +136,7 @@ namespace arduino.net
                 case "cpp":
                 case "h":
                 case "hpp":
-                case "ino": break;
+                case "ino": hl = "cpp"; break;
 
                 default: break;
             }
