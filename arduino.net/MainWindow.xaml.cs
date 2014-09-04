@@ -153,6 +153,7 @@ namespace arduino.net
         private async Task<bool> LaunchBuild()
         {
             OutputTextBox1.ClearText();
+            StatusControl.SetState(1, "Compiling...");
             bool result = await IdeManager.Compiler.BuildAsync("atmega328", true);
             return result;
         }
@@ -160,6 +161,7 @@ namespace arduino.net
         private async Task<bool> LaunchDeploy()
         {
             OutputTextBox1.ClearText();
+            StatusControl.SetState(1, "Deploying...");
             bool result = await IdeManager.Compiler.DeployAsync("atmega328", "usbasp", true);
             return result;
         }
