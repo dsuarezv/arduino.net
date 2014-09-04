@@ -106,6 +106,8 @@ namespace AurelienRibon.Ui.SyntaxHighlightBox
         {
             base.OnApplyTemplate();
 
+            // This was in the Loaded event handler. If set there, the Template.FindName calls 
+            // returned null if more than one Textbox was created. So here it works fine.
             mRenderCanvas = (DrawingControl)Template.FindName("PART_RenderCanvas", this);
             mLineNumbersCanvas = (DrawingControl)Template.FindName("PART_LineNumbersCanvas", this);
             mScrollViewer = (ScrollViewer)Template.FindName("PART_ContentHost", this);

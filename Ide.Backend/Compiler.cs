@@ -28,8 +28,7 @@ namespace arduino.net
         {
             var tempDir = CreateTempDirectory();
 
-            if (mBoardName != boardName) Clean();
-            mBoardName = boardName;
+            SetupBoardName(boardName);
 
             var projectCmds = CreateProjectCompileCommands(tempDir, debug);
             var coreCmds = CreateCoreCompileCommands(tempDir);
@@ -51,11 +50,36 @@ namespace arduino.net
             
         }
 
-        public bool Deploy(string boardName, string programmerName)
+        public Task<bool> DeployAsync(string boardName, string programmerName, bool debug)
         {
-            throw new NotImplementedException();
+            return Task.Run<bool>(() => Deploy(boardName, programmerName, debug));
+        }
+
+        public bool Deploy(string boardName, string programmerName, bool debug)
+        {
+            var tempDir = CreateTempDirectory();
+            var hexFile = GetHexFile(tempDir);
+
+            SetupBoardName(boardName);
+
+            if (!File.Exists(hexFile))
+            {
+                if (!Build(boardName, debug)) return false;
+            }
+
+            var deployCmds = CreateDeployCommands(tempDir, programmerName);
+
+            if (!RunCommands(deployCmds, tempDir)) return false;
+
+            return true;
         }
         
+
+        private void SetupBoardName(string boardName)
+        {
+            if (mBoardName != boardName) Clean();
+            mBoardName = boardName;
+        }
 
         // __ Command generation ______________________________________________
 
@@ -142,7 +166,16 @@ namespace arduino.net
             return result;
         }
 
+        private List<BuildTarget> CreateDeployCommands(string tempDir, string programmerName)
+        {
+            var result = new List<BuildTarget>();
+            
+            result.Add(new DeployBuildTarget(programmerName) { SourceFile = GetHexFile(tempDir) });
 
+            return result;
+        }
+
+        
         // __ Command execution _______________________________________________
 
 

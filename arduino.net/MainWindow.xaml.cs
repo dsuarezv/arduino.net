@@ -90,9 +90,18 @@ namespace arduino.net
             }
         }
 
-        private void DeployButton_Click(object sender, RoutedEventArgs e)
+        private async void DeployButton_Click(object sender, RoutedEventArgs e)
         {
-            StatusControl.SetState(1, "Deploy failed");
+            var success = await LaunchDeploy();
+
+            if (success)
+            {
+                StatusControl.SetState(0, "Deploy succeeded");
+            }
+            else
+            {
+                StatusControl.SetState(1, "Deploy failed");
+            }
         }
 
         private void DebugButton_Click(object sender, RoutedEventArgs e)
@@ -147,6 +156,14 @@ namespace arduino.net
             bool result = await IdeManager.Compiler.BuildAsync("atmega328", true);
             return result;
         }
+
+        private async Task<bool> LaunchDeploy()
+        {
+            OutputTextBox1.ClearText();
+            bool result = await IdeManager.Compiler.DeployAsync("atmega328", "usbasp", true);
+            return result;
+        }
+
 
 
         void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)

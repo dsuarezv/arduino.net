@@ -343,4 +343,41 @@ namespace arduino.net
             base.SetupCommand(boardName);
         }
     }
+
+
+    public class DeployBuildTarget: BuildTarget
+    {
+        private string mProgrammerName;
+
+        public DeployBuildTarget(string programmerName)
+        {
+            CopyToTmp = false;
+            DisableTargetDateCheck = true;
+            mProgrammerName = programmerName;
+        }
+
+        public override void SetupSources(string tempDir)
+        {
+            EffectiveSourceFile = SourceFile;
+        }
+
+        public override void SetupCommand(string boardName)
+        {
+            var communication = Configuration.Programmers[mProgrammerName].Get("communication");
+            var protocol = Configuration.Programmers[mProgrammerName].Get("protocol");
+            var mcu = Configuration.Boards[boardName]["build"].Get("mcu");
+
+            BuildCommand = new Command()
+            {
+                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avrdude"),
+                Arguments = string.Format("-C\"{0}\" -v -v -v -v -p{1} -c{2} -P{3} -Uflash:w:{4}:i ",
+                    Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/etc/avrdude.conf"),
+                    mcu,
+                    protocol,   // usbasp
+                    communication,   // usb
+                    EffectiveSourceFile
+                    )
+            };
+        }
+    }
 }
