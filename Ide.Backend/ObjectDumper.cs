@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 
 namespace arduino.net
@@ -31,6 +32,15 @@ namespace arduino.net
             return RunObjectDumper("-w -W " + elfFile);
         }
 
+        public static string GetSingleString(List<string> listOfStrings)
+        {
+            var sb = new StringBuilder();
+
+            foreach (var s in listOfStrings) sb.AppendLine(s);
+
+            return sb.ToString();
+        }
+
         private static List<string> RunObjectDumper(string arguments)
         {
             string objDumpCommand = Path.Combine(Configuration.ToolsPath, ObjDumpCommand);
@@ -39,6 +49,7 @@ namespace arduino.net
             CmdRunner.Run(cmd);
             return cmd.Output;
         }
+
 
     }
 }

@@ -7,23 +7,26 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using arduino.net;
 
 namespace ArduinoIDE.net
 {
     public partial class Form1 : Form
     {
-        const string ElfFile = @"C:\Users\dave\AppData\Local\Temp\build5092726759323454303.tmp\Debugger.cpp.elf";
+        const string ElfFile = @"C:\Users\dave\AppData\Local\Temp\build-Debugger.ino.tmp\Debugger.ino.elf";
 
 
-        private DebuggerTransport mDebugger = new DebuggerTransport("COM3");
+        private Debugger mDebugger = new Debugger("COM3");
         private SymbolTableParser mSymbolTable;
         private DwarfParser mDwarfParser;
 
         public Form1()
         {
             InitializeComponent();
-            
-            mDebugger.BreakPoints.Add(new BreakpointInfo());
+
+            Configuration.Initialize(@"C:\program files (x86)\Arduino");
+
+            mDebugger.BreakPoints.Add(new BreakPointInfo());
             mDebugger.BreakPointHit += BreakPointHit;
             mDebugger.SerialCharReceived += SerialCharReceived;
 
@@ -42,7 +45,7 @@ namespace ArduinoIDE.net
             });
         }
 
-        void BreakPointHit(object sender, BreakpointInfo breakpoint)
+        void BreakPointHit(object sender, BreakPointInfo breakpoint)
         {
             SetState(false, string.Format("Breakpoint at line {0} ({1})", breakpoint.LineNumber, breakpoint.SourceFileName));
 
@@ -58,7 +61,7 @@ namespace ArduinoIDE.net
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            mDebugger.Initialize();
+            //mDebugger.Initialize();
         }
 
         private void SetState(bool running, string breakDesc)

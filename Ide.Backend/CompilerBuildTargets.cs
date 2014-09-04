@@ -331,6 +331,7 @@ namespace arduino.net
             if (Debugger != null)
             {
                 brs = Debugger.GetBreakpointsForFile(SourceFile);
+                DisableTargetDateCheck = true;
             }
 
             CalculateEffectiveSourceFile(tempDir);

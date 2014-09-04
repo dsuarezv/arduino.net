@@ -19,8 +19,16 @@
     <FontStyle>Normal</FontStyle>
   </HighlightLineRule>
 
+  <HighlightLineRule name="Preprocessor">
+    <LineStart>#</LineStart>
+    <IgnoreCase>false</IgnoreCase>
+    <Foreground>#00B772</Foreground>
+    <FontWeight>Normal</FontWeight>
+    <FontStyle>Normal</FontStyle>
+  </HighlightLineRule>
+  
   <AdvancedHighlightRule name="Numbers">
-    <Expression>\b([0-9a-fA-Fx]+)\b</Expression>
+    <Expression>\b([0-9]+|0x[0-9a-fA-F]+)\b</Expression>
     <IgnoreCase>false</IgnoreCase>
     <Foreground>#F68A1B</Foreground>
     <FontWeight>Normal</FontWeight>

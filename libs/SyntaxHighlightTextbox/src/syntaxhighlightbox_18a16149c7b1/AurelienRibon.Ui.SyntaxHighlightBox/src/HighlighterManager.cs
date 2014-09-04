@@ -232,6 +232,7 @@ namespace AurelienRibon.Ui.SyntaxHighlightBox
         private class HighlightLineRule
         {
             public string LineStart { get; private set; }
+            public bool ForceFirstCharInLine { get; private set; }
             public RuleOptions Options { get; private set; }
 
             public HighlightLineRule(XElement rule)

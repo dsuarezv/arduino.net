@@ -66,6 +66,15 @@ namespace arduino.net
             ApplySyntaxHighlight();
         }
 
+        public void OpenContent(string content, string highlighter)
+        {
+            MainTextBox.Text = content;
+
+            if (highlighter == null) return;
+
+            MainTextBox.CurrentHighlighter = HighlighterManager.Instance.Highlighters[highlighter];
+        }
+
         public void SaveFile()
         {
             if (mFileName == null) 
@@ -209,7 +218,7 @@ namespace arduino.net
         {
             if (breakpoint.SourceFileName != mFileName) return;
 
-            mBreakpoints.Add(breakpoint.LineNumber, breakpoint);
+            mBreakpoints[breakpoint.LineNumber] = breakpoint;
             
             MainTextBox.InvalidateVisual();
         }

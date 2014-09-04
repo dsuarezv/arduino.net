@@ -45,6 +45,7 @@ namespace arduino.net
                 IdeManager.Debugger = new Debugger("COM3");
                 IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
+                IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
 
                 foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
 
@@ -55,6 +56,7 @@ namespace arduino.net
                 DisplayException(ex);
             }
         }
+
 
 
         protected async override void OnPreviewKeyDown(KeyEventArgs e)
@@ -107,6 +109,7 @@ namespace arduino.net
         private void DebugButton_Click(object sender, RoutedEventArgs e)
         {
             IdeManager.Debugger.TargetContinue();
+            StatusControl.SetState(0, "Running...");
         }
 
 
@@ -120,19 +123,27 @@ namespace arduino.net
                 return;
             }
 
-            CreateTabItemForFile(fileName);
+            var editor = CreateEditorTabItem(fileName);
+            editor.OpenFile(fileName);
         }
 
-        private void CreateTabItemForFile(string fileName)
+        private void OpenContent(string title, string content)
+        {
+            var editor = CreateEditorTabItem(title);
+            editor.OpenContent(content, null);
+        }
+
+        private CodeTextBox CreateEditorTabItem(string fileName)
         {
             var codeEditor = new CodeTextBox() { Padding = new Thickness(0, 5, 0, 5) };
-            codeEditor.OpenFile(fileName);
 
             TabItem t = new TabItem() { Header = System.IO.Path.GetFileName(fileName), Tag = fileName, Content = codeEditor };
 
             OpenFilesTab.Items.Add(t);
 
             t.IsSelected = true;
+
+            return codeEditor;
         }
 
 
@@ -155,6 +166,13 @@ namespace arduino.net
             OutputTextBox1.ClearText();
             StatusControl.SetState(1, "Compiling...");
             bool result = await IdeManager.Compiler.BuildAsync("atmega328", true);
+            
+            var compiler = IdeManager.Compiler;
+            OpenContent("Dissasembly",
+                ObjectDumper.GetSingleString(
+                    ObjectDumper.GetDisassembly(
+                        compiler.GetElfFile(compiler.GetTempDirectory()))));
+
             return result;
         }
 
@@ -166,12 +184,17 @@ namespace arduino.net
             return result;
         }
 
-
-
-        void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
+        private void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
         {
-            StatusControl.SetState(1, "Breakpoint hit on line {0} ({1})", breakpoint.LineNumber, breakpoint.SourceFileName);
+            Dispatcher.Invoke(() =>
+            {
+                StatusControl.SetState(1, "Breakpoint hit on line {0} ({1})", breakpoint.LineNumber, breakpoint.SourceFileName);
+            });
         }
 
+        private void Debugger_SerialCharReceived(object sender, byte b)
+        {
+            
+        }
     }
 }

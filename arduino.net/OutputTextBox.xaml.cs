@@ -26,7 +26,11 @@ namespace arduino.net
 
             Logger.RegisterListener((i, msg) =>
             {
-                Dispatcher.Invoke(() => ContentTextBox.AppendText(msg + "\n"));
+                Dispatcher.Invoke(() => 
+                    {
+                        ContentTextBox.AppendText(msg + "\n");
+                        ContentTextBox.ScrollToEnd();
+                    });
             });
         }
 

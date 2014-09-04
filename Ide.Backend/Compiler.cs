@@ -217,7 +217,7 @@ namespace arduino.net
             return path;
         }
 
-        private string GetTempDirectory()
+        public string GetTempDirectory()
         {
             string tempDir = Path.GetTempPath();
             string dirName = string.Format("build-{0}.tmp", mProject.SketchFile);
@@ -225,7 +225,7 @@ namespace arduino.net
             return Path.Combine(tempDir, dirName);
         }
 
-        private string GetElfFile(string tempDir)
+        public string GetElfFile(string tempDir)
         {
             return Path.Combine(tempDir, mProject.SketchFile + ".elf");
         }
