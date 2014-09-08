@@ -127,10 +127,7 @@ namespace arduino.net
             var config = Configuration.Boards[boardName]["build"];
             var usbvid = config.Get("vid");
             var usbpid = config.Get("pid");
-            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"",
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config.Get("core")),
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config.Get("variant"))
-                );
+            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"", GetIncludePaths(config));
 
             BuildCommand = new Command()
             {
@@ -147,37 +144,18 @@ namespace arduino.net
             };
         }
 
-        /* 
-         static private List getCommandCompilerS(String avrBasePath, List includePaths,
-            String sourceName, String objectName, Map<String, String> boardPreferences) 
-         {
-            List baseCommandCompiler = new ArrayList(Arrays.asList(new String[] {
-              avrBasePath + "avr-gcc",
-              "-c", // compile, don't link
-              "-g", // include debugging info (so errors include line numbers)
-              "-x","assembler-with-cpp",
-              "-mmcu=" + boardPreferences.get("build.mcu"),
-              "-DF_CPU=" + boardPreferences.get("build.f_cpu"),      
-              "-DARDUINO=" + Base.REVISION,
-              "-DUSB_VID=" + boardPreferences.get("build.vid"),
-              "-DUSB_PID=" + boardPreferences.get("build.pid"),
-            }));
-
-            for (int i = 0; i < includePaths.size(); i++) {
-              baseCommandCompiler.add("-I" + (String) includePaths.get(i));
-            }
-
-            baseCommandCompiler.add(sourceName);
-            baseCommandCompiler.add("-o"+ objectName);
-
-            return baseCommandCompiler;
-          }
-         */
-
-
         private static bool IsCFile(string file)
         {
             return (Path.GetExtension(file).ToLower() == ".c");
+        }
+
+        public static string[] GetIncludePaths(ConfigurationFile config)
+        {
+            return new string[] {
+                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config.Get("core")),
+                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config.Get("variant")),
+                Path.Combine(Configuration.ToolkitPath, "debugger/" + config.Get("core"))
+            };
         }
     }
 
@@ -185,25 +163,16 @@ namespace arduino.net
     {
         public override void SetupCommand(string boardName)
         {
-            var compiler = "hardware/tools/avr/bin/avr-gcc";
+            var compiler = "hardware/tools/avr/bin/avr-as";
 
             var config = Configuration.Boards[boardName]["build"];
-            var usbvid = config.Get("vid");
-            var usbpid = config.Get("pid");
-            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"",
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config.Get("core")),
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config.Get("variant"))
-                );
+            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"", CppBuildTarget.GetIncludePaths(config));
 
             BuildCommand = new Command()
             {
                 Program = Path.Combine(Configuration.ToolkitPath, compiler),
-                Arguments = string.Format("-c -g -x -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
+                Arguments = string.Format("-g -mmcu={0} {1} \"{2}\" -o \"{3}\"",
                 config.Get("mcu"),
-                config.Get("f_cpu"),
-                (usbvid == null) ? "null" : usbvid,
-                (usbpid == null) ? "null" : usbpid,
-                "105",
                 includePaths,
                 EffectiveSourceFile,
                 TargetFile)
