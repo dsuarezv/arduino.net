@@ -181,6 +181,36 @@ namespace arduino.net
         }
     }
 
+    public class AssemblerBuildTarget : BuildTarget
+    {
+        public override void SetupCommand(string boardName)
+        {
+            var compiler = "hardware/tools/avr/bin/avr-gcc";
+
+            var config = Configuration.Boards[boardName]["build"];
+            var usbvid = config.Get("vid");
+            var usbpid = config.Get("pid");
+            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"",
+                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config.Get("core")),
+                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config.Get("variant"))
+                );
+
+            BuildCommand = new Command()
+            {
+                Program = Path.Combine(Configuration.ToolkitPath, compiler),
+                Arguments = string.Format("-c -g -x -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
+                config.Get("mcu"),
+                config.Get("f_cpu"),
+                (usbvid == null) ? "null" : usbvid,
+                (usbpid == null) ? "null" : usbpid,
+                "105",
+                includePaths,
+                EffectiveSourceFile,
+                TargetFile)
+            };
+        }
+    }
+
 
     public class ArBuildTarget : BuildTarget
     {

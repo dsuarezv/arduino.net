@@ -100,7 +100,7 @@ namespace arduino.net
                 {
                     case FileType.Code: result.Add(new DebugBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, CopyToTmp = true }); break;
                     case FileType.Sketch: result.Add(new InoBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, FileExtensionOnTmp = ".cpp", CopyToTmp = true }); break;
-                    case FileType.Assembler: break;
+                    case FileType.Assembler: result.Add(new AssemblerBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, CopyToTmp = false }); break;
                     default: 
                          result.Add(new CopyBuildTarget() { SourceFile = sourceFile }); break;
                 }
