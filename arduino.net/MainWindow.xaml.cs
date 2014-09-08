@@ -37,7 +37,7 @@ namespace arduino.net
         {
             try
             {
-                Configuration.Initialize(@"C:\Program Files (x86)\Arduino");
+                Configuration.Initialize(@"C:\Users\dave\Documents\develop\Arduino\ArduinoIDE.net\deploy");
 
                 var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
 
