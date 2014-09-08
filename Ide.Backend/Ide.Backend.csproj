@@ -46,6 +46,7 @@
     <Compile Include="ObjectDumper.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SketchFileParser.cs" />
     <Compile Include="SymbolTableParser.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

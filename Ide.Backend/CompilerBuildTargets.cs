@@ -147,6 +147,34 @@ namespace arduino.net
             };
         }
 
+        /* 
+         static private List getCommandCompilerS(String avrBasePath, List includePaths,
+            String sourceName, String objectName, Map<String, String> boardPreferences) 
+         {
+            List baseCommandCompiler = new ArrayList(Arrays.asList(new String[] {
+              avrBasePath + "avr-gcc",
+              "-c", // compile, don't link
+              "-g", // include debugging info (so errors include line numbers)
+              "-x","assembler-with-cpp",
+              "-mmcu=" + boardPreferences.get("build.mcu"),
+              "-DF_CPU=" + boardPreferences.get("build.f_cpu"),      
+              "-DARDUINO=" + Base.REVISION,
+              "-DUSB_VID=" + boardPreferences.get("build.vid"),
+              "-DUSB_PID=" + boardPreferences.get("build.pid"),
+            }));
+
+            for (int i = 0; i < includePaths.size(); i++) {
+              baseCommandCompiler.add("-I" + (String) includePaths.get(i));
+            }
+
+            baseCommandCompiler.add(sourceName);
+            baseCommandCompiler.add("-o"+ objectName);
+
+            return baseCommandCompiler;
+          }
+         */
+
+
         private static bool IsCFile(string file)
         {
             return (Path.GetExtension(file).ToLower() == ".c");
@@ -242,7 +270,7 @@ namespace arduino.net
             return;
         }
 
-        protected void ProcessFile(List<BreakPointInfo> breakpoints)
+        protected virtual void ProcessFile(List<BreakPointInfo> breakpoints)
         { 
             using (var reader = new StreamReader(SourceFile))
             { 
@@ -264,7 +292,7 @@ namespace arduino.net
             {
                 return new string[] {
                     "#include \"soft_debugger.h\"",
-                    "#line 2",
+                    "#line 1",
                     line
                 };
             }
@@ -280,7 +308,7 @@ namespace arduino.net
                 {
                     if (br.LineNumber == lineNumber)
                     {
-                        return new string[] { string.Format("    SOFTDEBUGGER_BREAK({0}); {1}", br.Id, line) };
+                        return new string[] { string.Format("  SOFTDEBUGGER_BREAK({0});  {1}", br.Id, line) };
                     }
                 }
             }
@@ -291,31 +319,56 @@ namespace arduino.net
 
     public class InoBuildTarget : DebugBuildTarget
     {
+        private SketchFileParser mParser;
+
+        protected override void ProcessFile(List<BreakPointInfo> breakpoints)
+        {
+            // First pass: analyze
+
+            mParser = new SketchFileParser(SourceFile);
+            mParser.Parse();
+
+            // Second pass: edit through ProcessLine
+            base.ProcessFile(breakpoints);
+        }
+
         protected override string[] ProcessLine(int lineNumber, string line, List<BreakPointInfo> breakpoints)
         {
-            // DAVE: Hay que poner las declaraciones de las funciones después de los includes porque aquellas pueden usar algún tipo declarado en éstos.
-            // Todo esto hay que rescribirlo para que coloque las definiciones en su sitio y procese los breakpoints.
-
             if (lineNumber == 1)
             {
                 if (Debugger != null)
                 {
                     return new string[] {
                         "#include \"soft_debugger.h\"",
-                        "#include \"Arduino.h\"",
-                        "void setup();",
-                        "void loop();",
-                        "#line 2",
+                        "#line 1",
                         line
                     };
                 }
-                else
+            }
+            else if (lineNumber == mParser.LastIncludeLineNumber + 1)
+            {
+                var result = new List<string>();
+                result.Add(line);
+                result.Add("#include \"Arduino.h\"");
+                foreach (var prototype in mParser.UniqueFunctionDeclarations) result.Add(prototype + ";");
+
+                if (!mParser.HasSetupFunction)
                 {
+                    result.Add("void setup()");
+                    result.Add("{ ");
+                    result.Add("    SOFTDEBUGGER_CONNECT");
+                    result.Add("}");
+                    result.Add("");
+                }
+
+                return result.ToArray<string>();
+            }
+            else if (lineNumber == mParser.SetupFunctionFirstLine + 1)
+            {
+                if (mParser.HasSetupFunction)
+                { 
                     return new string[] {
-                        "#include \"Arduino.h\"",
-                        "void setup();",
-                        "void loop();",
-                        "#line 2",
+                        "SOFTDEBUGGER_CONNECT",
                         line
                     };
                 }
@@ -323,6 +376,7 @@ namespace arduino.net
 
             return ProcessLineForBreakpoints(lineNumber, line, breakpoints);
         }
+
 
         public override void SetupSources(string tempDir)
         {
@@ -336,12 +390,6 @@ namespace arduino.net
 
             CalculateEffectiveSourceFile(tempDir);
             ProcessFile(brs);
-        }
-
-
-        public override void SetupCommand(string boardName)
-        {
-            base.SetupCommand(boardName);
         }
     }
 

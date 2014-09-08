@@ -129,6 +129,14 @@ namespace arduino.net
 
         private void OpenContent(string title, string content)
         {
+            var ti = GetTabForFileName(title);
+
+            if (ti != null)
+            {
+                ti.IsSelected = true;
+                return;
+            }
+
             var editor = CreateEditorTabItem(title);
             editor.OpenContent(content, null);
         }
@@ -157,6 +165,17 @@ namespace arduino.net
             return null;
         }
 
+        private void SaveAll()
+        { 
+            foreach (TabItem ti in OpenFilesTab.Items)
+            {
+                var editor = ti.Content as CodeTextBox;
+                if (editor == null) continue;
+
+                editor.SaveFile();
+            }
+        }
+
 
         // __ Actions _________________________________________________________
 
@@ -165,6 +184,9 @@ namespace arduino.net
         {
             OutputTextBox1.ClearText();
             StatusControl.SetState(1, "Compiling...");
+
+            SaveAll();
+
             bool result = await IdeManager.Compiler.BuildAsync("atmega328", true);
             
             var compiler = IdeManager.Compiler;
