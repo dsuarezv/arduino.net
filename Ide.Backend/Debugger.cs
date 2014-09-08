@@ -210,11 +210,13 @@ namespace arduino.net
 
         private void OnTargetBreak(int breakpointIndex)
         {
-            if (breakpointIndex >= mBreakPoints.Count) return;
+            BreakPointInfo br = null;
 
-            var br = mBreakPoints[breakpointIndex];
-            
-            br.HitCount++;
+            if (breakpointIndex < mBreakPoints.Count)
+            { 
+                br = mBreakPoints[breakpointIndex];
+                br.HitCount++;
+            }
 
             if (BreakPointHit != null) BreakPointHit(this, br);
         }

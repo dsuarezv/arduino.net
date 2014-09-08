@@ -211,7 +211,14 @@ namespace arduino.net
         {
             Dispatcher.Invoke(() =>
             {
-                StatusControl.SetState(1, "Breakpoint hit on line {0} ({1})", breakpoint.LineNumber, breakpoint.SourceFileName);
+                if (breakpoint == null)
+                {
+                    StatusControl.SetState(1, "Unknown breakpoint hit. Target is stopped. Hit 'debug' to continue.");
+                }
+                else
+                { 
+                    StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", breakpoint.LineNumber, breakpoint.SourceFileName);
+                }
             });
         }
 
@@ -219,7 +226,7 @@ namespace arduino.net
         {
             Dispatcher.Invoke(() =>
             {
-                StatusControl.SetState(1, "Debugging...");
+                StatusControl.SetState(1, "Target running in debug...");
             });
         }
 
