@@ -14,6 +14,7 @@ namespace arduino.net
         private List<TracepointInfo> mTracepoints = new List<TracepointInfo>();
         private byte[] mTraceQueryBuffer;
 
+        public event TargetConnectedDelegate TargetConnected;
         public event BreakPointDelegate BreakPointHit;
         public event BreakPointDelegate BreakPointAdded;
         public event BreakPointDelegate BreakPointRemoved;
@@ -203,8 +204,8 @@ namespace arduino.net
 
 
         private void OnTargetInit()
-        { 
-            
+        {
+            if (TargetConnected != null) TargetConnected(this);
         }
 
         private void OnTargetBreak(int breakpointIndex)
@@ -228,6 +229,8 @@ namespace arduino.net
             if (SerialCharReceived != null) SerialCharReceived(this, b);
         }
     }
+
+    public delegate void TargetConnectedDelegate(object sender);
 
     public delegate void BreakPointDelegate(object sender, BreakPointInfo breakpoint);
 

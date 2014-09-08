@@ -96,8 +96,8 @@ static void DbgLoop()
 
 
 
+/*
 byte __DbgSavedRegisters[36];  // 32 registers + SP (16bits) + PC (16 bits)
-
 
 static void DbgSaveRegisters()
 {
@@ -151,9 +151,9 @@ static void DbgSaveRegisters()
         "
          :
          : "z" (__DbgSavedRegisters));
-         
-        
 } 
+*/
+
 
 static void DbgBreak(uint8_t breakpointNo)
 {

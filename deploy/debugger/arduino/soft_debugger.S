@@ -1,12 +1,12 @@
 
 
-.DSEG
+.section .data
 
 .global __DbgSavedRegisters
 
 		__DbgSavedRegisters: .BYTE 36
 
-.CSEG
+.section .text
 
 .extern DbgBreak
 .global DbgSaveRegisters

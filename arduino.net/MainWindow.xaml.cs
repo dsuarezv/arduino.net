@@ -45,6 +45,7 @@ namespace arduino.net
                 IdeManager.Debugger = new Debugger("COM3");
                 IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
+                IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
 
                 foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
@@ -211,6 +212,14 @@ namespace arduino.net
             Dispatcher.Invoke(() =>
             {
                 StatusControl.SetState(1, "Breakpoint hit on line {0} ({1})", breakpoint.LineNumber, breakpoint.SourceFileName);
+            });
+        }
+
+        void Debugger_TargetConnected(object sender)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                StatusControl.SetState(1, "Debugging...");
             });
         }
 
