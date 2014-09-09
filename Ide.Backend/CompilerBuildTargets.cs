@@ -359,15 +359,15 @@ namespace arduino.net
                 {
                     return new string[] {
                         "#include \"soft_debugger.h\"",
-                        "#line 1",
+                        string.Format("#line {0} \"{1}\"", lineNumber, Path.GetFileName(SourceFile)),
                         line
                     };
                 }
             }
-            else if (lineNumber == mParser.LastIncludeLineNumber + 1)
+            else if (lineNumber == mParser.LastIncludeLineNumber + 2)
             {
                 var result = new List<string>();
-                result.Add(line);
+                
                 result.Add("#include \"Arduino.h\"");
                 foreach (var prototype in mParser.UniqueFunctionDeclarations) result.Add(prototype + ";");
 
@@ -377,8 +377,10 @@ namespace arduino.net
                     result.Add("{ ");
                     result.Add("    SOFTDEBUGGER_CONNECT");
                     result.Add("}");
-                    result.Add("");
                 }
+
+                result.Add("#line " + lineNumber);
+                result.Add(line);
 
                 return result.ToArray<string>();
             }
@@ -388,6 +390,7 @@ namespace arduino.net
                 { 
                     return new string[] {
                         "SOFTDEBUGGER_CONNECT",
+                        "#line " + lineNumber,
                         line
                     };
                 }
