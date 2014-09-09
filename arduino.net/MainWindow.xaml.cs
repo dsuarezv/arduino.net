@@ -81,16 +81,7 @@ namespace arduino.net
 
         private async void BuildButton_Click(object sender, RoutedEventArgs e)
         {
-            var success = await LaunchBuild();
-            
-            if (success)
-            { 
-                StatusControl.SetState(0, "Build succeeded");
-            }
-            else
-            {
-                StatusControl.SetState(1, "Build failed");
-            }
+            await LaunchBuild();            
         }
 
         private async void DeployButton_Click(object sender, RoutedEventArgs e)
@@ -191,10 +182,24 @@ namespace arduino.net
             bool result = await IdeManager.Compiler.BuildAsync("atmega328", true);
             
             var compiler = IdeManager.Compiler;
-            OpenContent("Dissasembly",
+            OpenContent("Dissasembly sketch",
                 ObjectDumper.GetSingleString(
                     ObjectDumper.GetDisassembly(
                         compiler.GetElfFile(compiler.GetTempDirectory()))));
+
+            OpenContent("Dissasembly .S",
+                ObjectDumper.GetSingleString(
+                    ObjectDumper.GetDisassembly(
+                        System.IO.Path.Combine(compiler.GetTempDirectory(), "soft_debugger.S.o") )));
+
+            if (result)
+            {
+                StatusControl.SetState(0, "Build succeeded");
+            }
+            else
+            {
+                StatusControl.SetState(1, "Build failed");
+            }
 
             return result;
         }

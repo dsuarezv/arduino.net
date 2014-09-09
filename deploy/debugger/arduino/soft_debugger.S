@@ -1,17 +1,17 @@
 
-
 .section .data
 
 .global __DbgSavedRegisters
 
 		__DbgSavedRegisters: .BYTE 36
 
+
+
 .section .text
 
-.extern DbgBreakImpl
-.global DbgBreak
+.global DbgSaveRegisters
 
-	DbgBreak:
+	DbgSaveRegisters:
 		cli
 		push r31
 		push r30
@@ -42,6 +42,7 @@
 		pop r29
 		pop r30
 		pop r31
+		pop r24
 
 		; Copy program counter from the stack to r1, r2
 
@@ -49,8 +50,8 @@
 		pop r2				  ; PC
 		st Z+, r1
 		st Z+, r2
-		push r2
-		push r1
+		push r2 			  ; Restore PC in the stack
+		push r1 			  ; Restore PC in the stack
 
 		; Recover r1 and r2 from the saved buffer
 
@@ -62,6 +63,6 @@
 		st -Z, r2
 
 		sei
-		call DbgBreakImpl
+		ret
 
 .end

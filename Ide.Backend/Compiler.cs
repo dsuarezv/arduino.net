@@ -101,9 +101,7 @@ namespace arduino.net
             var config = Configuration.Boards[mBoardName]["build"];
             var sourceDir = Path.Combine(Configuration.ToolkitPath, "debugger/" + config.Get("core"));
 
-            var fileList = new List<string>();
-            fileList.AddRange(Directory.GetFiles(sourceDir, "*"));
-
+            var fileList = Project.GetCodeFilesOnPath(sourceDir);
             return GetCommandsForFiles(tempDir, debug, fileList);
         }
 

@@ -43,11 +43,16 @@ namespace arduino.net
             }
         }
 
-        protected bool IsTargetUpToDate()
+        protected virtual bool IsTargetUpToDate()
         {
-            if (File.Exists(TargetFile))
+            return IsTargetUpToDate(SourceFile, TargetFile);
+        }
+
+        protected bool IsTargetUpToDate(string sourceFile, string targetFile)
+        {
+            if (File.Exists(targetFile))
             {
-                if (File.GetLastWriteTime(SourceFile) < File.GetLastWriteTime(TargetFile))
+                if (File.GetLastWriteTime(sourceFile) < File.GetLastWriteTime(targetFile))
                 {
                     TargetIsUpToDate = true;
                     return true;
@@ -198,6 +203,16 @@ namespace arduino.net
                 Arguments = string.Format("rcs \"{0}\" {1}",
                     TargetFile, sb)
             };
+        }
+
+        protected override bool IsTargetUpToDate()
+        {
+            foreach (var s in SourceFiles)
+            {
+                if (!IsTargetUpToDate(s, TargetFile)) return false;
+            }
+
+            return true;
         }
     }
 
