@@ -5,11 +5,20 @@
 #include <stdint.h>
 
 #define SOFTDEBUGGER_CONNECT DbgConnect();
-#define SOFTDEBUGGER_BREAK(a) DbgSaveRegisters(); DbgBreak(a);
+#define SOFTDEBUGGER_BREAK(a) /*DbgSaveRegisters();*/ DbgBreak(a);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 void DbgConnect();
-void DbgSaveRegisters() __attribute__ ((noinline));
 void DbgBreak(uint8_t breakpointNo) __attribute__ ((noinline));
+extern void DbgSaveRegisters() __attribute__ ((noinline));
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -9,6 +9,8 @@
 #define DBG_HEADER_CONTINUE_TYPE      230
 
 
+extern uint8_t __DbgSavedRegisters[36];
+
 
 typedef struct 
 {
@@ -43,7 +45,6 @@ typedef struct
 
 
 static void DbgSendTrace(uint32_t address, uint8_t size);
-
 
 
 void DbgConnect()
@@ -86,67 +87,6 @@ static void DbgLoop()
     }
 }
 
-
-
-/*
-byte __DbgSavedRegisters[36];  // 32 registers + SP (16bits) + PC (16 bits)
-
-static void DbgSaveRegisters()
-{
-    // Source:      regY
-    // Destination: regZ (__DbgSavedRegisters). Z register (r30,r31) is lost.
-    
-    asm volatile ("\
-        cli                     \n\t\
-        push r29                \n\t\
-        push r28                \n\t\
-        push r27                \n\t\
-        \
-        ldi r28, 32             ; Source: Y = position 32      \n\t\
-        ldi r29, 0              ; Copying down                 \n\t\
-        \
-    DbgSaveRegisters_loop:      \n\t\
-        ld r27, -Y              ; buffer source content in r27                     \n\t\
-        st Z+, r27              ; Store the buffer content in *Z and increment Z   \n\t\
-        cpi r28, 0              \n\t\
-        brne DbgSaveRegisters_loop  \n\t\
-        \
-        ; Copy the stack pointer  \n\t\
-        \
-        ldi r27, 0x3e           \n\t\
-        st Z+, r27              \n\t\
-        ldi r27, 0x3d           \n\t\
-        st Z+, r27              \n\t\
-        \
-        pop r27                 \n\t\
-        pop r28                 \n\t\
-        pop r29                 \n\t\
-        \
-        ; Copy program counter from the stack         \n\t\
-        pop r1                  ; PC                  \n\t\
-        pop r2                  ; PC                  \n\t\
-        st Z+, r1               \n\t\
-        st Z+, r2               \n\t\
-        push r2                 \n\t\
-        push r1                 \n\t\
-        \
-        ; Recover r1 and r2 from the saved buffer     \n\t\
-        \
-        st -Z, r1               \n\t\
-        st -Z, r1               \n\t\
-        st -Z, r1               \n\t\
-        st -Z, r1               \n\t\
-        st -Z, r1               \n\t\
-        st -Z, r2               \n\t\
-        \
-        sei                     \n\t\
-        "
-         :
-         : "z" (__DbgSavedRegisters));
-} 
-*/
-
-
 void DbgBreak(uint8_t breakpointNo)
 {
     DbgBreakPacket p;
@@ -156,6 +96,7 @@ void DbgBreak(uint8_t breakpointNo)
     p.BreakpointNumber = breakpointNo;
     
     Serial.write((uint8_t*)&p, sizeof(DbgBreakPacket));
+    Serial.write(__DbgSavedRegisters, 36);
     DbgLoop();
 }
 

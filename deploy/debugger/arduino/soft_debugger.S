@@ -42,7 +42,6 @@
 		pop r29
 		pop r30
 		pop r31
-		pop r24
 
 		; Copy program counter from the stack to r1, r2
 
