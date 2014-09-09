@@ -359,7 +359,7 @@ namespace arduino.net
                 {
                     return new string[] {
                         "#include \"soft_debugger.h\"",
-                        string.Format("#line {0} \"{1}\"", lineNumber, Path.GetFileName(SourceFile)),
+                        string.Format("#line {0} \"{1}\"", lineNumber, EscapePath(SourceFile)),
                         line
                     };
                 }
@@ -399,6 +399,10 @@ namespace arduino.net
             return ProcessLineForBreakpoints(lineNumber, line, breakpoints);
         }
 
+        private static string EscapePath(string path)
+        {
+            return path.Replace("\\", "\\\\");
+        }
 
         public override void SetupSources(string tempDir)
         {
