@@ -8,10 +8,10 @@
 
 .section .text
 
-.extern DbgBreak
-.global DbgSaveRegisters
+.extern DbgBreakImpl
+.global DbgBreak
 
-	DbgSaveRegisters:
+	DbgBreak:
 		cli
 		push r31
 		push r30
@@ -19,8 +19,8 @@
 		push r28
 		push r27
 
-		ldi	r30, low(__DbgSavedRegisters)
-       	ldi	r31, high(__DbgSavedRegisters)
+		ldi	r30, lo8(__DbgSavedRegisters)
+       	ldi	r31, hi8(__DbgSavedRegisters)
 		ldi r28, 32		      			; Source: Y = position 32. Will pre-decrement later.
 		ldi r29, 0		      			; Copying down
 
@@ -62,4 +62,6 @@
 		st -Z, r2
 
 		sei
-		call DbgBreak
+		call DbgBreakImpl
+
+.end

@@ -30,15 +30,15 @@ namespace arduino.net
 
             SetupBoardName(boardName);
 
-            var projectCmds = CreateProjectCompileCommands(tempDir, debug);
             var debuggerCmds = CreateDebuggerCompileCommands(tempDir, debug);
+            var projectCmds = CreateProjectCompileCommands(tempDir, debug);
             var coreCmds = CreateCoreCompileCommands(tempDir);
             var coreLibCmds = CreateLibraryCommands(tempDir, coreCmds);
             var linkCmds = CreateLinkCommand(tempDir, projectCmds, debuggerCmds);
             var elfCmds = CreateImageCommands(tempDir);
 
-            if (!RunCommands(projectCmds, tempDir)) return false;
             if (!RunCommands(debuggerCmds, tempDir)) return false;
+            if (!RunCommands(projectCmds, tempDir)) return false;
             if (!RunCommands(coreCmds, tempDir)) return false;
             if (!RunCommands(coreLibCmds, tempDir)) return false;
             if (!RunCommands(linkCmds, tempDir)) return false;

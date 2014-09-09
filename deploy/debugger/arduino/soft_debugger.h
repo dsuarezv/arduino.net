@@ -18,7 +18,7 @@
 static void DbgSaveRegisters() __attribute__ ((noinline));
 static void DbgSendTrace(uint32_t address, uint8_t size);
 
-static void DbgBreak(uint8_t breakpointNo) __attribute__ ((noinline));
+void DbgBreak(uint8_t breakpointNo) __attribute__ ((noinline));
 
 
 typedef struct 
@@ -155,7 +155,7 @@ static void DbgSaveRegisters()
 */
 
 
-static void DbgBreak(uint8_t breakpointNo)
+void DbgBreakImpl(uint8_t breakpointNo)
 {
     DbgBreakPacket p;
     
