@@ -275,7 +275,7 @@ namespace arduino.net
         {
             if (Debugger != null)
             {
-                var brs = Debugger.GetBreakpointsForFile(SourceFile);
+                var brs = Debugger.BreakPoints.GetBreakpointsForFile(SourceFile);
 
                 if (brs.Count > 0)
                 {
@@ -410,7 +410,7 @@ namespace arduino.net
 
             if (Debugger != null)
             {
-                brs = Debugger.GetBreakpointsForFile(SourceFile);
+                brs = Debugger.BreakPoints.GetBreakpointsForFile(SourceFile);
                 DisableTargetDateCheck = true;
             }
 

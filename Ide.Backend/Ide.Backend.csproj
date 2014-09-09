@@ -33,6 +33,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BreakPointManager.cs" />
     <Compile Include="CompilerBuildTargets.cs" />
     <Compile Include="ConfigurationFile.cs" />
     <Compile Include="ControlPoints.cs" />

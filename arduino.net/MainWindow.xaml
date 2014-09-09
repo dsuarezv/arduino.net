@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:arduino.net" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:SyntaxHighlightBox="clr-namespace:AurelienRibon.Ui.SyntaxHighlightBox;assembly=AurelienRibon.Ui.SyntaxHighlightBox" mc:Ignorable="d" x:Class="arduino.net.MainWindow"
         Title="MainWindow" Height="609" Width="809"
-        WindowStyle="SingleBorderWindow" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded">
+        WindowStyle="SingleBorderWindow" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded" Icon="arduino-icon2.ico">
     <Grid Width="auto">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

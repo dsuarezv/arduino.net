@@ -109,13 +109,18 @@ namespace arduino.net
         {
             var ti = GetTabForFileName(fileName);
 
+            CodeTextBox editor = null;
+
             if (ti != null)
             {
                 ti.IsSelected = true;
-                return;
+                editor = ti.Content as CodeTextBox;
+            }
+            else
+            {
+                editor = CreateEditorTabItem(fileName);
             }
 
-            var editor = CreateEditorTabItem(fileName);
             editor.OpenFile(fileName);
         }
 
@@ -123,13 +128,18 @@ namespace arduino.net
         {
             var ti = GetTabForFileName(title);
 
+            CodeTextBox editor = null;
+
             if (ti != null)
             {
                 ti.IsSelected = true;
-                return;
+                editor = ti.Content as CodeTextBox;
             }
-
-            var editor = CreateEditorTabItem(title);
+            else
+            {
+                editor = CreateEditorTabItem(title);
+            }
+            
             editor.OpenContent(content, null);
         }
 

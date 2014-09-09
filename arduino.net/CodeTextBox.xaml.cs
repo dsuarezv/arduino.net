@@ -46,8 +46,8 @@ namespace arduino.net
         {
             if (IdeManager.Debugger == null) return;
 
-            IdeManager.Debugger.BreakPointAdded += Debugger_BreakPointAdded;
-            IdeManager.Debugger.BreakPointRemoved += Debugger_BreakPointRemoved;
+            IdeManager.Debugger.BreakPoints.BreakPointAdded += Debugger_BreakPointAdded;
+            IdeManager.Debugger.BreakPoints.BreakPointRemoved += Debugger_BreakPointRemoved;
         }
 
 
@@ -177,11 +177,11 @@ namespace arduino.net
                     
                     if (mBreakpoints.ContainsKey(lineNumber))
                     {
-                        IdeManager.Debugger.RemoveBreakPoint(mBreakpoints[lineNumber]);
+                        IdeManager.Debugger.BreakPoints.Remove(mBreakpoints[lineNumber]);
                     }
                     else
                     {
-                        IdeManager.Debugger.AddBreakpoint(mFileName, lineNumber);
+                        IdeManager.Debugger.BreakPoints.Add(mFileName, lineNumber);
                     }
                     break;  
             }

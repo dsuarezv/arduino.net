@@ -10,17 +10,16 @@ namespace arduino.net
     public class Debugger: IDisposable
     {
         private SerialPort mSerialPort;
-        private List<BreakPointInfo> mBreakPoints = new List<BreakPointInfo>();
+        private BreakPointManager mBreakPoints = new BreakPointManager();
         private List<TracepointInfo> mTracepoints = new List<TracepointInfo>();
         private byte[] mTraceQueryBuffer;
+        private byte[] mRegisters;
 
         public event TargetConnectedDelegate TargetConnected;
         public event BreakPointDelegate BreakPointHit;
-        public event BreakPointDelegate BreakPointAdded;
-        public event BreakPointDelegate BreakPointRemoved;
         public event ByteDelegate SerialCharReceived;
 
-        public List<BreakPointInfo> BreakPoints
+        public BreakPointManager BreakPoints
         {
             get { return mBreakPoints; }
         }
@@ -28,6 +27,11 @@ namespace arduino.net
         public List<TracepointInfo> TracePoints
         {
             get { return mTracepoints; }
+        }
+
+        public byte[] Registers
+        {
+            get { return mRegisters; }
         }
 
 
@@ -50,37 +54,7 @@ namespace arduino.net
             mSerialPort.Dispose();
         }
 
-        public BreakPointInfo AddBreakpoint(string sourceFile, int lineNumber)
-        {
-            var result = new BreakPointInfo() { LineNumber = lineNumber, SourceFileName = sourceFile, Id = mBreakPoints.Count };
-
-            mBreakPoints.Add(result);
-
-            if (BreakPointAdded != null) BreakPointAdded(this, result);
-
-            return result;
-        }
-
-        public void RemoveBreakPoint(BreakPointInfo br)
-        {
-            if (!mBreakPoints.Remove(br)) return;
-
-            if (BreakPointRemoved != null) BreakPointRemoved(this, br);
-        }
-
-        public List<BreakPointInfo> GetBreakpointsForFile(string fileName)
-        {
-            List<BreakPointInfo> result = new List<BreakPointInfo>();
-
-            foreach (var br in mBreakPoints)
-            {
-                if (br.SourceFileName == fileName) result.Add(br);
-            }
-
-            return result;
-        }
-
-
+       
         // __ Debugger commands _______________________________________________
 
 
@@ -164,6 +138,7 @@ namespace arduino.net
                 
                 case DebuggerPacketType.Break:
                     int breakpointIndex = r.ReadByte();
+                    mRegisters = r.ReadBytes(36);
                     OnTargetBreak(breakpointIndex); 
                     break;
                 
@@ -208,13 +183,13 @@ namespace arduino.net
             if (TargetConnected != null) TargetConnected(this);
         }
 
-        private void OnTargetBreak(int breakpointIndex)
+        private void OnTargetBreak(int breakpointId)
         {
             BreakPointInfo br = null;
 
-            if (breakpointIndex < mBreakPoints.Count)
+            if (breakpointId < mBreakPoints.Count)
             { 
-                br = mBreakPoints[breakpointIndex];
+                br = mBreakPoints[breakpointId];
                 br.HitCount++;
             }
 
