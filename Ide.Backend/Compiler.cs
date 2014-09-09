@@ -144,14 +144,14 @@ namespace arduino.net
         private List<BuildTarget> CreateLibraryCommands(string tempDir, List<BuildTarget> coreTargets)
         {
             var result = new List<BuildTarget>();
+            var cmd = new ArBuildTarget() { TargetFile = GetCoreLibraryFile(tempDir) };
 
             foreach (var c in coreTargets)
             {
-                var sourceFile = c.TargetFile;
-                var targetFile = GetCoreLibraryFile(tempDir);
-
-                result.Add(new ArBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile });
+                cmd.SourceFiles.Add(c.TargetFile);
             }
+
+            result.Add(cmd);
 
             return result;
         }
@@ -210,9 +210,16 @@ namespace arduino.net
             cmd.SetupSources(tempDir);
             cmd.SetupCommand(mBoardName);
 
-            Logger.LogCompiler(cmd.ToString());
-
             cmd.Build(tempDir);
+
+            if (cmd.TargetIsUpToDate)
+            {
+                Logger.LogCompiler("{0} is up to date.", cmd.TargetFile);
+            }
+            else
+            { 
+                Logger.LogCompiler(cmd.ToString());
+            }
             
             if (cmd.BuildCommand == null) return true;
             foreach (var s in cmd.BuildCommand.Output) Logger.LogCompiler("    " + s);

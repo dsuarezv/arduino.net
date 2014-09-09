@@ -15,7 +15,7 @@
 #define DBG_HEADER_TRACEANSWER_TYPE   249
 #define DBG_HEADER_CONTINUE_TYPE      230
 
-static void DbgSaveRegisters() __attribute__ ((noinline));
+//static void DbgSaveRegisters() __attribute__ ((noinline));
 static void DbgSendTrace(uint32_t address, uint8_t size);
 
 void DbgBreak(uint8_t breakpointNo) __attribute__ ((noinline));

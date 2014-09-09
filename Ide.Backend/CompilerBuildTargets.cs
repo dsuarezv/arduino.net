@@ -14,7 +14,7 @@ namespace arduino.net
         public bool CopyToTmp = false;
         public string FileExtensionOnTmp;
         public Command BuildCommand;
-        public bool TargetUpToDate = false;
+        public bool TargetIsUpToDate = false;
         public bool DisableTargetDateCheck = false;
         public bool FinishedSuccessfully = true;
 
@@ -49,12 +49,12 @@ namespace arduino.net
             {
                 if (File.GetLastWriteTime(SourceFile) < File.GetLastWriteTime(TargetFile))
                 {
-                    TargetUpToDate = true;
+                    TargetIsUpToDate = true;
                     return true;
                 }
             }
 
-            TargetUpToDate = false;
+            TargetIsUpToDate = false;
             return false;
         }
 
@@ -93,7 +93,7 @@ namespace arduino.net
 
         public override string ToString()
         {
-            if (TargetUpToDate) return string.Format("* \"{0}\" is up to date", TargetFile);
+            if (TargetIsUpToDate) return string.Format("* \"{0}\" is up to date", TargetFile);
             if (BuildCommand == null) return "";
 
             return BuildCommand.ToString();
@@ -183,15 +183,20 @@ namespace arduino.net
 
     public class ArBuildTarget : BuildTarget
     {
+        public List<string> SourceFiles = new List<string>();
+
         public override void SetupCommand(string boardName)
         {
             DisableTargetDateCheck = true;
 
+            var sb = new StringBuilder();
+            foreach (var file in SourceFiles) sb.AppendFormat("\"{0}\" ", file);
+
             BuildCommand = new Command()
             {
                 Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-ar"),
-                Arguments = string.Format("rcs \"{0}\" \"{1}\"",
-                    TargetFile, SourceFile)
+                Arguments = string.Format("rcs \"{0}\" {1}",
+                    TargetFile, sb)
             };
         }
     }
