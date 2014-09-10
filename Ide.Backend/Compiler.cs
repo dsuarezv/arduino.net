@@ -30,12 +30,14 @@ namespace arduino.net
 
             SetupBoardName(boardName);
 
+            var debuggerCmds = CreateDebuggerCompileCommands(tempDir, debug);
             var projectCmds = CreateProjectCompileCommands(tempDir, debug);
             var coreCmds = CreateCoreCompileCommands(tempDir);
             var coreLibCmds = CreateLibraryCommands(tempDir, coreCmds);
-            var linkCmds = CreateLinkCommand(tempDir, projectCmds);
+            var linkCmds = CreateLinkCommand(tempDir, projectCmds, debuggerCmds);
             var elfCmds = CreateImageCommands(tempDir);
 
+            if (!RunCommands(debuggerCmds, tempDir)) return false;
             if (!RunCommands(projectCmds, tempDir)) return false;
             if (!RunCommands(coreCmds, tempDir)) return false;
             if (!RunCommands(coreLibCmds, tempDir)) return false;
@@ -89,10 +91,26 @@ namespace arduino.net
 
         private List<BuildTarget> CreateProjectCompileCommands(string tempDir, bool debug)
         {
+            return GetCommandsForFiles(tempDir, debug, mProject.GetFileList());
+        }
+        
+        private List<BuildTarget> CreateDebuggerCompileCommands(string tempDir, bool debug)
+        {
+            if (!debug) return new List<BuildTarget>();
+            
+            var config = Configuration.Boards[mBoardName]["build"];
+            var sourceDir = Path.Combine(Configuration.ToolkitPath, "debugger/" + config.Get("core"));
+
+            var fileList = Project.GetCodeFilesOnPath(sourceDir);
+            return GetCommandsForFiles(tempDir, debug, fileList);
+        }
+
+        private List<BuildTarget> GetCommandsForFiles(string tempDir, bool debug, List<string> fileList)
+        {
             var result = new List<BuildTarget>();
             var debugger = debug ? mDebugger : null;
 
-            foreach (var sourceFile in mProject.GetFileList())
+            foreach (var sourceFile in fileList)
             {
                 var targetFile = Path.Combine(tempDir, Path.GetFileName(sourceFile) + ".o");
 
@@ -101,18 +119,16 @@ namespace arduino.net
                     case FileType.Code: result.Add(new DebugBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, CopyToTmp = true }); break;
                     case FileType.Sketch: result.Add(new InoBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, FileExtensionOnTmp = ".cpp", CopyToTmp = true }); break;
                     case FileType.Assembler: result.Add(new AssemblerBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, CopyToTmp = false }); break;
-                    default: 
-                         result.Add(new CopyBuildTarget() { SourceFile = sourceFile }); break;
+                    default:
+                        result.Add(new CopyBuildTarget() { SourceFile = sourceFile }); break;
                 }
             }
-
             return result;
         }
 
         private List<BuildTarget> CreateCoreCompileCommands(string tempDir)
         {
             var result = new List<BuildTarget>();
-
 
             foreach (var sourceFile in GetCoreFiles())
             {
@@ -126,27 +142,25 @@ namespace arduino.net
         private List<BuildTarget> CreateLibraryCommands(string tempDir, List<BuildTarget> coreTargets)
         {
             var result = new List<BuildTarget>();
+            var cmd = new ArBuildTarget() { TargetFile = GetCoreLibraryFile(tempDir) };
 
             foreach (var c in coreTargets)
             {
-                var sourceFile = c.TargetFile;
-                var targetFile = GetCoreLibraryFile(tempDir);
-
-                result.Add(new ArBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile });
+                cmd.SourceFiles.Add(c.TargetFile);
             }
+
+            result.Add(cmd);
 
             return result;
         }
 
-        private List<BuildTarget> CreateLinkCommand(string tempDir, List<BuildTarget> projectTargets)
+        private List<BuildTarget> CreateLinkCommand(string tempDir, List<BuildTarget> projectTargets, List<BuildTarget> debuggerTargets)
         {
             var result = new List<BuildTarget>();
             var sourceFiles = new StringBuilder();
 
-            foreach (var c in projectTargets)
-            {
-                sourceFiles.AppendFormat("{0} ", c.TargetFile);
-            }
+            foreach (var c in projectTargets) if (c.TargetFile != null) sourceFiles.AppendFormat("{0} ", c.TargetFile);
+            foreach (var c in debuggerTargets) if (c.TargetFile != null) sourceFiles.AppendFormat("{0} ", c.TargetFile);
 
             sourceFiles.AppendFormat(GetCoreLibraryFile(tempDir));
 
@@ -194,9 +208,16 @@ namespace arduino.net
             cmd.SetupSources(tempDir);
             cmd.SetupCommand(mBoardName);
 
-            Logger.LogCompiler(cmd.ToString());
-
             cmd.Build(tempDir);
+
+            if (cmd.TargetIsUpToDate)
+            {
+                Logger.LogCompiler("{0} is up to date.", cmd.TargetFile);
+            }
+            else
+            { 
+                Logger.LogCompiler(cmd.ToString());
+            }
             
             if (cmd.BuildCommand == null) return true;
             foreach (var s in cmd.BuildCommand.Output) Logger.LogCompiler("    " + s);
@@ -251,7 +272,7 @@ namespace arduino.net
             return Directory.GetFiles(GetBoardCoreDirectory(), "*.c*", SearchOption.AllDirectories);
         }
 
-        private FileType GetFileType(string fileName)
+        private static FileType GetFileType(string fileName)
         {
             var ext = Path.GetExtension(fileName).ToLower();
 

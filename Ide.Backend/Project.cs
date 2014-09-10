@@ -32,16 +32,21 @@ namespace arduino.net
 
         public List<string> GetFileList()
         {
+            return GetCodeFilesOnPath(mProjectPath);
+        }
+
+        public static List<string> GetCodeFilesOnPath(string path)
+        {
             List<string> result = new List<string>();
 
-            var extensions = new string[] { "c", "cpp", "h", "hpp", "s", "ino" };
+            var extensions = new string[] { "h", "hpp", "s", "c", "cpp", "ino" };
 
             foreach (var ext in extensions)
             {
-                result.AddRange(Directory.GetFileSystemEntries(mProjectPath, "*." + ext, SearchOption.TopDirectoryOnly));
+                result.AddRange(Directory.GetFileSystemEntries(path, "*." + ext, SearchOption.TopDirectoryOnly));
             }
 
-            return result;
+            return result;            
         }
 
         public string GetFileContent(string fileName)

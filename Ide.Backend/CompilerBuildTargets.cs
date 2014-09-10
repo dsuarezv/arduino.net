@@ -14,7 +14,7 @@ namespace arduino.net
         public bool CopyToTmp = false;
         public string FileExtensionOnTmp;
         public Command BuildCommand;
-        public bool TargetUpToDate = false;
+        public bool TargetIsUpToDate = false;
         public bool DisableTargetDateCheck = false;
         public bool FinishedSuccessfully = true;
 
@@ -43,18 +43,23 @@ namespace arduino.net
             }
         }
 
-        protected bool IsTargetUpToDate()
+        protected virtual bool IsTargetUpToDate()
         {
-            if (File.Exists(TargetFile))
+            return IsTargetUpToDate(SourceFile, TargetFile);
+        }
+
+        protected bool IsTargetUpToDate(string sourceFile, string targetFile)
+        {
+            if (File.Exists(targetFile))
             {
-                if (File.GetLastWriteTime(SourceFile) < File.GetLastWriteTime(TargetFile))
+                if (File.GetLastWriteTime(sourceFile) < File.GetLastWriteTime(targetFile))
                 {
-                    TargetUpToDate = true;
+                    TargetIsUpToDate = true;
                     return true;
                 }
             }
 
-            TargetUpToDate = false;
+            TargetIsUpToDate = false;
             return false;
         }
 
@@ -93,7 +98,7 @@ namespace arduino.net
 
         public override string ToString()
         {
-            if (TargetUpToDate) return string.Format("* \"{0}\" is up to date", TargetFile);
+            if (TargetIsUpToDate) return string.Format("* \"{0}\" is up to date", TargetFile);
             if (BuildCommand == null) return "";
 
             return BuildCommand.ToString();
@@ -127,10 +132,7 @@ namespace arduino.net
             var config = Configuration.Boards[boardName]["build"];
             var usbvid = config.Get("vid");
             var usbpid = config.Get("pid");
-            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"",
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config.Get("core")),
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config.Get("variant"))
-                );
+            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"", GetIncludePaths(config));
 
             BuildCommand = new Command()
             {
@@ -147,37 +149,18 @@ namespace arduino.net
             };
         }
 
-        /* 
-         static private List getCommandCompilerS(String avrBasePath, List includePaths,
-            String sourceName, String objectName, Map<String, String> boardPreferences) 
-         {
-            List baseCommandCompiler = new ArrayList(Arrays.asList(new String[] {
-              avrBasePath + "avr-gcc",
-              "-c", // compile, don't link
-              "-g", // include debugging info (so errors include line numbers)
-              "-x","assembler-with-cpp",
-              "-mmcu=" + boardPreferences.get("build.mcu"),
-              "-DF_CPU=" + boardPreferences.get("build.f_cpu"),      
-              "-DARDUINO=" + Base.REVISION,
-              "-DUSB_VID=" + boardPreferences.get("build.vid"),
-              "-DUSB_PID=" + boardPreferences.get("build.pid"),
-            }));
-
-            for (int i = 0; i < includePaths.size(); i++) {
-              baseCommandCompiler.add("-I" + (String) includePaths.get(i));
-            }
-
-            baseCommandCompiler.add(sourceName);
-            baseCommandCompiler.add("-o"+ objectName);
-
-            return baseCommandCompiler;
-          }
-         */
-
-
         private static bool IsCFile(string file)
         {
             return (Path.GetExtension(file).ToLower() == ".c");
+        }
+
+        public static string[] GetIncludePaths(ConfigurationFile config)
+        {
+            return new string[] {
+                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config.Get("core")),
+                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config.Get("variant")),
+                Path.Combine(Configuration.ToolkitPath, "debugger/" + config.Get("core"))
+            };
         }
     }
 
@@ -185,25 +168,16 @@ namespace arduino.net
     {
         public override void SetupCommand(string boardName)
         {
-            var compiler = "hardware/tools/avr/bin/avr-gcc";
+            var compiler = "hardware/tools/avr/bin/avr-as";
 
             var config = Configuration.Boards[boardName]["build"];
-            var usbvid = config.Get("vid");
-            var usbpid = config.Get("pid");
-            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"",
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config.Get("core")),
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config.Get("variant"))
-                );
+            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"", CppBuildTarget.GetIncludePaths(config));
 
             BuildCommand = new Command()
             {
                 Program = Path.Combine(Configuration.ToolkitPath, compiler),
-                Arguments = string.Format("-c -g -x -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
+                Arguments = string.Format("-g -mmcu={0} {1} \"{2}\" -o \"{3}\"",
                 config.Get("mcu"),
-                config.Get("f_cpu"),
-                (usbvid == null) ? "null" : usbvid,
-                (usbpid == null) ? "null" : usbpid,
-                "105",
                 includePaths,
                 EffectiveSourceFile,
                 TargetFile)
@@ -214,16 +188,31 @@ namespace arduino.net
 
     public class ArBuildTarget : BuildTarget
     {
+        public List<string> SourceFiles = new List<string>();
+
         public override void SetupCommand(string boardName)
         {
             DisableTargetDateCheck = true;
 
+            var sb = new StringBuilder();
+            foreach (var file in SourceFiles) sb.AppendFormat("\"{0}\" ", file);
+
             BuildCommand = new Command()
             {
                 Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-ar"),
-                Arguments = string.Format("rcs \"{0}\" \"{1}\"",
-                    TargetFile, SourceFile)
+                Arguments = string.Format("rcs \"{0}\" {1}",
+                    TargetFile, sb)
             };
+        }
+
+        protected override bool IsTargetUpToDate()
+        {
+            foreach (var s in SourceFiles)
+            {
+                if (!IsTargetUpToDate(s, TargetFile)) return false;
+            }
+
+            return true;
         }
     }
 
@@ -286,7 +275,7 @@ namespace arduino.net
         {
             if (Debugger != null)
             {
-                var brs = Debugger.GetBreakpointsForFile(SourceFile);
+                var brs = Debugger.BreakPoints.GetBreakpointsForFile(SourceFile);
 
                 if (brs.Count > 0)
                 {
@@ -370,15 +359,15 @@ namespace arduino.net
                 {
                     return new string[] {
                         "#include \"soft_debugger.h\"",
-                        "#line 1",
+                        string.Format("#line {0} \"{1}\"", lineNumber, EscapePath(SourceFile)),
                         line
                     };
                 }
             }
-            else if (lineNumber == mParser.LastIncludeLineNumber + 1)
+            else if (lineNumber == mParser.LastIncludeLineNumber + 2)
             {
                 var result = new List<string>();
-                result.Add(line);
+                
                 result.Add("#include \"Arduino.h\"");
                 foreach (var prototype in mParser.UniqueFunctionDeclarations) result.Add(prototype + ";");
 
@@ -388,8 +377,10 @@ namespace arduino.net
                     result.Add("{ ");
                     result.Add("    SOFTDEBUGGER_CONNECT");
                     result.Add("}");
-                    result.Add("");
                 }
+
+                result.Add("#line " + lineNumber);
+                result.Add(line);
 
                 return result.ToArray<string>();
             }
@@ -399,6 +390,7 @@ namespace arduino.net
                 { 
                     return new string[] {
                         "SOFTDEBUGGER_CONNECT",
+                        "#line " + lineNumber,
                         line
                     };
                 }
@@ -407,6 +399,10 @@ namespace arduino.net
             return ProcessLineForBreakpoints(lineNumber, line, breakpoints);
         }
 
+        private static string EscapePath(string path)
+        {
+            return path.Replace("\\", "\\\\");
+        }
 
         public override void SetupSources(string tempDir)
         {
@@ -414,7 +410,7 @@ namespace arduino.net
 
             if (Debugger != null)
             {
-                brs = Debugger.GetBreakpointsForFile(SourceFile);
+                brs = Debugger.BreakPoints.GetBreakpointsForFile(SourceFile);
                 DisableTargetDateCheck = true;
             }
 

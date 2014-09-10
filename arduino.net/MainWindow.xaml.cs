@@ -37,7 +37,7 @@ namespace arduino.net
         {
             try
             {
-                Configuration.Initialize(@"C:\Program Files (x86)\Arduino");
+                Configuration.Initialize(@"C:\Users\dave\Documents\develop\Arduino\ArduinoIDE.net\deploy");
 
                 var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
 
@@ -45,6 +45,7 @@ namespace arduino.net
                 IdeManager.Debugger = new Debugger("COM3");
                 IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
+                IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
 
                 foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
@@ -80,16 +81,7 @@ namespace arduino.net
 
         private async void BuildButton_Click(object sender, RoutedEventArgs e)
         {
-            var success = await LaunchBuild();
-            
-            if (success)
-            { 
-                StatusControl.SetState(0, "Build succeeded");
-            }
-            else
-            {
-                StatusControl.SetState(1, "Build failed");
-            }
+            await LaunchBuild();            
         }
 
         private async void DeployButton_Click(object sender, RoutedEventArgs e)
@@ -117,13 +109,18 @@ namespace arduino.net
         {
             var ti = GetTabForFileName(fileName);
 
+            CodeTextBox editor = null;
+
             if (ti != null)
             {
                 ti.IsSelected = true;
-                return;
+                editor = ti.Content as CodeTextBox;
+            }
+            else
+            {
+                editor = CreateEditorTabItem(fileName);
             }
 
-            var editor = CreateEditorTabItem(fileName);
             editor.OpenFile(fileName);
         }
 
@@ -131,13 +128,18 @@ namespace arduino.net
         {
             var ti = GetTabForFileName(title);
 
+            CodeTextBox editor = null;
+
             if (ti != null)
             {
                 ti.IsSelected = true;
-                return;
+                editor = ti.Content as CodeTextBox;
             }
-
-            var editor = CreateEditorTabItem(title);
+            else
+            {
+                editor = CreateEditorTabItem(title);
+            }
+            
             editor.OpenContent(content, null);
         }
 
@@ -190,10 +192,24 @@ namespace arduino.net
             bool result = await IdeManager.Compiler.BuildAsync("atmega328", true);
             
             var compiler = IdeManager.Compiler;
-            OpenContent("Dissasembly",
+            OpenContent("Dissasembly sketch",
                 ObjectDumper.GetSingleString(
                     ObjectDumper.GetDisassembly(
                         compiler.GetElfFile(compiler.GetTempDirectory()))));
+
+            OpenContent("Dissasembly .S",
+                ObjectDumper.GetSingleString(
+                    ObjectDumper.GetDisassembly(
+                        System.IO.Path.Combine(compiler.GetTempDirectory(), "soft_debugger.S.o") )));
+
+            if (result)
+            {
+                StatusControl.SetState(0, "Build succeeded");
+            }
+            else
+            {
+                StatusControl.SetState(1, "Build failed");
+            }
 
             return result;
         }
@@ -210,7 +226,22 @@ namespace arduino.net
         {
             Dispatcher.Invoke(() =>
             {
-                StatusControl.SetState(1, "Breakpoint hit on line {0} ({1})", breakpoint.LineNumber, breakpoint.SourceFileName);
+                if (breakpoint == null)
+                {
+                    StatusControl.SetState(1, "Unknown breakpoint hit. Target is stopped. Hit 'debug' to continue.");
+                }
+                else
+                { 
+                    StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", breakpoint.LineNumber, breakpoint.SourceFileName);
+                }
+            });
+        }
+
+        void Debugger_TargetConnected(object sender)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                StatusControl.SetState(1, "Target running in debug...");
             });
         }
 
