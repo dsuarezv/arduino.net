@@ -10,26 +10,32 @@ namespace arduino.net
     public class ObjectDumper
     {
         public const string ObjDumpCommand = "avr-objdump.exe";
+        public const string NmCommand = "avr-nm.exe";
 
 
         public static List<string> GetHelp()
         {
-            return RunObjectDumper("--help");
+            return RunObjectDump("--help");
         }
 
         public static List<string> GetSymbolTable(string elfFile)
         {
-            return RunObjectDumper("-t " + elfFile);
+            return RunObjectDump("-t " + elfFile);
+        }
+
+        public static List<string> GetNmSymbolTable(string elfFile)
+        {
+            return RunNm("-n -l " + elfFile);
         }
 
         public static List<string> GetDisassembly(string elfFile)
         {
-            return RunObjectDumper(" -d -w -C " + elfFile);
+            return RunObjectDump(" -d -w -C " + elfFile);
         }
 
         public static List<string> GetDwarf(string elfFile)
         {
-            return RunObjectDumper("-w -W " + elfFile);
+            return RunObjectDump("-w -W " + elfFile);
         }
 
         public static string GetSingleString(List<string> listOfStrings)
@@ -41,7 +47,16 @@ namespace arduino.net
             return sb.ToString();
         }
 
-        private static List<string> RunObjectDumper(string arguments)
+        private static List<string> RunNm(string arguments)
+        {
+            string nmCommand = Path.Combine(Configuration.ToolsPath, NmCommand);
+
+            var cmd = new Command() { Program = nmCommand, Arguments = arguments };
+            CmdRunner.Run(cmd);
+            return cmd.Output;
+        }
+
+        private static List<string> RunObjectDump(string arguments)
         {
             string objDumpCommand = Path.Combine(Configuration.ToolsPath, ObjDumpCommand);
 

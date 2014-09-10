@@ -9,7 +9,7 @@
 #define DBG_HEADER_CONTINUE_TYPE      230
 
 
-extern uint8_t __DbgSavedRegisters[36];
+uint8_t __DbgSavedRegisters[36];
 
 
 typedef struct 

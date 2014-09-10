@@ -87,15 +87,6 @@ namespace arduino.net
         private async void DeployButton_Click(object sender, RoutedEventArgs e)
         {
             var success = await LaunchDeploy();
-
-            if (success)
-            {
-                StatusControl.SetState(0, "Deploy succeeded");
-            }
-            else
-            {
-                StatusControl.SetState(1, "Deploy failed");
-            }
         }
 
         private void DebugButton_Click(object sender, RoutedEventArgs e)
@@ -202,6 +193,12 @@ namespace arduino.net
                     ObjectDumper.GetDisassembly(
                         System.IO.Path.Combine(compiler.GetTempDirectory(), "soft_debugger.S.o") )));
 
+            OpenContent("Symbol table",
+                ObjectDumper.GetSingleString(
+                    ObjectDumper.GetNmSymbolTable(
+                        compiler.GetElfFile(compiler.GetTempDirectory()))));
+
+
             if (result)
             {
                 StatusControl.SetState(0, "Build succeeded");
@@ -219,6 +216,16 @@ namespace arduino.net
             OutputTextBox1.ClearText();
             StatusControl.SetState(1, "Deploying...");
             bool result = await IdeManager.Compiler.DeployAsync("atmega328", "usbasp", true);
+
+            //if (success)
+            //{
+            //    StatusControl.SetState(0, "Deploy succeeded");
+            //}
+            //else
+            //{
+            //    StatusControl.SetState(1, "Deploy failed");
+            //}
+
             return result;
         }
 
@@ -226,6 +233,8 @@ namespace arduino.net
         {
             Dispatcher.Invoke(() =>
             {
+                RegistersPad.UpdateRegisters(IdeManager.Debugger.Registers);
+
                 if (breakpoint == null)
                 {
                     StatusControl.SetState(1, "Unknown breakpoint hit. Target is stopped. Hit 'debug' to continue.");
@@ -239,10 +248,10 @@ namespace arduino.net
 
         void Debugger_TargetConnected(object sender)
         {
-            Dispatcher.Invoke(() =>
-            {
-                StatusControl.SetState(1, "Target running in debug...");
-            });
+            //Dispatcher.Invoke(() =>
+            //{
+            //    StatusControl.SetState(1, "Target running in debug...");
+            //});
         }
 
         private void Debugger_SerialCharReceived(object sender, byte b)

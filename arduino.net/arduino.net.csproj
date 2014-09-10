@@ -62,6 +62,9 @@
     <Compile Include="ProjectExplorer.xaml.cs">
       <DependentUpon>ProjectExplorer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="RegistersPad.xaml.cs">
+      <DependentUpon>RegistersPad.xaml</DependentUpon>
+    </Compile>
     <Compile Include="StatusHeaderControl.xaml.cs">
       <DependentUpon>StatusHeaderControl.xaml</DependentUpon>
     </Compile>
@@ -92,6 +95,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ProjectExplorer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RegistersPad.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -151,9 +158,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\cpp.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="arduino-icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="arduino-icon2.ico" />
