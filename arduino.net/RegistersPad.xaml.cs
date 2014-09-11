@@ -27,19 +27,25 @@ namespace arduino.net
             InitializeComponent();
         }
 
-        public void UpdateRegisters(byte[] registers)
+        public void UpdateRegisters(RegisterManager regMan)
         {
             var sb = new StringBuilder();
             sb.Append("Registers:\n\n");
 
-            for (int i = 0; i < registers.Length; ++i)
+            var sorted = regMan.Registers.OrderBy(x =>
             {
-                sb.AppendFormat("  r{0}: {1}\n", i, registers[i]);
+                if (x.Key.StartsWith("r")) return string.Format("__{0}", x.Key);
+
+                return x.Key;
+            });
+
+            foreach (var e in sorted)
+            {
+                sb.AppendFormat("  {0}:\t0x{1:X2}\t({1})\n", e.Key, e.Value);
             }
 
             RegistersTextbox.Text = sb.ToString();
         }
-
-
     }
+
 }

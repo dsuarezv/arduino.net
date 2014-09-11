@@ -32,7 +32,7 @@ typedef struct
 typedef struct 
 {
     DbgHeader Header;
-    uint32_t  Address;
+    uint16_t  Address;
     uint8_t   Size;
 } DbgTraceQueryPacket;
 
@@ -44,7 +44,7 @@ typedef struct
 
 
 
-static void DbgSendTrace(uint32_t address, uint8_t size);
+static void DbgSendTrace(uint16_t address, uint8_t size);
 
 
 void DbgConnect()
@@ -72,9 +72,9 @@ static void DbgLoop()
         
         if (type == DBG_HEADER_TRACEQUERY_TYPE)
         {
-            uint32_t address;
+            uint16_t address;
             uint8_t size;
-            Serial.readBytes((char*)&address, sizeof(uint32_t));
+            Serial.readBytes((char*)&address, sizeof(uint16_t));
             Serial.readBytes((char*)&size, sizeof(uint8_t));
             
             DbgSendTrace(address, size);
@@ -100,7 +100,7 @@ void DbgBreak(uint8_t breakpointNo)
     DbgLoop();
 }
 
-static void DbgSendTrace(uint32_t address, uint8_t size)
+static void DbgSendTrace(uint16_t address, uint8_t size)
 {
     DbgTraceAnswerPacket p;
     

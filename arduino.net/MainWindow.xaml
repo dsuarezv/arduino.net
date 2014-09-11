@@ -55,7 +55,22 @@
 				Background="#b6b6b6" 
 				ShowsPreview="True"
 				Width="1"/>
-            <local:RegistersPad x:Name="RegistersPad" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <local:RegistersPad x:Name="RegistersPad" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                <GridSplitter
+                    Grid.Row="0"
+                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Stretch"
+                    Background="#b6b6b6" 
+				    ShowsPreview="True"
+				    Width="1"/>
+                <local:MemoryDumpPad Grid.Row="1"/>
+            </Grid>
+            
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>

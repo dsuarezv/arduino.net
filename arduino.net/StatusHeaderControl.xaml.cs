@@ -38,6 +38,7 @@ namespace arduino.net
         private void StatusHeaderControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             InternalBar.Width = this.ActualWidth * 2.1;
+            InternalBar.Margin = GetMarginForState(mState);
             mBarAnimation.From = GetMarginForState(0);
             mBarAnimation.To = GetMarginForState(1);
         }
