@@ -29,24 +29,61 @@ namespace arduino.net
 
             if (debugger.IsTargetRunning) return;
 
-            Int16 address;
-            Byte size;
-            
-            if (!Int16.TryParse(AddressTextBox.Text, out address)) return;
-            if (!Byte.TryParse(SizeTextBox.Text, out size)) return;
+            int? address = ParseHexOrDecimal(AddressTextBox.Text);
+            int? size = ParseHexOrDecimal(SizeTextBox.Text);
 
-            var result = debugger.GetTargetMemDump(address, size);
+            if (address == null || size == null) return;
 
-            PrintBuffer(result);
+            var result = debugger.GetTargetMemDump((short)address, (byte)size);
+
+            PrintBuffer((short)address, result);
         }
 
-        private void PrintBuffer(byte[] bytes)
+        private void PrintBuffer(short startAddress, byte[] bytes)
         {
+            const int BytesPerLine = 4;
+
             var sb = new StringBuilder();
 
+            for (int i = 0; i < bytes.Length; ++i)
+            {
+                var address = startAddress + i;
 
+                if (address % BytesPerLine == 0 && i != 0)
+                {
+                    sb.AppendFormat("\n0x{0:X4}:\t", address);
+                }
+
+                if (i == 0)
+                {
+                    sb.AppendFormat("0x{0:X4}:\t{1}", address, new string(' ', address % BytesPerLine * 3));
+                }
+
+                sb.AppendFormat("{0:X2} ", bytes[i]);
+            }
 
             ResultTextBlock.Text = sb.ToString();
+        }
+
+        public static int? ParseHexOrDecimal(string number)
+        { 
+            // Parses a number in hex (0x000) or decimal (000)
+
+            number = number.Trim();
+
+            int result;
+
+            if (number.StartsWith("0x"))
+            {
+                if (!int.TryParse(number.Substring(2), NumberStyles.HexNumber, null, out result)) return null;
+            }
+            else
+            {
+                if (!int.TryParse(number, out result)) return null;
+            }
+
+            return result;
+
         }
     }
 }
