@@ -212,11 +212,11 @@ namespace arduino.net
 
             if (cmd.TargetIsUpToDate)
             {
-                Logger.LogCompiler("{0} is up to date.", cmd.TargetFile);
+                Logger.LogCompiler("  {0} is up to date.", Path.GetFileName(cmd.TargetFile));
             }
             else
             { 
-                Logger.LogCompiler(cmd.ToString());
+                Logger.LogCompiler("Building {0}", Path.GetFileName(cmd.TargetFile));
             }
             
             if (cmd.BuildCommand == null) return true;

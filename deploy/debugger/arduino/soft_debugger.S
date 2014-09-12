@@ -16,16 +16,22 @@ DbgSaveRegisters:
 	push r27
 	push r26
 
-
+	; Save status register before any other instruction touches it
+   	in r27, 0x3f
 
 	; Setup copy destination
 	
-	ldi	r30, lo8(__DbgSavedRegisters)
+	ldi	r30, lo8(__DbgSavedRegisters)		; r30, r31 (Z) = destination
    	ldi	r31, hi8(__DbgSavedRegisters)
 
-   	; 1. Copy registers r0 - r25
+   	
+   	; 1. Copy status register
 
-   	ldi r28, 0 			
+   	st Z+, r27
+
+   	; 2. Copy registers r0 - r25
+
+   	ldi r28, 0 			; r28, r29 (Y) = source
    	ldi r29, 0 			; register file starts at 0x0000
 
 .copyLoop:
@@ -35,7 +41,7 @@ DbgSaveRegisters:
 	brne .copyLoop
 	
 
-	; 2. Copy rest of the registers (r27-r31) from the stack, and also the program counter
+	; 3. Copy rest of the registers (r26-r31) from the stack, and also the program counter
 
 
 	in r28, 0x3d		; SPL
@@ -49,11 +55,13 @@ DbgSaveRegisters:
     cpi r26, 8			; copy 6 registers in the stack + 2 for the program counter = 8
     brne .stackCopyLoop
 
-    ; 3. Finally copy the stack pointer itself, removing the fingerprint of this method
+
+
+    ; 4. Finally copy the stack pointer itself, removing the fingerprint of this method
 	
 	in r28, 0x3d		; SPL
 	in r29, 0x3e		; SPH
-	adiw r28, 8			; 6 bytes in this func stack + 2 for the program counter
+	;adiw r28, 8			; 6 bytes in this func stack + 2 for the program counter
 	st Z+, r28
 	st Z+, r29
 

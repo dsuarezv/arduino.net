@@ -7,9 +7,9 @@
              d:DesignHeight="300" d:DesignWidth="200">
     <Grid>
         <TextBlock Margin="10,10,140,0" TextWrapping="Wrap" Text="Address" Height="16" VerticalAlignment="Top"/>
-        <TextBox Name="AddressTextBox" Margin="0,7,5,0" TextWrapping="Wrap" Text="0000" HorizontalAlignment="Right" Width="120" Height="23" VerticalAlignment="Top"/>
+        <TextBox Name="AddressTextBox" Margin="0,7,5,0" TextWrapping="Wrap" Text="0x8E0" HorizontalAlignment="Right" Width="120" Height="23" VerticalAlignment="Top"/>
         <TextBlock Margin="10,39,0,0" TextWrapping="Wrap" Text="Size" Height="16" VerticalAlignment="Top" HorizontalAlignment="Left" Width="50"/>
-        <TextBox Name="SizeTextBox" Margin="0,36,5,0" TextWrapping="Wrap" Text="32" HorizontalAlignment="Right" Width="120" Height="23" VerticalAlignment="Top"/>
+        <TextBox Name="SizeTextBox" Margin="0,36,5,0" TextWrapping="Wrap" Text="0x20" HorizontalAlignment="Right" Width="120" Height="23" VerticalAlignment="Top"/>
         <TextBlock Name="ResultTextBlock" Margin="10,73,5,36" TextWrapping="Wrap" Text="" FontFamily="Consolas" ScrollViewer.CanContentScroll="True"/>
         <Button Name="RetrieveButton" Content="Retrieve" Margin="0,0,5,8" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" Click="RetrieveButton_Click"/>
 

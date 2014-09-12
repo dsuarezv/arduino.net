@@ -8,8 +8,9 @@
 #define DBG_HEADER_TRACEANSWER_TYPE   249
 #define DBG_HEADER_CONTINUE_TYPE      230
 
+#define SAVED_REGS_SIZE 38
 
-uint8_t __DbgSavedRegisters[36];
+uint8_t __DbgSavedRegisters[SAVED_REGS_SIZE];
 
 
 typedef struct 
@@ -96,7 +97,7 @@ void DbgBreak(uint8_t breakpointNo)
     p.BreakpointNumber = breakpointNo;
     
     Serial.write((uint8_t*)&p, sizeof(DbgBreakPacket));
-    Serial.write(__DbgSavedRegisters, 36);
+    Serial.write(__DbgSavedRegisters, SAVED_REGS_SIZE);
     DbgLoop();
 }
 

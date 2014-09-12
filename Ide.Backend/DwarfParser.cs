@@ -163,14 +163,14 @@ namespace arduino.net
         {
             if (!s.StartsWith("<")) return -1;
 
-            return DwarfExtensionMethods.GetInt(s.Trim('<', '>', '\t'));
+            return DwarfHelper.GetInt(s.Trim('<', '>', '\t'));
         }
     }
 
 
 
 
-    public static class DwarfExtensionMethods
+    public static class DwarfHelper
     { 
         public static int GetIntValue(this Group group)
         {

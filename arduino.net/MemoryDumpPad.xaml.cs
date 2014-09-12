@@ -69,7 +69,7 @@ namespace arduino.net
         { 
             // Parses a number in hex (0x000) or decimal (000)
 
-            number = number.Trim();
+            number = number.Trim().ToLower();
 
             int result;
 
