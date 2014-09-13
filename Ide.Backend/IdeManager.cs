@@ -11,5 +11,6 @@ namespace arduino.net
         public static Project CurrentProject;
         public static Debugger Debugger;
         public static Compiler Compiler;
+        public static DwarfTree Dwarf;
     }
 }

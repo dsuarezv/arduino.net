@@ -183,20 +183,17 @@ namespace arduino.net
             bool result = await IdeManager.Compiler.BuildAsync("atmega328", true);
             
             var compiler = IdeManager.Compiler;
-            OpenContent("Dissasembly sketch",
+            var elfFile = compiler.GetElfFile(compiler.GetTempDirectory());
+            
+            OpenContent("Sketch dissasembly",
                 ObjectDumper.GetSingleString(
-                    ObjectDumper.GetDisassembly(
-                        compiler.GetElfFile(compiler.GetTempDirectory()))));
-
-            OpenContent("Dissasembly .S",
-                ObjectDumper.GetSingleString(
-                    ObjectDumper.GetDisassembly(
-                        System.IO.Path.Combine(compiler.GetTempDirectory(), "soft_debugger.S.o") )));
+                    ObjectDumper.GetDisassembly(elfFile)));
 
             OpenContent("Symbol table",
                 ObjectDumper.GetSingleString(
-                    ObjectDumper.GetNmSymbolTable(
-                        compiler.GetElfFile(compiler.GetTempDirectory()))));
+                    ObjectDumper.GetNmSymbolTable(elfFile)));
+
+            IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(elfFile));
 
 
             if (result)

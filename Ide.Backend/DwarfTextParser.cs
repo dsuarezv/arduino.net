@@ -5,16 +5,16 @@ using System.Text.RegularExpressions;
 
 namespace arduino.net
 {
-    public class DwarfParser
+    public class DwarfTextParser
     {
-        private DwarfNode mCurrentNode;
+        private DwarfParserNode mCurrentNode;
 
         private string mElfFile;
 
-        public List<DwarfNode> TopNodes = new List<DwarfNode>();
-        public List<DwarfNode> AllNodes = new List<DwarfNode>();
+        public List<DwarfParserNode> TopNodes = new List<DwarfParserNode>();
+        public List<DwarfParserNode> AllNodes = new List<DwarfParserNode>();
 
-        public DwarfParser(string elfFile)
+        public DwarfTextParser(string elfFile)
         {
             mElfFile = elfFile;
 
@@ -31,7 +31,7 @@ namespace arduino.net
 
         private bool ParseDwarfTreeLine(string s)
         {
-            var node = DwarfNode.Get(s);
+            var node = DwarfParserNode.Get(s);
             if (node != null)
             {
                 AllNodes.Add(node);
@@ -51,7 +51,7 @@ namespace arduino.net
             return false;  // No match here.
         }
 
-        private void AddNodeToParent(DwarfNode node)
+        private void AddNodeToParent(DwarfParserNode node)
         {
             if (node.Depth == 0)
             {
@@ -81,18 +81,18 @@ namespace arduino.net
             throw new Exception("No parent found for node");
         }
 
-        private static void AddChildToParent(DwarfNode parent, DwarfNode node)
+        private static void AddChildToParent(DwarfParserNode parent, DwarfParserNode node)
         {
             if (parent == null) return;
 
-            if (parent.Children == null) parent.Children = new List<DwarfNode>();
+            if (parent.Children == null) parent.Children = new List<DwarfParserNode>();
 
             parent.Children.Add(node);
         }
     }
 
     [System.Diagnostics.DebuggerDisplay("{Id} {TagType}")]
-    public class DwarfNode
+    public class DwarfParserNode
     {
         private static Regex RegExpr = new Regex(@"<([0-9a-f]+)><([0-9a-f]+)>: Abbrev Number: ([0-9]+) \(DW_TAG_([a-z_]+)\)");
 
@@ -100,7 +100,7 @@ namespace arduino.net
         public string TagType;
         public int Depth;
         public int AbbrevNumber;
-        public List<DwarfNode> Children;
+        public List<DwarfParserNode> Children;
         public Dictionary<string, DwarfAttribute> Attributes = new Dictionary<string, DwarfAttribute>();
 
         public override string ToString()
@@ -108,14 +108,14 @@ namespace arduino.net
             return string.Format("{0} {1}", Id, TagType);
         }
 
-        public static DwarfNode Get(string s)
+        public static DwarfParserNode Get(string s)
         {
             var match = RegExpr.Match(s);
             if (!match.Success) return null;
 
             var groups = match.Groups;
 
-            return new DwarfNode()
+            return new DwarfParserNode()
             {
                 Id = groups[2].GetIntValue(),
                 Depth = groups[1].GetIntValue(),
