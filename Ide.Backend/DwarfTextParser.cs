@@ -103,6 +103,13 @@ namespace arduino.net
         public List<DwarfParserNode> Children;
         public Dictionary<string, DwarfAttribute> Attributes = new Dictionary<string, DwarfAttribute>();
 
+        public DwarfAttribute GetAttr(string name)
+        {
+            if (Attributes.ContainsKey(name)) return Attributes[name];
+
+            return DwarfAttribute.Empty;
+        }
+
         public override string ToString()
         {
             return string.Format("{0} {1}", Id, TagType);
@@ -128,7 +135,10 @@ namespace arduino.net
     [System.Diagnostics.DebuggerDisplay("{Id} {Name}: {RawValue}")]
     public class DwarfAttribute
     {
-        private static Regex RegExpr = new Regex(@"<[ ]*([0-9a-f]+)> + DW_AT_([a-z_]+)[ \t]*: *([<>\(\)A-z, \t_\.\\:;0-9]+)");
+        public static DwarfAttribute Empty = new DwarfAttribute();
+
+        private static Regex RegExpr = new Regex(@"<[ ]*([0-9a-f]+)> + DW_AT_([a-z_]+)\s*: *(.+)");
+        private static Regex IndirectStringRegEx = new Regex(@"\(indirect string, offset: 0x[0-9a-fA-F]+\): (.+)");
 
         public int Id;
         public string Name;
@@ -157,6 +167,23 @@ namespace arduino.net
         public override string ToString()
         {
             return string.Format("{0} {1} {2}", Id, Name, RawValue);
+        }
+
+        public string GetStringValue()
+        {
+            if (RawValue == null) return null;
+
+            var match = IndirectStringRegEx.Match(RawValue);
+            if (!match.Success) return null;
+
+            return match.Groups[1].Value.Trim(' ', '\t');
+        }
+
+        public int GetIntValue()
+        {
+            if (RawValue == null) return -1;
+
+            return DwarfHelper.GetInt(RawValue);
         }
 
         private static int GetReference(string s)

@@ -240,19 +240,27 @@ namespace arduino.net
                 { 
                     StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", breakpoint.LineNumber, breakpoint.SourceFileName);
                 }
+
+                //IdeManager.Dwarf.GetFunctionAt(IdeManager.Debugger.Registers.Registers["PC"]);
             });
         }
 
         void Debugger_TargetConnected(object sender)
         {
-            //Dispatcher.Invoke(() =>
-            //{
-            //    StatusControl.SetState(1, "Target running in debug...");
-            //});
+            Dispatcher.Invoke(() =>
+            {
+                //    StatusControl.SetState(1, "Target running in debug...");
+                OutputTextBox1.ClearText();
+            });
         }
 
         private void Debugger_SerialCharReceived(object sender, byte b)
         {
+            Dispatcher.Invoke(() =>
+            {
+                OutputTextBox1.ContentTextBox.AppendText(new string((char)b, 1));
+                OutputTextBox1.ContentTextBox.ScrollToEnd();
+            });
             
         }
     }

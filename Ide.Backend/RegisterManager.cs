@@ -39,7 +39,7 @@ namespace arduino.net
             }
 
             UpdateWordRegister("SP", 35, 36);
-            UpdateWordRegister("PC", 33, 34);
+            UpdateWordRegister("PC", 34, 33);
         }
 
         public void UpdateWordRegister(string name, int indexLow, int indexHigh)

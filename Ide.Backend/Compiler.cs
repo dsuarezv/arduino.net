@@ -216,7 +216,7 @@ namespace arduino.net
             }
             else
             { 
-                Logger.LogCompiler("Building {0}", Path.GetFileName(cmd.TargetFile));
+                Logger.LogCompiler("Building {0}: {1}", Path.GetFileName(cmd.TargetFile), cmd);
             }
             
             if (cmd.BuildCommand == null) return true;

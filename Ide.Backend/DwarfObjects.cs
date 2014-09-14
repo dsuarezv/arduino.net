@@ -11,6 +11,7 @@ namespace arduino.net
         public int Id;
     }
 
+    [System.Diagnostics.DebuggerDisplay("{Id} {Name}")]
     public class DwarfNamedObject: DwarfObject
     {
         public string Name;
@@ -24,7 +25,7 @@ namespace arduino.net
 
     public class DwarfDeclaredObject: DwarfNamedObject
     {
-        public string DeclarationFile;
+        public int DeclarationFile;
         public int DeclarationLine;
     }
 
@@ -33,12 +34,20 @@ namespace arduino.net
         public string Ranges;
         public string StatementList;
 
+        public List<DwarfSubprogram> Subprograms = new List<DwarfSubprogram>();
+        public Dictionary<string, DwarfVariable> Variables = new Dictionary<string, DwarfVariable>();
+        public Dictionary<string, DwarfLocatedObject> Types = new Dictionary<string, DwarfLocatedObject>();
+
+
         // Subprograms: dictionary <name, subprogram>
-        // BaseTypes
         // Typedefs
         // Variables
+        
+        // BaseTypes
         // StructureTypes
         // ArrayTypes
+        // PointerTypes
+        // ClassTypes
     }
 
     public class DwarfSubprogram: DwarfDeclaredObject
@@ -48,11 +57,11 @@ namespace arduino.net
         public int LowPc;
         public int HighPc;
 
+        public Dictionary<string, DwarfLocatedObject> Variables = new Dictionary<string, DwarfLocatedObject>();
+
         // Formal parameters
         // Variables
         // InlinedSubroutines
-
-        // Dictionary <name, paramOrVariable> parameters
     }
 
     public class DwarfLocatedObject: DwarfDeclaredObject
