@@ -132,7 +132,7 @@ namespace arduino.net
             var config = Configuration.Boards[boardName]["build"];
             var usbvid = config.Get("vid");
             var usbpid = config.Get("pid");
-            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"", GetIncludePaths(config));
+            var includePaths = GetIncludeArgument(config);
 
             BuildCommand = new Command()
             {
@@ -162,6 +162,15 @@ namespace arduino.net
                 Path.Combine(Configuration.ToolkitPath, "debugger/" + config.Get("core"))
             };
         }
+
+        public static string GetIncludeArgument(ConfigurationFile config)
+        {
+            var sb = new StringBuilder();
+
+            foreach (var path in GetIncludePaths(config)) sb.AppendFormat("-I\"{0}\"", path);
+            
+            return sb.ToString();
+        }
     }
 
     public class AssemblerBuildTarget : BuildTarget
@@ -173,7 +182,7 @@ namespace arduino.net
             var config = Configuration.Boards[boardName]["build"];
             var usbvid = config.Get("vid");
             var usbpid = config.Get("pid");
-            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"", CppBuildTarget.GetIncludePaths(config));
+            var includePaths = CppBuildTarget.GetIncludeArgument(config);
 
             BuildCommand = new Command()
             {

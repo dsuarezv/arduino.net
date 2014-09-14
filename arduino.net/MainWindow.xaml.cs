@@ -247,11 +247,10 @@ namespace arduino.net
 
         void Debugger_TargetConnected(object sender)
         {
-            Dispatcher.Invoke(() =>
-            {
-                //    StatusControl.SetState(1, "Target running in debug...");
-                OutputTextBox1.ClearText();
-            });
+            //Dispatcher.Invoke(() =>
+            //{
+            //    OutputTextBox1.ClearText();
+            //});
         }
 
         private void Debugger_SerialCharReceived(object sender, byte b)
