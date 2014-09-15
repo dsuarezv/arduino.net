@@ -64,7 +64,7 @@ namespace arduino.net
         // __ Debugger commands _______________________________________________
 
 
-        public byte[] GetTargetMemDump(Int16 address, byte size)
+        public byte[] GetTargetMemDump(Int32 address, byte size)
         {
             mTraceQueryBuffer = null;
 
@@ -165,15 +165,21 @@ namespace arduino.net
         // __ Debugger impl ___________________________________________________
 
 
-        private void SendTraceQuery(Int16 address, byte size)
+        private void SendTraceQuery(Int32 address, byte size)
         {
             var p = new byte[7];
 
             p[0] = 255;
             p[1] = (byte)DebuggerPacketType.TraceQuery;
-            p[3] = (byte)(address >> 8);                  // little Endian
+            //p[2] = (byte)(address >> 24);               // BigEndian
+            //p[3] = (byte)(address >> 16);
+            //p[4] = (byte)(address >> 8);
+            //p[5] = (byte)(address);
+            p[5] = (byte)(address >> 24);               // LittleEndian
+            p[4] = (byte)(address >> 16);
+            p[3] = (byte)(address >> 8);
             p[2] = (byte)(address);
-            p[4] = size;
+            p[6] = size;
 
             mSerialPort.Write(p, 0, p.Length);
         }
@@ -183,7 +189,10 @@ namespace arduino.net
         {
             mIsTargetRunning = true;
 
-            if (TargetConnected != null) TargetConnected(this);
+            if (TargetConnected != null)
+            {
+                ThreadPool.QueueUserWorkItem((a) => TargetConnected(this));
+            }
         }
 
         private void OnTargetBreak(int breakpointId)
@@ -198,7 +207,10 @@ namespace arduino.net
                 br.HitCount++;
             }
 
-            if (BreakPointHit != null) BreakPointHit(this, br);
+            if (BreakPointHit != null) 
+            {
+                ThreadPool.QueueUserWorkItem((a) => BreakPointHit(this, br));
+            }
         }
 
         private void OnTargetTraceAnswer(byte[] memdump)
@@ -208,7 +220,10 @@ namespace arduino.net
 
         private void OnSerialCharReceived(byte b)
         {
-            if (SerialCharReceived != null) SerialCharReceived(this, b);
+            if (SerialCharReceived != null) 
+            {
+                ThreadPool.QueueUserWorkItem((a) => SerialCharReceived(this, b));
+            }
         }
     }
 

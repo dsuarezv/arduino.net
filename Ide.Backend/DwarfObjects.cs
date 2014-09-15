@@ -45,6 +45,13 @@ namespace arduino.net
             Encoding = node.GetAttr("encoding").GetIntValue();
         }
 
+        public virtual string GetValueRepresentation(byte[] value)
+        {
+            // Check if it is an integer or something in the base type set
+            // and return its basic representation.
+            throw new NotImplementedException();
+        }
+
         public static DwarfBaseType GetTypeFromIndex(Dictionary<int, DwarfObject> index, int key)
         {
             DwarfObject result;
@@ -123,32 +130,28 @@ namespace arduino.net
 
         public virtual byte[] GetValue(Debugger debugger)
         {
-            throw new NotImplementedException();
+            if (Location == null) return null;
 
-            // This method should interpret the location program and send the needed traceQueries 
-            // to the debugger until it finds the described value.
+            return Location.GetValue(debugger, Type);
         }
 
         public virtual string GetValueRepresentation(byte[] value)
         {
-            throw new NotImplementedException();
-
-            // using the Type, interpret the bytes and return a printable representation.
+            return Type.GetValueRepresentation(value);
         }
 
         public override void FillAttributes(DwarfParserNode node)
         {
  	        base.FillAttributes(node);
-             
-            mLocationString = node.GetAttr("location").GetStringValue();
+
+            mLocationString = node.GetAttr("location").RawValue;
             mTypeId = node.GetAttr("type").GetReferenceValue();
         }
 
         public override void SetupReferences(DwarfTextParser parser, Dictionary<int, DwarfObject> index)
         {
-            if (mTypeId == -1) return;
-
-            Type = DwarfBaseType.GetTypeFromIndex(index, mTypeId);
+            if (mTypeId > -1) Type = DwarfBaseType.GetTypeFromIndex(index, mTypeId);
+            if (mLocationString != null) Location = DwarfLocation.Get(parser, mLocationString);
         }
     }
 
@@ -160,12 +163,6 @@ namespace arduino.net
     public class DwarfVariable: DwarfLocatedObject
     {
         public string ConstValue;
-    }
-
-
-    public class DwarfLocation: DwarfObject
-    {
-        public List<string> LocationProgram;
     }
 
     public class DwarfPointerType: DwarfBaseType
