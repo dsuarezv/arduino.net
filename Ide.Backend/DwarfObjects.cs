@@ -9,12 +9,23 @@ namespace arduino.net
     public class DwarfObject
     {
         public int Id;
+
+        public virtual void FillAttributes(DwarfParserNode node)
+        {
+            Id = node.Id;
+        }
     }
 
     [System.Diagnostics.DebuggerDisplay("{Id} {Name}")]
     public class DwarfNamedObject: DwarfObject
     {
         public string Name;
+
+        public override void FillAttributes(DwarfParserNode node)
+        {
+            base.FillAttributes(node);
+            Name = node.GetAttr("name").GetStringValue();
+        }
     }
 
     public class DwarfBaseType: DwarfNamedObject
@@ -27,6 +38,13 @@ namespace arduino.net
     {
         public int DeclarationFile;
         public int DeclarationLine;
+
+        public override void FillAttributes(DwarfParserNode node)
+        {
+            base.FillAttributes(node);
+            DeclarationFile = node.GetAttr("decl_file").GetIntValue();
+            DeclarationLine = node.GetAttr("decl_line").GetIntValue();
+        }
     }
 
     public class DwarfCompileUnit: DwarfNamedObject
@@ -39,7 +57,7 @@ namespace arduino.net
         public Dictionary<string, DwarfLocatedObject> Types = new Dictionary<string, DwarfLocatedObject>();
 
 
-        // Subprograms: dictionary <name, subprogram>
+        // Subprograms
         // Typedefs
         // Variables
         
@@ -62,6 +80,15 @@ namespace arduino.net
         // Formal parameters
         // Variables
         // InlinedSubroutines
+
+        public override void FillAttributes(DwarfParserNode node)
+        {
+            base.FillAttributes(node);
+            HighPc = node.GetAttr("high_pc").GetIntValue();
+            LowPc = node.GetAttr("low_pc").GetIntValue();
+            LinkageName = node.GetAttr("MIPS_linkage_name").GetStringValue();
+            External = node.GetAttr("external").GetBoolValue();
+        }
     }
 
     public class DwarfLocatedObject: DwarfDeclaredObject
@@ -82,6 +109,15 @@ namespace arduino.net
             throw new NotImplementedException();
 
             // using the Type, interpret the bytes and return a printable representation.
+        }
+
+        public override void FillAttributes(DwarfParserNode node)
+        {
+            base.FillAttributes(node);
+            var location = node.GetAttr("location").GetStringValue();
+            var type = node.GetAttr("type").GetIntValue();
+
+            
         }
     }
 

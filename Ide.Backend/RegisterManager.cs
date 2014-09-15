@@ -38,8 +38,10 @@ namespace arduino.net
                 mRegisters["r" + i.ToString("00")] = mRegistersPacket[i + 1];
             }
 
+            // TODO: on the atmega2560, the PC is 3 bytes. Have to account for that here and in the MCU side.
             UpdateWordRegister("SP", 35, 36);
             UpdateWordRegister("PC", 34, 33);
+            
         }
 
         public void UpdateWordRegister(string name, int indexLow, int indexHigh)

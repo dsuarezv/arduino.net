@@ -51,7 +51,7 @@ DbgSaveRegisters:
     ld r27, Y+
     st Z+, r27
     inc r26
-    cpi r26, 8			; copy 6 registers in the stack + 2 for the program counter = 8
+    cpi r26, 8			; copy 6 registers in the stack + 2 for the program counter = 8. NOTE: in the mega, the PC is 3 bytes, we should always copy 3 instead of 2 and let the pc side handle the 3rd byte.
     brne 2b
 
 
@@ -60,7 +60,7 @@ DbgSaveRegisters:
 	
 	in r28, 0x3d		; SPL
 	in r29, 0x3e		; SPH
-	;adiw r28, 8			; 6 bytes in this func stack + 2 for the program counter
+	adiw r28, 8			; 6 bytes in this func stack + 2 for the program counter
 	st Z+, r28
 	st Z+, r29
 

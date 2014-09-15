@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -22,18 +23,21 @@ namespace arduino.net
         }
 
         private void Parse()
-        { 
+        {
+            int lineNo = 1;
+
             foreach (var line in ObjectDumper.GetDwarf(mElfFile))
             {
-                ParseDwarfTreeLine(line);
+                ParseDwarfTreeLine(line, lineNo++);
             }
         }
 
-        private bool ParseDwarfTreeLine(string s)
+        private bool ParseDwarfTreeLine(string s, int lineNo)
         {
             var node = DwarfParserNode.Get(s);
             if (node != null)
             {
+                node.LineNumber = lineNo;
                 AllNodes.Add(node);
                 AddNodeToParent(node);
                 mCurrentNode = node;
@@ -96,6 +100,7 @@ namespace arduino.net
     {
         private static Regex RegExpr = new Regex(@"<([0-9a-f]+)><([0-9a-f]+)>: Abbrev Number: ([0-9]+) \(DW_TAG_([a-z_]+)\)");
 
+        public int LineNumber;
         public int Id;
         public string TagType;
         public int Depth;
@@ -124,8 +129,8 @@ namespace arduino.net
 
             return new DwarfParserNode()
             {
-                Id = groups[2].GetIntValue(),
-                Depth = groups[1].GetIntValue(),
+                Id = groups[2].GetHexValue(),
+                Depth = groups[1].GetHexValue(),
                 TagType = groups[4].Value,
                 AbbrevNumber = groups[3].GetIntValue()
             };
@@ -157,7 +162,7 @@ namespace arduino.net
 
             return new DwarfAttribute()
             {
-                Id = groups[1].GetIntValue(),
+                Id = groups[1].GetHexValue(),
                 Name = groups[2].Value,
                 RawValue = rawValue,
                 ReferencedId = GetReference(rawValue)
@@ -183,14 +188,21 @@ namespace arduino.net
         {
             if (RawValue == null) return -1;
 
-            return DwarfHelper.GetInt(RawValue);
+            return DwarfHelper.GetIntOrHex(RawValue);
+        }
+
+        public bool GetBoolValue()
+        {
+            if (RawValue == null) return false;
+
+            return (RawValue == "1");
         }
 
         private static int GetReference(string s)
         {
             if (!s.StartsWith("<")) return -1;
 
-            return DwarfHelper.GetInt(s.Trim('<', '>', '\t'));
+            return DwarfHelper.GetIntOrHex(s.Trim('<', '>', '\t'));
         }
     }
 
@@ -201,22 +213,24 @@ namespace arduino.net
     { 
         public static int GetIntValue(this Group group)
         {
-            return GetInt(group.Value);
+            return GetIntOrHex(group.Value);
         }
 
-        public static int GetInt(string s)
+        public static int GetHexValue(this Group group)
         {
             int result;
+            if (int.TryParse(group.Value, NumberStyles.HexNumber, null, out result)) return result;
+
+            return -1;
+        }
+
+        public static int GetIntOrHex(string s)
+        {
+            int result;
+            if (int.TryParse(s, NumberStyles.HexNumber, null, out result)) return result;
             if (Int32.TryParse(s, out result)) return result;
 
-            try
-            {
-                return Convert.ToInt32(s, 16);
-            }
-            catch
-            {
-                return -1;
-            }            
+            return -1;
         }
     }
 }

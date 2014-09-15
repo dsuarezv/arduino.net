@@ -11,7 +11,7 @@ namespace arduino.net
         private DwarfTextParser mParser;
         //private Dictionary<string, DwarfNamedObject> mIndexByName = new Dictionary<string, DwarfNamedObject>();
         private Dictionary<int, DwarfObject> mIndexById = new Dictionary<int, DwarfObject>();
-        private Dictionary<string, DwarfCompileUnit> mCompileUnits = new Dictionary<string, DwarfCompileUnit>();
+        private List<DwarfCompileUnit> mCompileUnits = new List<DwarfCompileUnit>();
 
         public DwarfTree(DwarfTextParser parser)
         {
@@ -23,7 +23,7 @@ namespace arduino.net
         
         public DwarfSubprogram GetFunctionAt(int programCounter)
         {
-            foreach (var cu in mCompileUnits.Values)
+            foreach (var cu in mCompileUnits)
             { 
                 foreach (var sub in cu.Subprograms)
                 { 
@@ -52,70 +52,39 @@ namespace arduino.net
 
             switch (node.TagType)
             {
-                case "compile_unit": result = CreateCompileUnit(node); break;
-                case "base_type": break;
-                case "const_type": break;
+                case "compile_unit": 
+                    result = SetupNewObject(node, new DwarfCompileUnit());
+                    mCompileUnits.Add((DwarfCompileUnit)result);
+                    break;
+                case "base_type": result = SetupNewObject(node, new DwarfBaseType()); break;
+                case "const_type":  break;
                 case "pointer_type": break;
                 case "class_type": break;
-                case "subprogram": result = CreateSubProgram(node); break;
-                case "formal_parameter": break;
-                case "variable": break;
+                case "subprogram": result = SetupNewObject(node, new DwarfSubprogram()); break;
+                case "formal_parameter": result = SetupNewObject(node, new DwarfFormalParameter()); break;
+                case "variable": result = SetupNewObject(node, new DwarfVariable()); break;
             }
 
-            if (result != null) 
-            {
-                mIndexById[result.Id] = result;
-            }
+            if (result != null) mIndexById.Add(result.Id, result);
 
             return result;
         }
 
 
-        private DwarfCompileUnit CreateCompileUnit(DwarfParserNode node)
+        private DwarfObject SetupNewObject(DwarfParserNode node, DwarfObject obj)
         {
-            var result = new DwarfCompileUnit()
-            {
-                Id = node.Id,
-                Name = node.GetAttr("name").GetStringValue()
-            };
+            obj.FillAttributes(node);
 
             if (node.Children != null)
-            { 
+            {
                 foreach (var childNode in node.Children)
                 {
                     var child = ParseNode(childNode);
-                    Add(child).To(result);
+                    Add(child).To(obj);
                 }
             }
 
-            mCompileUnits.Add(result.Name, result);
-
-            return result;
-        }
-
-        private DwarfSubprogram CreateSubProgram(DwarfParserNode node)
-        {
-            var result = new DwarfSubprogram()
-            {
-                Id = node.Id,
-                Name = node.GetAttr("name").GetStringValue(),
-                DeclarationFile = node.GetAttr("decl_file").GetIntValue(),
-                DeclarationLine = node.GetAttr("decl_line").GetIntValue(),
-                HighPc = node.GetAttr("high_pc").GetIntValue(),
-                LowPc = node.GetAttr("low_pc").GetIntValue(),
-                LinkageName = node.GetAttr("MIPS_linkage_name").GetStringValue(),
-            };
-
-            if (node.Children != null)
-            { 
-                foreach (var childNode in node.Children)
-                {
-                    var child = ParseNode(childNode);
-                    Add(child).To(result);
-                }
-            }
-
-            return result;
+            return obj;
         }
 
 
@@ -139,9 +108,16 @@ namespace arduino.net
                 mTarget = target;
             }
 
+            public void To(DwarfObject container)
+            {
+                if (container is DwarfCompileUnit) { To((DwarfCompileUnit)container); return; }
+                if (container is DwarfSubprogram) { To((DwarfSubprogram)container); return; }
+            }
+
             public void To(DwarfCompileUnit container)
             {
                 if (!IsValidInput(container)) return;
+
 
                 var subprogram = mTarget as DwarfSubprogram;
                 if (subprogram != null)

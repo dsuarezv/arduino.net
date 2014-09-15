@@ -167,7 +167,7 @@ namespace arduino.net
         {
             var sb = new StringBuilder();
 
-            foreach (var path in GetIncludePaths(config)) sb.AppendFormat("-I\"{0}\"", path);
+            foreach (var path in GetIncludePaths(config)) sb.AppendFormat("-I\"{0}\" ", path);
             
             return sb.ToString();
         }
