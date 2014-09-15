@@ -12,6 +12,8 @@ namespace arduino.net
         //private Dictionary<string, DwarfNamedObject> mIndexByName = new Dictionary<string, DwarfNamedObject>();
         private Dictionary<int, DwarfObject> mIndexById = new Dictionary<int, DwarfObject>();
         private List<DwarfCompileUnit> mCompileUnits = new List<DwarfCompileUnit>();
+        private DwarfCompileUnit mCurrentCompileUnit;
+
 
         public DwarfTree(DwarfTextParser parser)
         {
@@ -36,6 +38,42 @@ namespace arduino.net
 
             return null;
         }
+
+        public DwarfSubprogram GetFunctionByName(string funcName)
+        {
+            foreach (var cu in mCompileUnits)
+            {
+                foreach (var sub in cu.Subprograms)
+                {
+                    if (sub.Name == funcName)
+                    {
+                        return sub;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public byte[] GetSymbolValue(string symbolName, DwarfSubprogram currentFunc, Debugger debugger)
+        { 
+            // Search in this function first
+            DwarfLocatedObject result;
+
+            if (currentFunc.Variables.TryGetValue(symbolName, out result))
+            {
+                return result.GetValue(debugger);
+            }
+
+            DwarfVariable globalVar;
+
+            if (currentFunc.Parent.Variables.TryGetValue(symbolName, out globalVar))
+            {
+                return globalVar.GetValue(debugger);
+            }
+
+            return null;
+        }
         
         
         private void BuildTree()
@@ -52,15 +90,12 @@ namespace arduino.net
 
             switch (node.TagType)
             {
-                case "compile_unit": 
-                    result = SetupNewObject(node, new DwarfCompileUnit());
-                    mCompileUnits.Add((DwarfCompileUnit)result);
-                    break;
+                case "compile_unit": result = CreateCompileUnit(node); break;
                 case "base_type": result = SetupNewObject(node, new DwarfBaseType()); break;
                 case "const_type":  break;
                 case "pointer_type": break;
                 case "class_type": break;
-                case "subprogram": result = SetupNewObject(node, new DwarfSubprogram()); break;
+                case "subprogram": result = CreateSubProgram(node); break;
                 case "formal_parameter": result = SetupNewObject(node, new DwarfFormalParameter()); break;
                 case "variable": result = SetupNewObject(node, new DwarfVariable()); break;
             }
@@ -70,6 +105,26 @@ namespace arduino.net
             return result;
         }
 
+        private DwarfCompileUnit CreateCompileUnit(DwarfParserNode node)
+        {
+            var result = new DwarfCompileUnit();
+            mCurrentCompileUnit = result;
+            SetupNewObject(node, result);
+            mCompileUnits.Add(result);
+            
+
+            return result;
+        }
+
+        private DwarfSubprogram CreateSubProgram(DwarfParserNode node)
+        {
+            var result = new DwarfSubprogram();
+            result.Parent = mCurrentCompileUnit;
+            SetupNewObject(node, result);
+            
+
+            return result;
+        }
 
         private DwarfObject SetupNewObject(DwarfParserNode node, DwarfObject obj)
         {
@@ -149,6 +204,13 @@ namespace arduino.net
                 if (variable != null) 
                 {
                     container.Variables.Add(variable.Name, variable);
+                    return;
+                }
+
+                var param = mTarget as DwarfFormalParameter;
+                if (param != null)
+                {
+                    container.Variables.Add(param.Name, param);
                     return;
                 }
             }

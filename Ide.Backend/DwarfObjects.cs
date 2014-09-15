@@ -70,6 +70,7 @@ namespace arduino.net
 
     public class DwarfSubprogram: DwarfDeclaredObject
     {
+        public DwarfCompileUnit Parent;
         public string LinkageName;
         public bool External;
         public int LowPc;
@@ -117,7 +118,7 @@ namespace arduino.net
             var location = node.GetAttr("location").GetStringValue();
             var type = node.GetAttr("type").GetIntValue();
 
-            
+
         }
     }
 

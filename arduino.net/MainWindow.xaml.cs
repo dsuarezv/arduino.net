@@ -240,9 +240,11 @@ namespace arduino.net
                 { 
                     StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", breakpoint.LineNumber, breakpoint.SourceFileName);
                 }
-
-                IdeManager.Dwarf.GetFunctionAt(IdeManager.Debugger.Registers.Registers["PC"]);
             });
+
+            var di = IdeManager.Dwarf;
+            var currentFunc = di.GetFunctionByName("loop");
+            var val = di.GetSymbolValue("myGlobalVariable", currentFunc, IdeManager.Debugger);
         }
 
         void Debugger_TargetConnected(object sender)
