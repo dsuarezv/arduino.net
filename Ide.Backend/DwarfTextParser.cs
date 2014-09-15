@@ -9,11 +9,13 @@ namespace arduino.net
     public class DwarfTextParser
     {
         private DwarfParserNode mCurrentNode;
-
         private string mElfFile;
+        private DwarfParserSection mSection = new DwarfParserSection();
+
 
         public List<DwarfParserNode> TopNodes = new List<DwarfParserNode>();
         public List<DwarfParserNode> AllNodes = new List<DwarfParserNode>();
+        public Dictionary<int, List<string>> Locations = new Dictionary<int, List<string>>();
 
         public DwarfTextParser(string elfFile)
         {
@@ -32,9 +34,49 @@ namespace arduino.net
             }
         }
 
-        private bool ParseDwarfTreeLine(string s, int lineNo)
+        private bool ParseDwarfTreeLine(string line, int lineNo)
         {
-            var node = DwarfParserNode.Get(s);
+            mSection.Update(line);
+
+            switch (mSection.Section)
+            {
+                case DwarfSection.DebugInfo: return ParseDebugInfoLine(line, lineNo);
+                case DwarfSection.LocationTable: return ParseLocationInfoLine(line, lineNo);
+                case DwarfSection.LineInfoTable: break;
+            }
+
+            return false;
+        }
+
+
+        // __ Location table parsing __________________________________________
+
+
+        private bool ParseLocationInfoLine(string line, int lineNo)
+        {
+            var loc = DwarfParserLocation.Get(line);
+            if (loc != null)
+            { 
+                if (!Locations.ContainsKey(loc.Id))
+                {
+                    Locations.Add(loc.Id, new List<string>());
+                }
+
+                Locations[loc.Id].AddRange(DwarfParserLocation.GetProgramEntries(loc.Program));
+                
+                return true;
+            }
+
+            return false;  // no match here
+        }
+
+
+        // __ Debug Info parsing ______________________________________________
+
+
+        private bool ParseDebugInfoLine(string line, int lineNo)
+        {
+            var node = DwarfParserNode.Get(line);
             if (node != null)
             {
                 node.LineNumber = lineNo;
@@ -44,7 +86,7 @@ namespace arduino.net
                 return true;
             }
 
-            var att = DwarfAttribute.Get(s);
+            var att = DwarfParserAttribute.Get(line);
             if (att != null)
             {
                 if (mCurrentNode == null) throw new Exception("Orphan attribute");
@@ -95,10 +137,33 @@ namespace arduino.net
         }
     }
 
+
+    public class DwarfParserSection
+    {
+        private static Regex RegExpr = new Regex(@"section (?<section>\.debug_line)|Contents of the (?<section>\.debug_loc) section|section (?<section>\.debug_info) contains");
+
+        public DwarfSection Section;
+
+        public bool Update(string s)
+        {
+            var m = RegExpr.Match(s);
+            if (!m.Success) return false;
+
+            switch (m.Groups["section"].Value)
+            {
+                case ".debug_info": Section = DwarfSection.DebugInfo; break;
+                case ".debug_loc": Section = DwarfSection.LocationTable; break;
+                case ".debug_line": Section = DwarfSection.LineInfoTable; break;
+            }
+
+            return true;
+        }
+    }
+
     [System.Diagnostics.DebuggerDisplay("{Id} {TagType}")]
     public class DwarfParserNode
     {
-        private static Regex RegExpr = new Regex(@"<([0-9a-f]+)><([0-9a-f]+)>: Abbrev Number: ([0-9]+) \(DW_TAG_([a-z_]+)\)");
+        private static Regex RegExpr = new Regex(@"<([0-9a-f]+)><([0-9a-f]+)>: Abbrev Number: ([0-9]+) \(DW_TAG_([a-z_]+)\)", RegexOptions.Compiled);
 
         public int LineNumber;
         public int Id;
@@ -106,13 +171,13 @@ namespace arduino.net
         public int Depth;
         public int AbbrevNumber;
         public List<DwarfParserNode> Children;
-        public Dictionary<string, DwarfAttribute> Attributes = new Dictionary<string, DwarfAttribute>();
+        public Dictionary<string, DwarfParserAttribute> Attributes = new Dictionary<string, DwarfParserAttribute>();
 
-        public DwarfAttribute GetAttr(string name)
+        public DwarfParserAttribute GetAttr(string name)
         {
             if (Attributes.ContainsKey(name)) return Attributes[name];
 
-            return DwarfAttribute.Empty;
+            return DwarfParserAttribute.Empty;
         }
 
         public override string ToString()
@@ -122,10 +187,10 @@ namespace arduino.net
 
         public static DwarfParserNode Get(string s)
         {
-            var match = RegExpr.Match(s);
-            if (!match.Success) return null;
+            var m = RegExpr.Match(s);
+            if (!m.Success) return null;
 
-            var groups = match.Groups;
+            var groups = m.Groups;
 
             return new DwarfParserNode()
             {
@@ -138,34 +203,32 @@ namespace arduino.net
     }
 
     [System.Diagnostics.DebuggerDisplay("{Id} {Name}: {RawValue}")]
-    public class DwarfAttribute
+    public class DwarfParserAttribute
     {
-        public static DwarfAttribute Empty = new DwarfAttribute();
+        public static DwarfParserAttribute Empty = new DwarfParserAttribute();
 
-        private static Regex RegExpr = new Regex(@"<[ ]*([0-9a-f]+)> + DW_AT_([a-z_]+)\s*: *(.+)");
-        private static Regex IndirectStringRegEx = new Regex(@"\(indirect string, offset: 0x[0-9a-fA-F]+\): (.+)");
+        private static Regex RegExpr = new Regex(@"<[ ]*([0-9a-f]+)> + DW_AT_([a-z_]+)\s*: *(.+)", RegexOptions.Compiled);
+        private static Regex IndirectStringRegEx = new Regex(@"\(indirect string, offset: 0x[0-9a-fA-F]+\): (.+)", RegexOptions.Compiled);
 
         public int Id;
         public string Name;
         public string RawValue;
-        public int ReferencedId = -1;
 
 
-        public static DwarfAttribute Get(string s)
+        public static DwarfParserAttribute Get(string s)
         {
-            var match = RegExpr.Match(s);
-            if (!match.Success) return null;
+            var m = RegExpr.Match(s);
+            if (!m.Success) return null;
 
-            var groups = match.Groups;
+            var groups = m.Groups;
 
             string rawValue = groups[3].Value;
 
-            return new DwarfAttribute()
+            return new DwarfParserAttribute()
             {
                 Id = groups[1].GetHexValue(),
                 Name = groups[2].Value,
-                RawValue = rawValue,
-                ReferencedId = GetReference(rawValue)
+                RawValue = rawValue
             };
         }
 
@@ -178,10 +241,10 @@ namespace arduino.net
         {
             if (RawValue == null) return null;
 
-            var match = IndirectStringRegEx.Match(RawValue);
-            if (!match.Success) return null;
+            var m = IndirectStringRegEx.Match(RawValue);
+            if (!m.Success) return null;
 
-            return match.Groups[1].Value.Trim(' ', '\t');
+            return m.Groups[1].Value.Trim(' ', '\t');
         }
 
         public int GetIntValue()
@@ -198,14 +261,46 @@ namespace arduino.net
             return (RawValue == "1");
         }
 
-        private static int GetReference(string s)
+        public int GetReferenceValue()
         {
-            if (!s.StartsWith("<")) return -1;
+            if (RawValue == null) return -1;
 
-            return DwarfHelper.GetIntOrHex(s.Trim('<', '>', '\t'));
+            if (!RawValue.StartsWith("<")) return -1;
+
+            var cleanValue = RawValue.Trim('<', '>', '\t').Substring(2);
+
+            return DwarfHelper.GetIntOrHex(cleanValue);
         }
     }
 
+    public class DwarfParserLocation
+    {
+        public int Id;
+        public string Program;
+
+        private static Regex RegExpr = new Regex(@"(?<id>[0-9a-f]+) \w+ \w+ \((?<program>[\w; :]+)\)", RegexOptions.Compiled);
+        
+        public static DwarfParserLocation Get(string s)
+        {
+            var m = RegExpr.Match(s);
+            if (!m.Success) return null;
+
+            return new DwarfParserLocation()
+            {
+                Id = m.Groups[1].GetHexValue(),
+                Program = m.Groups[2].Value
+            };
+        }
+
+        public static List<string> GetProgramEntries(string program)
+        {
+            List<string> result = new List<string>();
+
+            foreach (var s in program.Split(';')) result.Add(s.Trim());
+
+            return result;
+        }
+    }
 
 
 
@@ -233,4 +328,8 @@ namespace arduino.net
             return -1;
         }
     }
+
+
+    public enum DwarfSection { DebugInfo, LocationTable, LineInfoTable };
+
 }

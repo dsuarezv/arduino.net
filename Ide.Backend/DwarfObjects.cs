@@ -14,6 +14,11 @@ namespace arduino.net
         {
             Id = node.Id;
         }
+
+        public virtual void SetupReferences(DwarfTextParser parser, Dictionary<int, DwarfObject> index)
+        { 
+            
+        }
     }
 
     [System.Diagnostics.DebuggerDisplay("{Id} {Name}")]
@@ -32,6 +37,22 @@ namespace arduino.net
     {
         public int ByteSize;
         public int Encoding;
+
+        public override void FillAttributes(DwarfParserNode node)
+        {
+            base.FillAttributes(node);
+            ByteSize = node.GetAttr("byte_size").GetIntValue();
+            Encoding = node.GetAttr("encoding").GetIntValue();
+        }
+
+        public static DwarfBaseType GetTypeFromIndex(Dictionary<int, DwarfObject> index, int key)
+        {
+            DwarfObject result;
+
+            index.TryGetValue(key, out result);
+            
+            return  result as DwarfBaseType;
+        }
     }
 
     public class DwarfDeclaredObject: DwarfNamedObject
@@ -94,6 +115,9 @@ namespace arduino.net
 
     public class DwarfLocatedObject: DwarfDeclaredObject
     {
+        private string mLocationString;
+        private int mTypeId;
+
         public DwarfLocation Location;
         public DwarfBaseType Type;
 
@@ -114,11 +138,17 @@ namespace arduino.net
 
         public override void FillAttributes(DwarfParserNode node)
         {
-            base.FillAttributes(node);
-            var location = node.GetAttr("location").GetStringValue();
-            var type = node.GetAttr("type").GetIntValue();
+ 	        base.FillAttributes(node);
+             
+            mLocationString = node.GetAttr("location").GetStringValue();
+            mTypeId = node.GetAttr("type").GetReferenceValue();
+        }
 
+        public override void SetupReferences(DwarfTextParser parser, Dictionary<int, DwarfObject> index)
+        {
+            if (mTypeId == -1) return;
 
+            Type = DwarfBaseType.GetTypeFromIndex(index, mTypeId);
         }
     }
 
@@ -126,7 +156,7 @@ namespace arduino.net
     {
         
     }
-
+    
     public class DwarfVariable: DwarfLocatedObject
     {
         public string ConstValue;
@@ -135,6 +165,64 @@ namespace arduino.net
 
     public class DwarfLocation: DwarfObject
     {
-        public string[] LocationProgram;
+        public List<string> LocationProgram;
+    }
+
+    public class DwarfPointerType: DwarfBaseType
+    {
+        private int mTypeId;
+        public DwarfBaseType PointerToType;
+
+        public override void FillAttributes(DwarfParserNode node)
+        {
+            base.FillAttributes(node);
+            mTypeId = node.GetAttr("type").GetReferenceValue();
+        }
+
+        public override void SetupReferences(DwarfTextParser parser, Dictionary<int, DwarfObject> index)
+        {
+            if (mTypeId == -1) return;
+
+            PointerToType = GetTypeFromIndex(index, mTypeId);
+        }
+    }
+
+    public class DwarfClassType: DwarfBaseType
+    {
+        private int mSiblingId;
+
+        public int Declaration;
+
+        public override void FillAttributes(DwarfParserNode node)
+        {
+            base.FillAttributes(node);
+            Declaration = node.GetAttr("declaration").GetIntValue();
+            mSiblingId = node.GetAttr("sibling").GetReferenceValue();
+        }
+
+        public override void SetupReferences(DwarfTextParser parser, Dictionary<int,DwarfObject> index)
+        {
+            if (mSiblingId == -1) return;
+        }
+    }
+
+    public class DwarfConstType: DwarfBaseType
+    {
+        private int mConstTypeId;
+        public DwarfBaseType ConstType;
+
+        public override void FillAttributes(DwarfParserNode node)
+        {
+            base.FillAttributes(node);
+            mConstTypeId = node.GetAttr("type").GetReferenceValue();
+        }
+
+        public override void SetupReferences(DwarfTextParser parser, Dictionary<int, DwarfObject> index)
+        {
+            if (mConstTypeId == -1) return;
+
+            ConstType = GetTypeFromIndex(index, mConstTypeId);
+        }
+
     }
 }

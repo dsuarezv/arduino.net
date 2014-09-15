@@ -78,9 +78,16 @@ namespace arduino.net
         
         private void BuildTree()
         { 
+            // First pass: fill objects with parsed values
             foreach (var n in mParser.TopNodes)
             { 
                 ParseNode(n);
+            }
+
+            // Second pass: update object references
+            foreach (var o in mIndexById.Values)
+            {
+                o.SetupReferences(mParser, mIndexById);
             }
         }
 
@@ -90,17 +97,17 @@ namespace arduino.net
 
             switch (node.TagType)
             {
+                case "typedef": break;
                 case "compile_unit": result = CreateCompileUnit(node); break;
                 case "base_type": result = SetupNewObject(node, new DwarfBaseType()); break;
-                case "const_type":  break;
-                case "pointer_type": break;
-                case "class_type": break;
+                case "const_type": result = SetupNewObject(node, new DwarfConstType()); break;
+                case "pointer_type": result = SetupNewObject(node, new DwarfPointerType()); break;
+                case "class_type": result = SetupNewObject(node, new DwarfClassType()); break;
+                case "structure_type": break;
                 case "subprogram": result = CreateSubProgram(node); break;
                 case "formal_parameter": result = SetupNewObject(node, new DwarfFormalParameter()); break;
                 case "variable": result = SetupNewObject(node, new DwarfVariable()); break;
             }
-
-            if (result != null) mIndexById.Add(result.Id, result);
 
             return result;
         }
@@ -111,7 +118,6 @@ namespace arduino.net
             mCurrentCompileUnit = result;
             SetupNewObject(node, result);
             mCompileUnits.Add(result);
-            
 
             return result;
         }
@@ -121,7 +127,6 @@ namespace arduino.net
             var result = new DwarfSubprogram();
             result.Parent = mCurrentCompileUnit;
             SetupNewObject(node, result);
-            
 
             return result;
         }
@@ -138,6 +143,8 @@ namespace arduino.net
                     Add(child).To(obj);
                 }
             }
+
+            mIndexById.Add(obj.Id, obj);
 
             return obj;
         }
