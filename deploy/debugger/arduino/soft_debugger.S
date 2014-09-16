@@ -60,7 +60,7 @@ DbgSaveRegisters:
 	
 	in r28, 0x3d		; SPL
 	in r29, 0x3e		; SPH
-	;adiw r28, 8			; 6 bytes in this func stack + 2 for the program counter
+	adiw r28, 8			; 6 bytes in this func stack + 2 for the program counter
 	st Z+, r28
 	st Z+, r29
 

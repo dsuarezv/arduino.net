@@ -222,7 +222,8 @@ namespace arduino.net
         {
             if (SerialCharReceived != null) 
             {
-                ThreadPool.QueueUserWorkItem((a) => SerialCharReceived(this, b));
+                //ThreadPool.QueueUserWorkItem((a) => SerialCharReceived(this, b));
+                SerialCharReceived(this, b);
             }
         }
     }

@@ -92,6 +92,7 @@ namespace arduino.net
             {
                 if (RegisterOp(op, debugger, result)) continue;
                 if (AddressOp(op, debugger, result, type)) continue;
+                if (RegisterOffsetOp(op, debugger, result, type)) continue;
             }
 
             if (result.Count > 0) return result.ToArray();
@@ -106,10 +107,9 @@ namespace arduino.net
             if (!m.Success) return false;
 
             int register = m.Groups["reg"].GetIntValue();
-            if (register < 0 || register > 32) return false;
+            if (register < 1 || register > 32) return false;
 
-            var registerName = string.Format("r{0:00}", --register);
-
+            var registerName = string.Format("r{0:00}", register);
             var val = debugger.Registers.Registers[registerName];
 
             result.Add((byte)val);
@@ -117,9 +117,31 @@ namespace arduino.net
             return true;
         }
 
-        private byte RegisterOffsetOp(string op)
+        private bool RegisterOffsetOp(string op, Debugger debugger, List<byte> result, DwarfBaseType type)
         {
-            throw new NotImplementedException();
+            var m = OpRegisterOffsetRegExpr.Match(op);
+            if (!m.Success) return false;
+
+            int register = m.Groups["reg"].GetIntValue();
+            if (register < 1 || register > 32) return false;
+
+            var addressRegister = "Y";
+
+            switch (register)
+            { 
+                case 26: addressRegister = "X"; break;
+                case 28: addressRegister = "Y"; break;
+                case 30: addressRegister = "Z"; break;
+            }
+
+            var offset = m.Groups["offset"].GetIntValue();
+            var address = debugger.Registers.Registers[addressRegister] + offset;            
+            var size = (type != null) ? (byte)type.ByteSize : (byte)2;
+            var value = debugger.GetTargetMemDump(address, size);
+
+            result.AddRange(value);
+
+            return true;
         }
 
         private bool AddressOp(string op, Debugger debugger, List<byte> result, DwarfBaseType type)
@@ -136,6 +158,7 @@ namespace arduino.net
 
             return true;
         }
+
 
     }
 }

@@ -187,14 +187,13 @@ namespace arduino.net
             
             OpenContent("Sketch dissasembly",
                 ObjectDumper.GetSingleString(
-                    ObjectDumper.GetDisassembly(elfFile)));
+                    ObjectDumper.GetDisassemblyWithSource(elfFile)));
 
             OpenContent("Symbol table",
                 ObjectDumper.GetSingleString(
                     ObjectDumper.GetNmSymbolTable(elfFile)));
 
-            IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(elfFile));
-
+            InitDwarf();
 
             if (result)
             {
@@ -206,6 +205,15 @@ namespace arduino.net
             }
 
             return result;
+        }
+
+        private void InitDwarf()
+        {
+            if (IdeManager.Dwarf != null) return;
+
+            var compiler = IdeManager.Compiler;
+            var elfFile = compiler.GetElfFile(compiler.GetTempDirectory());
+            IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(elfFile));
         }
 
         private async Task<bool> LaunchDeploy()
@@ -222,6 +230,8 @@ namespace arduino.net
             //{
             //    StatusControl.SetState(1, "Deploy failed");
             //}
+
+            InitDwarf();
 
             return result;
         }
@@ -241,9 +251,11 @@ namespace arduino.net
                     StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", breakpoint.LineNumber, breakpoint.SourceFileName);
                 }
 
+                InitDwarf();
+
                 var di = IdeManager.Dwarf;
-                var currentFunc = di.GetFunctionByName("loop");
-                var val = di.GetSymbolValue("myGlobalVariable", currentFunc, IdeManager.Debugger);
+                var currentFunc = di.GetFunctionByName("myfunc");
+                var val = di.GetSymbolValue("mylocal", currentFunc, IdeManager.Debugger);
             });
 
         }

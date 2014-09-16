@@ -308,7 +308,10 @@ namespace arduino.net
     { 
         public static int GetIntValue(this Group group)
         {
-            return GetIntOrHex(group.Value);
+            int result;
+            if (int.TryParse(group.Value, out result)) return result;
+
+            return -1;
         }
 
         public static int GetHexValue(this Group group)

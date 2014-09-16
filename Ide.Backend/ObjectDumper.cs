@@ -33,6 +33,11 @@ namespace arduino.net
             return RunObjectDump(" -d -w -C " + elfFile);
         }
 
+        public static List<string> GetDisassemblyWithSource(string elfFile)
+        {
+            return RunObjectDump(" -d -w -C -S " + elfFile);
+        }
+
         public static List<string> GetDwarf(string elfFile)
         {
             return RunObjectDump("-w -W " + elfFile);

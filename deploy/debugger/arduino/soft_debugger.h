@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #define SOFTDEBUGGER_CONNECT DbgConnect();
-#define SOFTDEBUGGER_BREAK(a) /*DbgSaveRegisters();*/ DbgBreak(a);
+#define SOFTDEBUGGER_BREAK(a) DbgSaveRegisters(); DbgBreak(a);
 
 #ifdef __cplusplus
 extern "C" {
