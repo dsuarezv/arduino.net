@@ -22,12 +22,6 @@
 			FontSize="36"
 			Foreground="#FFA1A1A1" ><Run Text="Blink sample - arduino.net"/></TextBlock>
 
-        <local:SystemButtons
-			Grid.Row="0"
-			Grid.Column="0" 
-			HorizontalAlignment="Right"
-			VerticalAlignment="Top"/>
-
 
         <Border Grid.Row="1" Padding="10,0,10,10">
             <StackPanel Orientation="Horizontal">
@@ -68,7 +62,7 @@
                     Background="#b6b6b6" 
 				    ShowsPreview="True"
 				    Height="1"/>
-                <local:MemoryDumpPad Grid.Row="1"/>
+                <local:MemoryDumpPad x:Name="MemDumpPad1" Grid.Row="1"/>
             </Grid>
             
             <Grid Grid.Column="1">

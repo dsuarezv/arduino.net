@@ -138,7 +138,7 @@ namespace arduino.net
             {
                 Program = Path.Combine(Configuration.ToolkitPath, compiler),
                 //Arguments = string.Format("-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
-                Arguments = string.Format("-c -g -O0 -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
+                Arguments = string.Format("-c -g {8} -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
                     config.Get("mcu"),
                     config.Get("f_cpu"),
                     (usbvid == null) ? "null" : usbvid,
@@ -146,7 +146,8 @@ namespace arduino.net
                     "105",
                     includePaths,
                     EffectiveSourceFile,
-                    TargetFile)
+                    TargetFile,
+                    GetOptimizationSetting())
             };
         }
 
@@ -171,6 +172,11 @@ namespace arduino.net
             foreach (var path in GetIncludePaths(config)) sb.AppendFormat("-I\"{0}\" ", path);
             
             return sb.ToString();
+        }
+
+        protected virtual string GetOptimizationSetting()
+        {
+            return "-Os";   // Optimize for size.
         }
     }
 
@@ -355,6 +361,11 @@ namespace arduino.net
 
             return new string[] { line };
         }
+
+        protected override string GetOptimizationSetting()
+        {
+            return "-O0";  // In debug, disable optimization. Most debug info is lost if enabled.
+        }
     }
 
     public class InoBuildTarget : DebugBuildTarget
@@ -409,6 +420,11 @@ namespace arduino.net
             {
                 if (mParser.HasSetupFunction)
                 { 
+                    // Inserting this as the first line in the setup() function effectively prevents user code from 
+                    // being executed first. If there is a watchdog reset (soft reset) in place, the watchdog 
+                    // registers should be set first-thing, and this would enter a reset loop. May brick a bootloader 
+                    // arduino (needs a programmer to fix).
+
                     return new string[] {
                         "SOFTDEBUGGER_CONNECT",
                         "#line " + lineNumber,

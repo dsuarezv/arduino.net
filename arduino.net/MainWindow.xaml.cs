@@ -210,7 +210,6 @@ namespace arduino.net
         private void InitDwarf()
         {
             if (IdeManager.Dwarf != null) return;
-
             var compiler = IdeManager.Compiler;
             var elfFile = compiler.GetElfFile(compiler.GetTempDirectory());
             IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(elfFile));
@@ -250,14 +249,36 @@ namespace arduino.net
                 { 
                     StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", breakpoint.LineNumber, breakpoint.SourceFileName);
                 }
-
-                InitDwarf();
-
-                var di = IdeManager.Dwarf;
-                var currentFunc = di.GetFunctionByName("myfunc");
-                var val = di.GetSymbolValue("mylocal", currentFunc, IdeManager.Debugger);
             });
 
+            InitDwarf();
+
+            UpdateWatches();
+        }
+
+        private void UpdateWatches()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var t = MemDumpPad1.ResultTextBlock;
+                t.Text = "";
+                t.Text += GetWatchValue("myfunc", "myGlobalVariable");
+                t.Text += GetWatchValue("myfunc", "mylocal");
+            });
+        }
+
+        private string GetWatchValue(string function, string symbol)
+        {
+            var di = IdeManager.Dwarf;
+            var currentFunc = di.GetFunctionByName(function);
+            var val = di.GetSymbolValue(symbol, currentFunc, IdeManager.Debugger);
+
+            if (val == null) return symbol + ": <not found>\n";
+            if (val.Length != 2) return symbol + ": <wrong size>\n";
+
+            int value = (int)(val[1] << 8 | val[0]);
+            var msg = string.Format("{0}: {1} (0x{1:X4})\n", symbol, value);
+            return msg;
         }
 
         void Debugger_TargetConnected(object sender)
@@ -270,11 +291,11 @@ namespace arduino.net
 
         private void Debugger_SerialCharReceived(object sender, byte b)
         {
-            Dispatcher.Invoke(() =>
-            {
-                OutputTextBox1.ContentTextBox.AppendText(new string((char)b, 1));
-                OutputTextBox1.ContentTextBox.ScrollToEnd();
-            });
+            //Dispatcher.Invoke(() =>
+            //{
+            //    OutputTextBox1.ContentTextBox.AppendText(new string((char)b, 1));
+            //    OutputTextBox1.ContentTextBox.ScrollToEnd();
+            //});
             
         }
     }

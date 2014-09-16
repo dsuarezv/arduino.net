@@ -135,7 +135,7 @@ namespace arduino.net
             }
 
             var offset = m.Groups["offset"].GetIntValue();
-            var address = debugger.Registers.Registers[addressRegister] + offset;            
+            var address = debugger.Registers.Registers[addressRegister] + offset;
             var size = (type != null) ? (byte)type.ByteSize : (byte)2;
             var value = debugger.GetTargetMemDump(address, size);
 
@@ -149,7 +149,7 @@ namespace arduino.net
             var m = OpAddress.Match(op);
             if (!m.Success) return false;
 
-            var address = m.Groups[1].GetIntValue();
+            var address = m.Groups[1].GetHexValue();
             var size = (type != null) ? (byte)type.ByteSize : (byte)2;
 
             var value = debugger.GetTargetMemDump(address, size);

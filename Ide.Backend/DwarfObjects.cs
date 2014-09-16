@@ -144,8 +144,6 @@ namespace arduino.net
         {
  	        base.FillAttributes(node);
 
-            if (Name == "mylocal")
-
             mLocationString = node.GetAttr("location").RawValue;
             mTypeId = node.GetAttr("type").GetReferenceValue();
         }
