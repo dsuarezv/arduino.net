@@ -40,13 +40,17 @@
     <Compile Include="CmdRunner.cs" />
     <Compile Include="Compiler.cs" />
     <Compile Include="Debugger.cs" />
-    <Compile Include="DwarfParser.cs" />
+    <Compile Include="DwarfLocation.cs" />
+    <Compile Include="DwarfObjects.cs" />
+    <Compile Include="DwarfTextParser.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="DwarfTree.cs" />
     <Compile Include="IdeManager.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ObjectDumper.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegisterManager.cs" />
     <Compile Include="SketchFileParser.cs" />
     <Compile Include="SymbolTableParser.cs" />
   </ItemGroup>

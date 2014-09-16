@@ -102,10 +102,10 @@ namespace arduino.net
             var sourceDir = Path.Combine(Configuration.ToolkitPath, "debugger/" + config.Get("core"));
 
             var fileList = Project.GetCodeFilesOnPath(sourceDir);
-            return GetCommandsForFiles(tempDir, debug, fileList);
+            return GetCommandsForFiles(tempDir, debug, fileList, false);
         }
 
-        private List<BuildTarget> GetCommandsForFiles(string tempDir, bool debug, List<string> fileList)
+        private List<BuildTarget> GetCommandsForFiles(string tempDir, bool debug, List<string> fileList, bool copyToTmp = true)
         {
             var result = new List<BuildTarget>();
             var debugger = debug ? mDebugger : null;
@@ -116,8 +116,8 @@ namespace arduino.net
 
                 switch (GetFileType(sourceFile))
                 {
-                    case FileType.Code: result.Add(new DebugBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, CopyToTmp = true }); break;
-                    case FileType.Sketch: result.Add(new InoBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, FileExtensionOnTmp = ".cpp", CopyToTmp = true }); break;
+                    case FileType.Code: result.Add(new DebugBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, CopyToTmp = copyToTmp }); break;
+                    case FileType.Sketch: result.Add(new InoBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, FileExtensionOnTmp = ".cpp", CopyToTmp = copyToTmp }); break;
                     case FileType.Assembler: result.Add(new AssemblerBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, CopyToTmp = false }); break;
                     default:
                         result.Add(new CopyBuildTarget() { SourceFile = sourceFile }); break;
@@ -212,11 +212,11 @@ namespace arduino.net
 
             if (cmd.TargetIsUpToDate)
             {
-                Logger.LogCompiler("{0} is up to date.", cmd.TargetFile);
+                Logger.LogCompiler("  {0} is up to date.", Path.GetFileName(cmd.TargetFile));
             }
             else
             { 
-                Logger.LogCompiler(cmd.ToString());
+                Logger.LogCompiler("Building {0}: {1}", Path.GetFileName(cmd.TargetFile), cmd);
             }
             
             if (cmd.BuildCommand == null) return true;

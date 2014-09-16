@@ -56,11 +56,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="MemoryDumpPad.xaml.cs">
+      <DependentUpon>MemoryDumpPad.xaml</DependentUpon>
+    </Compile>
     <Compile Include="OutputTextBox.xaml.cs">
       <DependentUpon>OutputTextBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="ProjectExplorer.xaml.cs">
       <DependentUpon>ProjectExplorer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="RegistersPad.xaml.cs">
+      <DependentUpon>RegistersPad.xaml</DependentUpon>
     </Compile>
     <Compile Include="StatusHeaderControl.xaml.cs">
       <DependentUpon>StatusHeaderControl.xaml</DependentUpon>
@@ -87,11 +93,19 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MemoryDumpPad.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="OutputTextBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ProjectExplorer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RegistersPad.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -151,9 +165,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\cpp.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="arduino-icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="arduino-icon2.ico" />

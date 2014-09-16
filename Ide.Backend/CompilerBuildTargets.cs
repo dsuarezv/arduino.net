@@ -132,20 +132,22 @@ namespace arduino.net
             var config = Configuration.Boards[boardName]["build"];
             var usbvid = config.Get("vid");
             var usbpid = config.Get("pid");
-            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"", GetIncludePaths(config));
+            var includePaths = GetIncludeArgument(config);
 
             BuildCommand = new Command()
             {
                 Program = Path.Combine(Configuration.ToolkitPath, compiler),
-                Arguments = string.Format("-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
-                config.Get("mcu"),
-                config.Get("f_cpu"),
-                (usbvid == null) ? "null" : usbvid,
-                (usbpid == null) ? "null" : usbpid,
-                "105",
-                includePaths,
-                EffectiveSourceFile,
-                TargetFile)
+                //Arguments = string.Format("-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
+                Arguments = string.Format("-c -g {8} -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
+                    config.Get("mcu"),
+                    config.Get("f_cpu"),
+                    (usbvid == null) ? "null" : usbvid,
+                    (usbpid == null) ? "null" : usbpid,
+                    "105",
+                    includePaths,
+                    EffectiveSourceFile,
+                    TargetFile,
+                    GetOptimizationSetting())
             };
         }
 
@@ -162,25 +164,50 @@ namespace arduino.net
                 Path.Combine(Configuration.ToolkitPath, "debugger/" + config.Get("core"))
             };
         }
+
+        public static string GetIncludeArgument(ConfigurationFile config)
+        {
+            var sb = new StringBuilder();
+
+            foreach (var path in GetIncludePaths(config)) sb.AppendFormat("-I\"{0}\" ", path);
+            
+            return sb.ToString();
+        }
+
+        protected virtual string GetOptimizationSetting()
+        {
+            return "-Os";   // Optimize for size.
+        }
     }
 
     public class AssemblerBuildTarget : BuildTarget
     {
         public override void SetupCommand(string boardName)
         {
-            var compiler = "hardware/tools/avr/bin/avr-as";
+            var compiler = "hardware/tools/avr/bin/avr-gcc";
 
             var config = Configuration.Boards[boardName]["build"];
-            var includePaths = string.Format("-I\"{0}\" -I\"{1}\"", CppBuildTarget.GetIncludePaths(config));
+            var usbvid = config.Get("vid");
+            var usbpid = config.Get("pid");
+            var includePaths = CppBuildTarget.GetIncludeArgument(config);
 
             BuildCommand = new Command()
             {
                 Program = Path.Combine(Configuration.ToolkitPath, compiler),
-                Arguments = string.Format("-g -mmcu={0} {1} \"{2}\" -o \"{3}\"",
-                config.Get("mcu"),
-                includePaths,
-                EffectiveSourceFile,
-                TargetFile)
+                //Arguments = string.Format("-c -g -mmcu={0} {1} \"{2}\" -o \"{3}\"",
+                //config.Get("mcu"),
+                //includePaths,
+                //EffectiveSourceFile,
+                //TargetFile)
+                Arguments = string.Format("-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
+                    config.Get("mcu"),
+                    config.Get("f_cpu"),
+                    (usbvid == null) ? "null" : usbvid,
+                    (usbpid == null) ? "null" : usbpid,
+                    "105",
+                    includePaths,
+                    EffectiveSourceFile,
+                    TargetFile)                
             };
         }
     }
@@ -334,6 +361,11 @@ namespace arduino.net
 
             return new string[] { line };
         }
+
+        protected override string GetOptimizationSetting()
+        {
+            return "-O0";  // In debug, disable optimization. Most debug info is lost if enabled.
+        }
     }
 
     public class InoBuildTarget : DebugBuildTarget
@@ -388,6 +420,11 @@ namespace arduino.net
             {
                 if (mParser.HasSetupFunction)
                 { 
+                    // Inserting this as the first line in the setup() function effectively prevents user code from 
+                    // being executed first. If there is a watchdog reset (soft reset) in place, the watchdog 
+                    // registers should be set first-thing, and this would enter a reset loop. May brick a bootloader 
+                    // arduino (needs a programmer to fix).
+
                     return new string[] {
                         "SOFTDEBUGGER_CONNECT",
                         "#line " + lineNumber,

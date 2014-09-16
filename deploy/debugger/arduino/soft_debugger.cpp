@@ -8,8 +8,9 @@
 #define DBG_HEADER_TRACEANSWER_TYPE   249
 #define DBG_HEADER_CONTINUE_TYPE      230
 
+#define SAVED_REGS_SIZE 38
 
-extern uint8_t __DbgSavedRegisters[36];
+uint8_t __DbgSavedRegisters[SAVED_REGS_SIZE];
 
 
 typedef struct 
@@ -72,7 +73,7 @@ static void DbgLoop()
         
         if (type == DBG_HEADER_TRACEQUERY_TYPE)
         {
-            uint32_t address;
+            uint16_t address;
             uint8_t size;
             Serial.readBytes((char*)&address, sizeof(uint32_t));
             Serial.readBytes((char*)&size, sizeof(uint8_t));
@@ -96,7 +97,7 @@ void DbgBreak(uint8_t breakpointNo)
     p.BreakpointNumber = breakpointNo;
     
     Serial.write((uint8_t*)&p, sizeof(DbgBreakPacket));
-    Serial.write(__DbgSavedRegisters, 36);
+    Serial.write(__DbgSavedRegisters, SAVED_REGS_SIZE);
     DbgLoop();
 }
 

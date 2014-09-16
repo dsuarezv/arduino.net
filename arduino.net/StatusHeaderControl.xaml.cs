@@ -38,6 +38,7 @@ namespace arduino.net
         private void StatusHeaderControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             InternalBar.Width = this.ActualWidth * 2.1;
+            InternalBar.Margin = GetMarginForState(mState);
             mBarAnimation.From = GetMarginForState(0);
             mBarAnimation.To = GetMarginForState(1);
         }
@@ -70,11 +71,11 @@ namespace arduino.net
             {
                 if (mState == 0) return;
 
-                mBarStoryboard.AutoReverse = true;
-                mBarStoryboard.Begin();
+                //mBarStoryboard.AutoReverse = true;
+                //mBarStoryboard.Begin();
                 
-                mBarStoryboard.Seek(mBarAnimation.Duration.TimeSpan);
-                mBarStoryboard.Resume();
+                //mBarStoryboard.Seek(mBarAnimation.Duration.TimeSpan);
+                //mBarStoryboard.Resume();
                 
                 mState = 0;
             }
@@ -82,11 +83,13 @@ namespace arduino.net
             {
                 if (mState == 1) return;
 
-                mBarStoryboard.AutoReverse = false;
-                mBarStoryboard.Begin();
+                //mBarStoryboard.AutoReverse = false;
+                //mBarStoryboard.Begin();
 
                 mState = 1;
             }
+
+            InternalBar.Margin = GetMarginForState(state);
         }
 
         private Thickness GetMarginForState(int state)

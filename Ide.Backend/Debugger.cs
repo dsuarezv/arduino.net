@@ -11,9 +11,10 @@ namespace arduino.net
     {
         private SerialPort mSerialPort;
         private BreakPointManager mBreakPoints = new BreakPointManager();
+        private RegisterManager mRegisters = new RegisterManager();
         private List<TracepointInfo> mTracepoints = new List<TracepointInfo>();
         private byte[] mTraceQueryBuffer;
-        private byte[] mRegisters;
+        private bool mIsTargetRunning = true;
 
         public event TargetConnectedDelegate TargetConnected;
         public event BreakPointDelegate BreakPointHit;
@@ -29,9 +30,14 @@ namespace arduino.net
             get { return mTracepoints; }
         }
 
-        public byte[] Registers
+        public RegisterManager Registers
         {
             get { return mRegisters; }
+        }
+
+        public bool IsTargetRunning
+        {
+            get { return mIsTargetRunning; }
         }
 
 
@@ -58,7 +64,7 @@ namespace arduino.net
         // __ Debugger commands _______________________________________________
 
 
-        public byte[] GetTargetMemDump(int address, byte size)
+        public byte[] GetTargetMemDump(Int32 address, byte size)
         {
             mTraceQueryBuffer = null;
 
@@ -77,6 +83,7 @@ namespace arduino.net
         {
             mSerialPort.BaseStream.WriteByte(255);
             mSerialPort.BaseStream.WriteByte((byte)DebuggerPacketType.Continue);
+            mIsTargetRunning = true;
         }
 
 
@@ -138,7 +145,7 @@ namespace arduino.net
                 
                 case DebuggerPacketType.Break:
                     int breakpointIndex = r.ReadByte();
-                    mRegisters = r.ReadBytes(36);
+                    mRegisters.UpdateRegisters(r.ReadBytes(RegisterManager.PacketSize));
                     OnTargetBreak(breakpointIndex); 
                     break;
                 
@@ -158,7 +165,7 @@ namespace arduino.net
         // __ Debugger impl ___________________________________________________
 
 
-        private void SendTraceQuery(int address, byte size)
+        private void SendTraceQuery(Int32 address, byte size)
         {
             var p = new byte[7];
 
@@ -180,12 +187,19 @@ namespace arduino.net
 
         private void OnTargetInit()
         {
-            if (TargetConnected != null) TargetConnected(this);
+            mIsTargetRunning = true;
+
+            if (TargetConnected != null)
+            {
+                ThreadPool.QueueUserWorkItem((a) => TargetConnected(this));
+            }
         }
 
         private void OnTargetBreak(int breakpointId)
         {
             BreakPointInfo br = null;
+
+            mIsTargetRunning = false;
 
             if (breakpointId < mBreakPoints.Count)
             { 
@@ -193,7 +207,10 @@ namespace arduino.net
                 br.HitCount++;
             }
 
-            if (BreakPointHit != null) BreakPointHit(this, br);
+            if (BreakPointHit != null) 
+            {
+                ThreadPool.QueueUserWorkItem((a) => BreakPointHit(this, br));
+            }
         }
 
         private void OnTargetTraceAnswer(byte[] memdump)
@@ -203,7 +220,11 @@ namespace arduino.net
 
         private void OnSerialCharReceived(byte b)
         {
-            if (SerialCharReceived != null) SerialCharReceived(this, b);
+            if (SerialCharReceived != null) 
+            {
+                //ThreadPool.QueueUserWorkItem((a) => SerialCharReceived(this, b));
+                SerialCharReceived(this, b);
+            }
         }
     }
 
