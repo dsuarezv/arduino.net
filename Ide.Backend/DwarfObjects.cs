@@ -106,9 +106,9 @@ namespace arduino.net
             return Location.GetValue(debugger, Type);
         }
 
-        public virtual string GetValueRepresentation(byte[] value)
+        public virtual string GetValueRepresentation(Debugger debugger, byte[] value)
         {
-            return Type.GetValueRepresentation(value);
+            return Type.GetValueRepresentation(debugger, value);
         }
 
         public override void FillAttributes(DwarfParserNode node)
@@ -161,7 +161,7 @@ namespace arduino.net
             }
         }
 
-        public virtual string GetValueRepresentation(byte[] value)
+        public virtual string GetValueRepresentation(Debugger debugger, byte[] value)
         {
             long intValue = GetIntFromBytes(value);
 
@@ -210,11 +210,27 @@ namespace arduino.net
             PointerToType = GetTypeFromIndex(index, mTypeId);
         }
 
-        public override string GetValueRepresentation(byte[] value)
+        public override string GetValueRepresentation(Debugger debugger, byte[] value)
         {
-            if (PointerToType == null) return base.GetValueRepresentation(value);
+            if (PointerToType == null) return base.GetValueRepresentation(debugger, value);
 
-            return string.Format("{0} ({1} *)", GetIntFromBytes(value), PointerToType.Name);
+            var pointerValue = GetIntFromBytes(value);
+
+            // Null pointer?
+            if (pointerValue == 0) return string.Format("{0} ({1} *)", pointerValue, PointerToType.Name);
+
+            // Create a new expression to get the pointer value
+
+            //pointerValue += 0x800000;    // TODO: get this from the config
+
+            var program = new List<string>();
+            program.Add(string.Format("DW_OP_addr: {0:X}", pointerValue));
+            var pointerTargetLocation = new DwarfLocation() { RawLocationProgram = program };
+
+            var targetRawValue = pointerTargetLocation.GetValue(debugger, PointerToType);
+
+            return string.Format("0x{0:X} ({1} *) -> {2}", pointerValue, PointerToType.Name, 
+                PointerToType.GetValueRepresentation(debugger, targetRawValue));
         }
     }
 

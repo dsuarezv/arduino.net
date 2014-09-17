@@ -32,7 +32,7 @@ namespace arduino.net
         private static Regex OpRegisterOffsetRegExpr = new Regex(@"DW_OP_breg(?<reg>[0-9]+):\s+(?<offset>[0-9]+)");
         private static Regex OpAddress = new Regex(@"DW_OP_addr: ([0-9a-f]+)");
 
-        private List<string> RawLocationProgram;
+        internal List<string> RawLocationProgram;
 
         
         public static DwarfLocation Get(DwarfTextParser parser, string locationString)

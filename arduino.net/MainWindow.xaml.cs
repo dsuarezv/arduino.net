@@ -225,8 +225,8 @@ namespace arduino.net
 
             if (success)
             {
-            //    StatusControl.SetState(0, "Deploy succeeded");
-                OpenFilesTab.InvalidateVisual();
+                //    StatusControl.SetState(0, "Deploy succeeded");
+                
             }
             //else
             //{
@@ -237,6 +237,10 @@ namespace arduino.net
 
             return success;
         }
+
+
+        // __ Debugger events _________________________________________________
+
 
         private void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
         {
@@ -250,7 +254,8 @@ namespace arduino.net
                 }
                 else
                 { 
-                    StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", breakpoint.LineNumber, breakpoint.SourceFileName);
+                    StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", 
+                        breakpoint.LineNumber, System.IO.Path.GetFileName(breakpoint.SourceFileName));
                 }
             });
 
@@ -282,15 +287,13 @@ namespace arduino.net
 
             if (val == null) return symbolName + ": <symbol has no location>\n";
 
-            return string.Format("{0}: {1}\n", symbolName, symbol.GetValueRepresentation(val));
+            return string.Format("{0}: {1}\n", symbolName, symbol.GetValueRepresentation(IdeManager.Debugger, val));
         }
 
-        void Debugger_TargetConnected(object sender)
+
+        private void Debugger_TargetConnected(object sender)
         {
-            //Dispatcher.Invoke(() =>
-            //{
-            //    OutputTextBox1.ClearText();
-            //});
+            
         }
 
         private void Debugger_SerialCharWorker(object state)
