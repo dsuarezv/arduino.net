@@ -7,7 +7,7 @@ namespace arduino.net
     public class BreakPointManager
     {
         private List<BreakPointInfo> mBreakPoints = new List<BreakPointInfo>();
-
+        private byte mNewBreakPointIndex = 10;
 
         public event BreakPointDelegate BreakPointAdded;
         public event BreakPointDelegate BreakPointRemoved;
@@ -18,20 +18,24 @@ namespace arduino.net
             get { return mBreakPoints.Count; }
         }
 
-        public BreakPointInfo this[int index]
+        public BreakPointInfo this[int breakpointId]
         {
-            get { return mBreakPoints[index]; }
+            get 
+            {
+                foreach (var br in mBreakPoints)
+                { 
+                    if (br.Id == breakpointId) return br;
+                }
+
+                return null;
+            }
         }
 
 
-        public BreakPointManager()
-        { 
-            
-        }
 
         public BreakPointInfo Add(string sourceFile, int lineNumber)
         {
-            var result = new BreakPointInfo() { LineNumber = lineNumber, SourceFileName = sourceFile, Id = mBreakPoints.Count };
+            var result = new BreakPointInfo() { LineNumber = lineNumber, SourceFileName = sourceFile, Id = mNewBreakPointIndex++ };
 
             mBreakPoints.Add(result);
 

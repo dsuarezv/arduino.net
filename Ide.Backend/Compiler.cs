@@ -12,6 +12,21 @@ namespace arduino.net
         private Project mProject;
         private Debugger mDebugger;
         private string mBoardName;
+        private DateTime mLastSuccessfulCompilationDate = DateTime.MinValue;
+        private DateTime mLastSuccessfulDeploymentDate = DateTime.MinValue;
+
+
+        public DateTime LastSuccessfulCompilationDate
+        {
+            get { return mLastSuccessfulCompilationDate; }
+        }
+
+        public DateTime LastSuccessfulDeploymentDate
+        {
+            get { return mLastSuccessfulDeploymentDate; }
+        }
+
+
 
         public Compiler(Project p, Debugger d)
         {
@@ -44,6 +59,8 @@ namespace arduino.net
             if (!RunCommands(linkCmds, tempDir)) return false;
             if (!RunCommands(elfCmds, tempDir)) return false;
 
+            mLastSuccessfulCompilationDate = DateTime.Now;
+
             return true;
         }
 
@@ -72,6 +89,8 @@ namespace arduino.net
             var deployCmds = CreateDeployCommands(tempDir, programmerName);
 
             if (!RunCommands(deployCmds, tempDir)) return false;
+
+            mLastSuccessfulDeploymentDate = DateTime.Now;
 
             return true;
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Ports;
@@ -13,12 +14,19 @@ namespace arduino.net
         private BreakPointManager mBreakPoints = new BreakPointManager();
         private RegisterManager mRegisters = new RegisterManager();
         private List<TracepointInfo> mTracepoints = new List<TracepointInfo>();
+        private ConcurrentQueue<byte> mReceivedCharsQueue = new ConcurrentQueue<byte>();
         private byte[] mTraceQueryBuffer;
         private bool mIsTargetRunning = true;
 
         public event TargetConnectedDelegate TargetConnected;
         public event BreakPointDelegate BreakPointHit;
         public event ByteDelegate SerialCharReceived;
+
+
+        public ConcurrentQueue<byte> ReceivedCharsQueue
+        {
+            get { return mReceivedCharsQueue; }
+        }
 
         public BreakPointManager BreakPoints
         {
@@ -201,11 +209,8 @@ namespace arduino.net
 
             mIsTargetRunning = false;
 
-            if (breakpointId < mBreakPoints.Count)
-            { 
-                br = mBreakPoints[breakpointId];
-                br.HitCount++;
-            }
+            br = mBreakPoints[breakpointId];
+            if (br != null) br.HitCount++;
 
             if (BreakPointHit != null) 
             {
@@ -220,6 +225,8 @@ namespace arduino.net
 
         private void OnSerialCharReceived(byte b)
         {
+            mReceivedCharsQueue.Enqueue(b);
+
             if (SerialCharReceived != null) 
             {
                 //ThreadPool.QueueUserWorkItem((a) => SerialCharReceived(this, b));

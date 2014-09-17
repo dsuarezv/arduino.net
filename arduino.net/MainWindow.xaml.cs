@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -46,7 +46,9 @@ namespace arduino.net
                 IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
-                IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
+                //IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
+                ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
+
 
                 foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
 
@@ -219,12 +221,13 @@ namespace arduino.net
         {
             OutputTextBox1.ClearText();
             StatusControl.SetState(1, "Deploying...");
-            bool result = await IdeManager.Compiler.DeployAsync("atmega328", "usbasp", true);
+            bool success = await IdeManager.Compiler.DeployAsync("atmega328", "usbasp", true);
 
-            //if (success)
-            //{
+            if (success)
+            {
             //    StatusControl.SetState(0, "Deploy succeeded");
-            //}
+                OpenFilesTab.InvalidateVisual();
+            }
             //else
             //{
             //    StatusControl.SetState(1, "Deploy failed");
@@ -232,7 +235,7 @@ namespace arduino.net
 
             InitDwarf();
 
-            return result;
+            return success;
         }
 
         private void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
@@ -290,17 +293,39 @@ namespace arduino.net
             //});
         }
 
-        private void Debugger_SerialCharReceived(object sender, byte b)
+        private void Debugger_SerialCharWorker(object state)
         {
-            // Have to find a better way, this is flooding and blocking the UI. 
-            // Invoking and appending like this for every char is overkill.
-            // Producer / consumer?
+            const int BufLen = 100;
+            var queue = IdeManager.Debugger.ReceivedCharsQueue;
+            var buffer = new char[BufLen];
 
-            //Dispatcher.Invoke(() =>
-            //{
-            //    OutputTextBox1.ContentTextBox.AppendText(new string((char)b, 1));
-            //    OutputTextBox1.ContentTextBox.ScrollToEnd();
-            //});
+            while (true)
+            {
+                int bufIdx = 0;
+
+                while (queue.Count > 0 && bufIdx < BufLen)
+                {
+                    byte b;
+                    if (!queue.TryDequeue(out b)) break;
+
+                    buffer[bufIdx++] = (char)b;
+                }
+
+                if (bufIdx > 0)
+                {
+                    var s = new string(buffer, 0, bufIdx);
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        OutputTextBox1.ContentTextBox.AppendText(s);
+                        //OutputTextBox1.ContentTextBox.ScrollToEnd();
+                    });
+                }
+
+                Thread.Sleep(50);
+            }
+
+            
         }
     }
 }
