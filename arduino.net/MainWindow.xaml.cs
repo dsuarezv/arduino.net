@@ -263,22 +263,23 @@ namespace arduino.net
                 var t = MemDumpPad1.ResultTextBlock;
                 t.Text = "";
                 t.Text += GetWatchValue("myfunc", "myGlobalVariable");
-                t.Text += GetWatchValue("myfunc", "mylocal");
+                t.Text += GetWatchValue("myfunc", "arg3");
             });
         }
 
-        private string GetWatchValue(string function, string symbol)
+        private string GetWatchValue(string function, string symbolName)
         {
-            var di = IdeManager.Dwarf;
-            var currentFunc = di.GetFunctionByName(function);
-            var val = di.GetSymbolValue(symbol, currentFunc, IdeManager.Debugger);
+            var debInfo = IdeManager.Dwarf;
+            var currentFunc = debInfo.GetFunctionByName(function);
+            var symbol = debInfo.GetSymbol(symbolName, currentFunc);
 
-            if (val == null) return symbol + ": <not found>\n";
-            if (val.Length != 2) return symbol + ": <wrong size>\n";
+            if (symbol == null) return symbolName + ": <not found>\n";
 
-            int value = (int)(val[1] << 8 | val[0]);
-            var msg = string.Format("{0}: {1} (0x{1:X4})\n", symbol, value);
-            return msg;
+            var val = symbol.GetValue(IdeManager.Debugger);
+
+            if (val == null) return symbolName + ": <symbol has no location>\n";
+
+            return string.Format("{0}: {1}\n", symbolName, symbol.GetValueRepresentation(val));
         }
 
         void Debugger_TargetConnected(object sender)
@@ -291,12 +292,15 @@ namespace arduino.net
 
         private void Debugger_SerialCharReceived(object sender, byte b)
         {
+            // Have to find a better way, this is flooding and blocking the UI. 
+            // Invoking and appending like this for every char is overkill.
+            // Producer / consumer?
+
             //Dispatcher.Invoke(() =>
             //{
             //    OutputTextBox1.ContentTextBox.AppendText(new string((char)b, 1));
             //    OutputTextBox1.ContentTextBox.ScrollToEnd();
             //});
-            
         }
     }
 }

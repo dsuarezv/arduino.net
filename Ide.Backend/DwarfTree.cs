@@ -55,24 +55,35 @@ namespace arduino.net
             return null;
         }
 
-        public byte[] GetSymbolValue(string symbolName, DwarfSubprogram currentFunc, Debugger debugger)
-        { 
+        public DwarfLocatedObject GetSymbol(string symbolName, DwarfSubprogram currentFunc)
+        {
             // Search in this function first
             DwarfLocatedObject result;
 
+            if (currentFunc == null) return null;
+
             if (currentFunc.Variables.TryGetValue(symbolName, out result))
             {
-                return result.GetValue(debugger);
+                return result;
             }
 
             DwarfVariable globalVar;
 
             if (currentFunc.Parent.Variables.TryGetValue(symbolName, out globalVar))
             {
-                return globalVar.GetValue(debugger);
+                return globalVar;
             }
 
-            return null;
+            return null;            
+        }
+
+        public byte[] GetSymbolValue(string symbolName, DwarfSubprogram currentFunc, Debugger debugger)
+        {
+            var symbol = GetSymbol(symbolName, currentFunc);
+
+            if (symbol == null) return null;
+
+            return symbol.GetValue(debugger);
         }
         
         
