@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -46,7 +46,9 @@ namespace arduino.net
                 IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
-                IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
+                //IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
+                ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
+
 
                 foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
 
@@ -217,14 +219,19 @@ namespace arduino.net
 
         private async Task<bool> LaunchDeploy()
         {
+            bool buildSuccess = await LaunchBuild();
+
+            if (!buildSuccess) return false;
+
             OutputTextBox1.ClearText();
             StatusControl.SetState(1, "Deploying...");
-            bool result = await IdeManager.Compiler.DeployAsync("atmega328", "usbasp", true);
+            bool success = await IdeManager.Compiler.DeployAsync("atmega328", "usbasp", true);
 
-            //if (success)
-            //{
-            //    StatusControl.SetState(0, "Deploy succeeded");
-            //}
+            if (success)
+            {
+                //    StatusControl.SetState(0, "Deploy succeeded");
+                
+            }
             //else
             //{
             //    StatusControl.SetState(1, "Deploy failed");
@@ -232,8 +239,12 @@ namespace arduino.net
 
             InitDwarf();
 
-            return result;
+            return success;
         }
+
+
+        // __ Debugger events _________________________________________________
+
 
         private void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
         {
@@ -247,7 +258,8 @@ namespace arduino.net
                 }
                 else
                 { 
-                    StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", breakpoint.LineNumber, breakpoint.SourceFileName);
+                    StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", 
+                        breakpoint.LineNumber, System.IO.Path.GetFileName(breakpoint.SourceFileName));
                 }
             });
 
@@ -262,40 +274,78 @@ namespace arduino.net
             {
                 var t = MemDumpPad1.ResultTextBlock;
                 t.Text = "";
-                t.Text += GetWatchValue("myfunc", "myGlobalVariable");
-                t.Text += GetWatchValue("myfunc", "mylocal");
+                t.Text += GetWatchValue("myGlobalVariable");
+                t.Text += GetWatchValue("mylocal");
+                t.Text += GetWatchValue("result");
             });
         }
 
-        private string GetWatchValue(string function, string symbol)
+        private string GetWatchValue(string symbolName)
         {
-            var di = IdeManager.Dwarf;
-            var currentFunc = di.GetFunctionByName(function);
-            var val = di.GetSymbolValue(symbol, currentFunc, IdeManager.Debugger);
+            var pc = IdeManager.Debugger.Registers.Registers["PC"];
+            var function = IdeManager.Dwarf.GetFunctionAt(pc);
+            if (function == null) return symbolName + ": <context not found>\n";
 
-            if (val == null) return symbol + ": <not found>\n";
-            if (val.Length != 2) return symbol + ": <wrong size>\n";
-
-            int value = (int)(val[1] << 8 | val[0]);
-            var msg = string.Format("{0}: {1} (0x{1:X4})\n", symbol, value);
-            return msg;
+            return GetWatchValue(function, symbolName);
         }
 
-        void Debugger_TargetConnected(object sender)
+        private string GetWatchValue(string functionName, string symbolName)
         {
-            //Dispatcher.Invoke(() =>
-            //{
-            //    OutputTextBox1.ClearText();
-            //});
+            var function = IdeManager.Dwarf.GetFunctionByName(functionName);
+            if (function == null) return symbolName + ": <context not found>\n";
+
+            return GetWatchValue(function, symbolName);
         }
 
-        private void Debugger_SerialCharReceived(object sender, byte b)
+        private string GetWatchValue(DwarfSubprogram function, string symbolName)
         {
-            //Dispatcher.Invoke(() =>
-            //{
-            //    OutputTextBox1.ContentTextBox.AppendText(new string((char)b, 1));
-            //    OutputTextBox1.ContentTextBox.ScrollToEnd();
-            //});
+            var symbol = IdeManager.Dwarf.GetSymbol(symbolName, function);
+            if (symbol == null) return symbolName + ": <not found>\n";
+
+            var val = symbol.GetValue(IdeManager.Debugger);
+            if (val == null) return symbolName + ": <symbol has no location>\n";
+
+            return string.Format("{0}: {1}\n", symbolName, symbol.GetValueRepresentation(IdeManager.Debugger, val));
+        }
+
+
+        private void Debugger_TargetConnected(object sender)
+        {
+            
+        }
+
+        private void Debugger_SerialCharWorker(object state)
+        {
+            const int BufLen = 100;
+            var queue = IdeManager.Debugger.ReceivedCharsQueue;
+            var buffer = new char[BufLen];
+
+            while (true)
+            {
+                int bufIdx = 0;
+
+                while (queue.Count > 0 && bufIdx < BufLen)
+                {
+                    byte b;
+                    if (!queue.TryDequeue(out b)) break;
+
+                    buffer[bufIdx++] = (char)b;
+                }
+
+                if (bufIdx > 0)
+                {
+                    var s = new string(buffer, 0, bufIdx);
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        OutputTextBox1.ContentTextBox.AppendText(s);
+                        //OutputTextBox1.ContentTextBox.ScrollToEnd();
+                    });
+                }
+
+                Thread.Sleep(50);
+            }
+
             
         }
     }

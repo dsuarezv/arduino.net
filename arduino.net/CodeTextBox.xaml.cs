@@ -187,15 +187,17 @@ namespace arduino.net
             }
         }
 
-
-
         private void MainTextBox_BeforeDrawingLineNumber(int lineNumber, DrawingContext dc, Rect lineRect)
         {
-            foreach (int i in mBreakpoints.Keys)
+            foreach (var i in mBreakpoints)
             { 
-                if (i == lineNumber + 1)
+                if (i.Key == lineNumber + 1)
                 {
-                    dc.DrawRectangle(Brushes.Red, null, lineRect);
+                    bool isUpToDate = i.Value.IsDeployedOnDevice(IdeManager.Compiler);
+
+                    var brush = isUpToDate ? Brushes.Red : Brushes.Orange;
+
+                    dc.DrawRectangle(brush, null, lineRect);
                     return;
                 }
             }

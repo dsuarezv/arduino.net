@@ -33,35 +33,6 @@ namespace arduino.net
         }
     }
 
-    public class DwarfBaseType: DwarfNamedObject
-    {
-        public int ByteSize;
-        public int Encoding;
-
-        public override void FillAttributes(DwarfParserNode node)
-        {
-            base.FillAttributes(node);
-            ByteSize = node.GetAttr("byte_size").GetIntValue();
-            Encoding = node.GetAttr("encoding").GetIntValue();
-        }
-
-        public virtual string GetValueRepresentation(byte[] value)
-        {
-            // Check if it is an integer or something in the base type set
-            // and return its basic representation.
-            throw new NotImplementedException();
-        }
-
-        public static DwarfBaseType GetTypeFromIndex(Dictionary<int, DwarfObject> index, int key)
-        {
-            DwarfObject result;
-
-            index.TryGetValue(key, out result);
-            
-            return  result as DwarfBaseType;
-        }
-    }
-
     public class DwarfDeclaredObject: DwarfNamedObject
     {
         public int DeclarationFile;
@@ -113,8 +84,8 @@ namespace arduino.net
         public override void FillAttributes(DwarfParserNode node)
         {
             base.FillAttributes(node);
-            HighPc = node.GetAttr("high_pc").GetIntValue();
-            LowPc = node.GetAttr("low_pc").GetIntValue();
+            HighPc = node.GetAttr("high_pc").GetHexValue();
+            LowPc = node.GetAttr("low_pc").GetHexValue();
             LinkageName = node.GetAttr("MIPS_linkage_name").GetStringValue();
             External = node.GetAttr("external").GetBoolValue();
         }
@@ -135,9 +106,9 @@ namespace arduino.net
             return Location.GetValue(debugger, Type);
         }
 
-        public virtual string GetValueRepresentation(byte[] value)
+        public virtual string GetValueRepresentation(Debugger debugger, byte[] value)
         {
-            return Type.GetValueRepresentation(value);
+            return Type.GetValueRepresentation(debugger, value);
         }
 
         public override void FillAttributes(DwarfParserNode node)
@@ -150,6 +121,8 @@ namespace arduino.net
 
         public override void SetupReferences(DwarfTextParser parser, Dictionary<int, DwarfObject> index)
         {
+            //if (Name == "arg3") System.Diagnostics.Debugger.Break();
+
             if (mTypeId > -1) Type = DwarfBaseType.GetTypeFromIndex(index, mTypeId);
             if (mLocationString != null) Location = DwarfLocation.Get(parser, mLocationString);
         }
@@ -162,8 +135,62 @@ namespace arduino.net
     
     public class DwarfVariable: DwarfLocatedObject
     {
-        public string ConstValue;
+        
     }
+
+
+    // __ Base Types __________________________________________________________
+
+
+    public class DwarfBaseType : DwarfNamedObject
+    {
+        public int ByteSize;
+        public int Encoding;
+
+        public override void FillAttributes(DwarfParserNode node)
+        {
+            base.FillAttributes(node);
+            ByteSize = node.GetAttr("byte_size").GetIntValue();
+            Encoding = node.GetAttr("encoding").GetIntValue();
+
+            if (Name == null) 
+            {
+                // Special case: apparently "int" is not an indirect string, like everything else.
+                var n = node.GetAttr("name").RawValue;
+                if (n != null) Name = n.Trim(' ', '\t');
+            }
+        }
+
+        public virtual string GetValueRepresentation(Debugger debugger, byte[] value)
+        {
+            long intValue = GetIntFromBytes(value);
+
+            return string.Format("{0} ({1})", intValue, Name);
+        }
+
+        public static DwarfBaseType GetTypeFromIndex(Dictionary<int, DwarfObject> index, int key)
+        {
+            DwarfObject result;
+
+            index.TryGetValue(key, out result);
+
+            return result as DwarfBaseType;
+        }
+
+
+        protected long GetIntFromBytes(byte[] value)
+        {
+            long intValue = 0;
+
+            for (int i = 0; i < ByteSize; ++i)
+            {
+                intValue += ((long)(value[i])) << i * 8;
+            }
+
+            return intValue;
+        }
+    }
+
 
     public class DwarfPointerType: DwarfBaseType
     {
@@ -181,6 +208,29 @@ namespace arduino.net
             if (mTypeId == -1) return;
 
             PointerToType = GetTypeFromIndex(index, mTypeId);
+        }
+
+        public override string GetValueRepresentation(Debugger debugger, byte[] value)
+        {
+            if (PointerToType == null) return base.GetValueRepresentation(debugger, value);
+
+            var pointerValue = GetIntFromBytes(value);
+
+            // Null pointer?
+            if (pointerValue == 0) return string.Format("{0} ({1} *)", pointerValue, PointerToType.Name);
+
+            // Create a new expression to get the pointer value
+
+            //pointerValue += 0x800000;    // TODO: get this from the config
+
+            var program = new List<string>();
+            program.Add(string.Format("DW_OP_addr: {0:X}", pointerValue));
+            var pointerTargetLocation = new DwarfLocation() { RawLocationProgram = program };
+
+            var targetRawValue = pointerTargetLocation.GetValue(debugger, PointerToType);
+
+            return string.Format("0x{0:X} ({1} *) -> {2}", pointerValue, PointerToType.Name, 
+                PointerToType.GetValueRepresentation(debugger, targetRawValue));
         }
     }
 
@@ -200,6 +250,8 @@ namespace arduino.net
         public override void SetupReferences(DwarfTextParser parser, Dictionary<int,DwarfObject> index)
         {
             if (mSiblingId == -1) return;
+            
+            // The sibling points to the structure definition that describes the class.
         }
     }
 

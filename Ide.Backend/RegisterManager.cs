@@ -41,22 +41,29 @@ namespace arduino.net
             // TODO: on the atmega2560, the PC is 3 bytes. Have to account for that here and in the MCU side.
             UpdateWordRegister("SP", 35, 36);
             //UpdateWordRegister("PC", 34, 33);
-            UpdatePc(34, 35);
+            UpdatePc(33, 34);
 
             UpdateWordRegister("X", 27, 28);
             UpdateWordRegister("Y", 29, 30);
             UpdateWordRegister("Z", 31, 32);
-            
         }
 
         private void UpdateWordRegister(string name, int indexLow, int indexHigh)
         {
-            mRegisters[name] = (int)( (mRegistersPacket[indexHigh] << 8) | mRegistersPacket[indexLow]);
+            mRegisters[name] = (int)( (int)(mRegistersPacket[indexHigh]) << 8 | mRegistersPacket[indexLow]);
         }
 
         private void UpdatePc(int indexLow, int indexHigh)
         {
-            mRegisters["PC"] = (int)(mRegistersPacket[indexHigh] << 1);
+            // Aparently the program counter is different (atmega328P). 
+            // It is stored in opposite order to the other registers.
+            // Also, it is stored with the last bit stripped. So it has to 
+            // be left-shifted once to get the real address (multiply x2).
+            // The reasoning is that all instructions are stored in 2 or 4 bytes.
+            int high = mRegistersPacket[indexLow] << 8;
+            int low = mRegistersPacket[indexHigh];
+            int val = (high | low) << 1;
+            mRegisters["PC"] = val;
         }
     }
 

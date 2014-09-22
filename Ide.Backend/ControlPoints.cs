@@ -10,7 +10,13 @@ namespace arduino.net
     {
         public int Id = 0;
         public int LineNumber = 1;
-        public string SourceFileName = "default.cpp";        
+        public string SourceFileName = "default.cpp";
+        public DateTime LastEditDate = DateTime.Now;
+
+        public bool IsDeployedOnDevice(Compiler compiler)
+        {
+            return (LastEditDate < compiler.LastSuccessfulDeploymentDate);
+        }
     }
 
     public class BreakPointInfo: ControlPointInfo
