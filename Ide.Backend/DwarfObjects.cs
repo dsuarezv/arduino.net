@@ -84,8 +84,8 @@ namespace arduino.net
         public override void FillAttributes(DwarfParserNode node)
         {
             base.FillAttributes(node);
-            HighPc = node.GetAttr("high_pc").GetIntValue();
-            LowPc = node.GetAttr("low_pc").GetIntValue();
+            HighPc = node.GetAttr("high_pc").GetHexValue();
+            LowPc = node.GetAttr("low_pc").GetHexValue();
             LinkageName = node.GetAttr("MIPS_linkage_name").GetStringValue();
             External = node.GetAttr("external").GetBoolValue();
         }

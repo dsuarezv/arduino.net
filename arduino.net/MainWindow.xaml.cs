@@ -219,6 +219,10 @@ namespace arduino.net
 
         private async Task<bool> LaunchDeploy()
         {
+            bool buildSuccess = await LaunchBuild();
+
+            if (!buildSuccess) return false;
+
             OutputTextBox1.ClearText();
             StatusControl.SetState(1, "Deploying...");
             bool success = await IdeManager.Compiler.DeployAsync("atmega328", "usbasp", true);
@@ -270,21 +274,35 @@ namespace arduino.net
             {
                 var t = MemDumpPad1.ResultTextBlock;
                 t.Text = "";
-                t.Text += GetWatchValue("myfunc", "myGlobalVariable");
-                t.Text += GetWatchValue("myfunc", "arg3");
+                t.Text += GetWatchValue("myGlobalVariable");
+                t.Text += GetWatchValue("mylocal");
+                t.Text += GetWatchValue("result");
             });
         }
 
-        private string GetWatchValue(string function, string symbolName)
+        private string GetWatchValue(string symbolName)
         {
-            var debInfo = IdeManager.Dwarf;
-            var currentFunc = debInfo.GetFunctionByName(function);
-            var symbol = debInfo.GetSymbol(symbolName, currentFunc);
+            var pc = IdeManager.Debugger.Registers.Registers["PC"];
+            var function = IdeManager.Dwarf.GetFunctionAt(pc);
+            if (function == null) return symbolName + ": <context not found>\n";
 
+            return GetWatchValue(function, symbolName);
+        }
+
+        private string GetWatchValue(string functionName, string symbolName)
+        {
+            var function = IdeManager.Dwarf.GetFunctionByName(functionName);
+            if (function == null) return symbolName + ": <context not found>\n";
+
+            return GetWatchValue(function, symbolName);
+        }
+
+        private string GetWatchValue(DwarfSubprogram function, string symbolName)
+        {
+            var symbol = IdeManager.Dwarf.GetSymbol(symbolName, function);
             if (symbol == null) return symbolName + ": <not found>\n";
 
             var val = symbol.GetValue(IdeManager.Debugger);
-
             if (val == null) return symbolName + ": <symbol has no location>\n";
 
             return string.Format("{0}: {1}\n", symbolName, symbol.GetValueRepresentation(IdeManager.Debugger, val));

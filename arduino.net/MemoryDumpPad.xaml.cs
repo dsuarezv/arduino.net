@@ -41,7 +41,7 @@ namespace arduino.net
 
         private void PrintBuffer(short startAddress, byte[] bytes)
         {
-            const int BytesPerLine = 4;
+            const int BytesPerLine = 1;
 
             var sb = new StringBuilder();
 

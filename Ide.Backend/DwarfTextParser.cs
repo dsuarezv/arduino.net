@@ -254,6 +254,13 @@ namespace arduino.net
             return DwarfHelper.GetIntOrHex(RawValue);
         }
 
+        public int GetHexValue()
+        {
+            if (RawValue == null) return -1;
+
+            return DwarfHelper.GetHexValue(RawValue);
+        }
+
         public bool GetBoolValue()
         {
             if (RawValue == null) return false;
@@ -316,15 +323,30 @@ namespace arduino.net
 
         public static int GetHexValue(this Group group)
         {
-            int result;
-            if (int.TryParse(group.Value, NumberStyles.HexNumber, null, out result)) return result;
+            return GetHexValue(group.Value);
+        }
 
-            return -1;
+        public static int GetHexValue(string s)
+        {
+            if (s.StartsWith("0x")) s = s.Substring(2);
+
+            int result;
+            if (int.TryParse(s, NumberStyles.HexNumber, null, out result)) return result;
+
+            return -1;            
         }
 
         public static int GetIntOrHex(string s)
         {
             int result;
+
+            if (s.StartsWith("0x"))
+            {
+                s = s.Substring(2);
+                if (int.TryParse(s, NumberStyles.HexNumber, null, out result)) return result;
+                return -1;
+            }
+
             if (int.TryParse(s, NumberStyles.HexNumber, null, out result)) return result;
             if (Int32.TryParse(s, out result)) return result;
 
