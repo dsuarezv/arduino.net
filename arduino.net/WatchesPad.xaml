@@ -7,8 +7,8 @@
              d:DesignHeight="300" d:DesignWidth="300">
     
     <Grid>
-        <Button Name="AddButton" Width="26" Height="26" Margin="10,7,264,267">+</Button>
-        <Button Name="RemoveButton" Width="26" Height="26" Margin="41,7,233,267">-</Button>
+        <Button Name="AddButton" Width="26" Height="26" Margin="10,7,264,267" Click="AddButton_Click">+</Button>
+        <Button Name="RemoveButton" Width="26" Height="26" Margin="41,7,233,267" Click="RemoveButton_Click">-</Button>
         
         <ListView Name="mainListView" Margin="0, 40, 0, 0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <ListView.View>
