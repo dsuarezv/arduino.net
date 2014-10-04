@@ -43,6 +43,7 @@ namespace arduino.net
                 IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
+                IdeManager.GoToLineRequested += IdeManager_GoToLineRequested;
                 //IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
 
@@ -56,6 +57,9 @@ namespace arduino.net
                 DisplayException(ex);
             }
         }
+
+        
+
 
 
 
@@ -243,6 +247,11 @@ namespace arduino.net
         // __ Debugger events _________________________________________________
 
 
+        private void Debugger_TargetConnected(object sender)
+        {
+
+        }
+
         private void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
         {
             Dispatcher.Invoke(() =>
@@ -262,15 +271,7 @@ namespace arduino.net
 
             InitDwarf();
         }
-
         
-
-
-        private void Debugger_TargetConnected(object sender)
-        {
-            
-        }
-
         private void Debugger_SerialCharWorker(object state)
         {
             const int BufLen = 100;
@@ -304,5 +305,30 @@ namespace arduino.net
 
             
         }
+
+
+        // __ Open file in given line _________________________________________
+
+
+        private void IdeManager_GoToLineRequested(string fileName, int lineNumber)
+        {
+            OpenFileAtLine(fileName, lineNumber);
+        }
+
+
+        private void OpenFileAtLine(string fileName, int lineNumber)
+        {
+            var tab = GetTabForFileName(fileName);
+            if (tab == null) return;
+
+            tab.IsSelected = true;
+
+            var editor = tab.Content as CodeTextBox;
+            if (editor == null) return;
+
+            editor.SetCursorAt(lineNumber, 0);
+            editor.FocusEditor();
+        }
+
     }
 }

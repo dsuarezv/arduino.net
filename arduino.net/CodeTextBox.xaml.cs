@@ -143,6 +143,20 @@ namespace arduino.net
             
         }
 
+        public void SetCursorAt(int lineNumber, int charNumber)
+        {
+            var s = mMainTextBox.Selection;
+
+            s.Start = new Place(charNumber, lineNumber);
+            s.End = s.Start;
+        }
+
+        public void FocusEditor()
+        {
+            //WFHost.Focus();
+            mMainTextBox.Focus();
+        }
+
 
         private bool CheckChanges()
         {

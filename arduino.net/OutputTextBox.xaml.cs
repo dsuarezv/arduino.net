@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
 using FastColoredTextBoxNS;
 
 namespace arduino.net
@@ -34,7 +34,7 @@ namespace arduino.net
                 Dispatcher.Invoke(() => 
                     {
                         mContentTextBox.AppendText(msg + "\n");
-                        //mContentTextBox.ScrollToEnd();
+                        mContentTextBox.GoEnd();
                     });
             });
         }
@@ -43,7 +43,7 @@ namespace arduino.net
         {
             mContentTextBox.AppendText(text);
 
-            //if (autoScroll) mContentTextBox.Selection.
+            if (autoScroll) mContentTextBox.GoEnd();
         }
 
         public void ClearText()
@@ -57,17 +57,66 @@ namespace arduino.net
             mContentTextBox = new FastColoredTextBox()
             {
                 Dock = System.Windows.Forms.DockStyle.Fill,
-                ShowLineNumbers = false
+                ShowLineNumbers = false,
+                ReadOnly = true
             };
 
+            mContentTextBox.MouseDown += mContentTextBox_MouseDown;
             mContentTextBox.TextChanged += mContentTextBox_TextChanged;
 
             WFHost.Child = mContentTextBox;
         }
 
-        void mContentTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
+        private void mContentTextBox_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Clicks == 2)
+            {
+                var lineNo = mContentTextBox.PointToPlace(e.Location).iLine;
+                var line = mContentTextBox.GetLineText(lineNo);
+
+                string fileName;
+                int lineNumber;
+
+                if (IsErrorLocation(line, out fileName, out lineNumber))
+                {
+                    IdeManager.GoToFileAndLine(fileName, lineNumber);
+                }
+            }
+        }
+
+        private void mContentTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
         {
             SyntaxHighlightApplier.Compiler(mContentTextBox, e);
+        }
+
+
+        // TODO: move this to the compiler or idemanager class
+
+
+        private bool IsErrorLocation(string line, out string fileName, out int lineNumber)
+        {
+            lineNumber = 0;
+            fileName = null;
+
+            if (IsLineMatch(SyntaxHighlightApplier.ErrorRegex, line, out fileName, out lineNumber)) return true;
+            if (IsLineMatch(SyntaxHighlightApplier.WarningRegex, line, out fileName, out lineNumber)) return true;
+
+            return false;
+        }
+
+        private bool IsLineMatch(Regex regex, string line, out string fileName, out int lineNumber)
+        {
+            var m = regex.Match(line);
+            if (m.Success)
+            {
+                lineNumber = m.Groups["line"].GetIntValue() - 1;
+                fileName = m.Groups["file"].Value;
+                return true;
+            }
+
+            lineNumber = 0;
+            fileName = null;
+            return false;
         }
     }
 }

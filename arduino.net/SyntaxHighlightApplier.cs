@@ -69,8 +69,8 @@ namespace arduino.net
         }
 
         
-        public const string ErrorRegexString = @".*:(?<line>[0-9]+): error: .*$";
-        public const string WarningRegexString = @".*:(?<line>[0-9]+): warning: .*$";
+        public static Regex ErrorRegex = new Regex(@"\s*(?<file>.*):(?<line>[0-9]+): error: .*$", RegexOptions.Singleline | RegexOptions.Compiled);
+        public static Regex WarningRegex = new Regex(@"\s*(?<file>.*):(?<line>[0-9]+): warning: .*$", RegexOptions.Singleline | RegexOptions.Compiled);
 
 
         public static void Compiler(FastColoredTextBox fctb, TextChangedEventArgs e)
@@ -83,11 +83,11 @@ namespace arduino.net
             // Debugger\Debugger.ino: In function 'void loop()':
             // Debugger\Debugger.ino:24: error: 'myfunfc' was not declared in this scope
             e.ChangedRange.SetStyle(MaroonStyle, @"(.*: In .*$)", RegexOptions.Singleline);     // error context
-            e.ChangedRange.SetStyle(RedStyle, ErrorRegexString, RegexOptions.Singleline);
+            e.ChangedRange.SetStyle(RedStyle, ErrorRegex);
 
             // Warning highlight
             // Debugger\Debugger.ino:24: warning: unused variable 'test'
-            e.ChangedRange.SetStyle(OrangeStyle, WarningRegexString, RegexOptions.Singleline);
+            e.ChangedRange.SetStyle(OrangeStyle, WarningRegex);
 
         }
     }
