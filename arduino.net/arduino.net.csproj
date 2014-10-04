@@ -37,8 +37,13 @@
     <ApplicationIcon>arduino-icon2.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FastColoredTextBox">
+      <HintPath>..\libs\FastColoredTextBox\FastColoredTextBox.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -47,9 +52,11 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -153,25 +160,15 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\assembler.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Ide.Backend\Ide.Backend.csproj">
       <Project>{4cb8f184-05ff-4cc9-9cd6-41f68589a5b3}</Project>
       <Name>Ide.Backend</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\libs\SyntaxHighlightTextbox\src\syntaxhighlightbox_18a16149c7b1\AurelienRibon.Ui.SyntaxHighlightBox\AurelienRibon.Ui.SyntaxHighlightBox.csproj">
-      <Project>{10a9ecd3-ae1e-494d-9a27-8a32dd581759}</Project>
-      <Name>AurelienRibon.Ui.SyntaxHighlightBox</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\CloseDisabled.png" />
     <Resource Include="resources\CloseNormal.png" />
     <Resource Include="resources\ClosePressed.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\cpp.xml" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="arduino-icon2.ico" />

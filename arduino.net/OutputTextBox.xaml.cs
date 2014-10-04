@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,6 +12,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using FastColoredTextBoxNS;
+
 namespace arduino.net
 {
     /// <summary>
@@ -20,23 +21,45 @@ namespace arduino.net
     /// </summary>
     public partial class OutputTextBox : UserControl
     {
+        private FastColoredTextBox mContentTextBox;
+
         public OutputTextBox()
         {
             InitializeComponent();
+
+            InitializeTextBox();
 
             Logger.RegisterListener((i, msg) =>
             {
                 Dispatcher.Invoke(() => 
                     {
-                        ContentTextBox.AppendText(msg + "\n");
-                        ContentTextBox.ScrollToEnd();
+                        mContentTextBox.AppendText(msg + "\n");
+                        //mContentTextBox.ScrollToEnd();
                     });
             });
         }
 
+        public void AppendText(string text, bool autoScroll)
+        {
+            mContentTextBox.AppendText(text);
+
+            //if (autoScroll) mContentTextBox.Selection.
+        }
+
         public void ClearText()
         {
-            ContentTextBox.Clear();
+            mContentTextBox.Clear();
+        }
+
+
+        private void InitializeTextBox()
+        {
+            mContentTextBox = new FastColoredTextBox()
+            {
+                Dock = System.Windows.Forms.DockStyle.Fill
+            };
+
+            WFHost.Child = mContentTextBox;
         }
     }
 }

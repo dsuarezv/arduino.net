@@ -3,14 +3,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:SyntaxHighlightBox="clr-namespace:AurelienRibon.Ui.SyntaxHighlightBox;assembly=AurelienRibon.Ui.SyntaxHighlightBox" x:Class="arduino.net.CodeTextBox"
+             x:Class="arduino.net.CodeTextBox"
              mc:Ignorable="d" 
              d:DesignHeight="399" d:DesignWidth="475" >
+    
+    <WindowsFormsHost Name="WFHost"/>
 
-    <SyntaxHighlightBox:SyntaxHighlightBox Name="MainTextBox" 
+
+
+    <!--SyntaxHighlightBox:SyntaxHighlightBox Name="MainTextBox" 
                                            Width="auto" BorderThickness="0" 
-                                           FontFamily="Consolas" KeyDown="MainTextBox_KeyDown" FontSize="14" BeforeDrawingLineNumber="MainTextBox_BeforeDrawingLineNumber" Loaded="MainTextBox_Loaded" ToolTip="my tooltip"
-                                           />
+                                           FontFamily="Consolas" KeyDown="MainTextBox_KeyDown" 
+                                           FontSize="14" 
+                                           BeforeDrawingLineNumber="MainTextBox_BeforeDrawingLineNumber" 
+                                           Loaded="MainTextBox_Loaded" 
+                                           ToolTip="my tooltip"
+                                           /-->
 
 
 </UserControl>

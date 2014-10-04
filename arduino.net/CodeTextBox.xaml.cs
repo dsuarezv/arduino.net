@@ -12,7 +12,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using AurelienRibon.Ui.SyntaxHighlightBox;
+
+using FastColoredTextBoxNS;
 
 namespace arduino.net
 {
@@ -20,6 +21,7 @@ namespace arduino.net
     {
         private string mFileName;
         private Dictionary<int, BreakPointInfo> mBreakpoints = new Dictionary<int, BreakPointInfo>();
+        private FastColoredTextBox mMainTextBox;
 
         public string FullFileName
         {
@@ -40,25 +42,33 @@ namespace arduino.net
         public CodeTextBox()
         {
             InitializeComponent();
+            InitializeTextBox();
         }
 
-        private void MainTextBox_Loaded(object sender, RoutedEventArgs e)
+        private void InitializeTextBox()
         {
+            mMainTextBox = new FastColoredTextBox();
+            mMainTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            mMainTextBox.PaintLine += mMainTextBox_PaintLine;
+            mMainTextBox.KeyDown += mMainTextBox_KeyDown;
+
+            
+            WFHost.Child = mMainTextBox;
+
             if (IdeManager.Debugger == null) return;
 
             IdeManager.Debugger.BreakPoints.BreakPointAdded += Debugger_BreakPointAdded;
             IdeManager.Debugger.BreakPoints.BreakPointRemoved += Debugger_BreakPointRemoved;
         }
-
-
-
+        
+        
         public void OpenFile(string fileName)
         {
             if (!CheckChanges()) return;
 
             using (var f = new StreamReader(fileName))
             {
-                MainTextBox.Text = f.ReadToEnd();
+                mMainTextBox.Text = f.ReadToEnd();
             }
 
             mFileName = fileName;
@@ -68,11 +78,11 @@ namespace arduino.net
 
         public void OpenContent(string content, string highlighter)
         {
-            MainTextBox.Text = content;
+            mMainTextBox.Text = content;
 
             if (highlighter == null) return;
 
-            MainTextBox.CurrentHighlighter = HighlighterManager.Instance.Highlighters[highlighter];
+            ApplySyntaxHighlight();
         }
 
         public void SaveFile()
@@ -83,17 +93,14 @@ namespace arduino.net
                 return;
             }
 
-            using (var w = new StreamWriter(mFileName))
-            {
-                w.Write(MainTextBox.Text);
-            }
+            SaveFileAs(mFileName);
         }
 
         public void SaveFileAs(string fileName)
         {
             using (var w = new StreamWriter(fileName))
             {
-                w.Write(MainTextBox.Text);
+                w.Write(mMainTextBox.Text);
             }
         }
 
@@ -101,7 +108,7 @@ namespace arduino.net
         {
             if (!CheckChanges()) return;
 
-            MainTextBox.Text = "";
+            mMainTextBox.Text = "";
             mFileName = null;
         }
 
@@ -124,6 +131,7 @@ namespace arduino.net
         { 
             
         }
+
 
         private bool CheckChanges()
         {
@@ -152,29 +160,30 @@ namespace arduino.net
 
             if (hl == null) return;
 
-            MainTextBox.CurrentHighlighter = HighlighterManager.Instance.Highlighters[hl];
+            
+            // TODO: Apply syntax highlight based
         }
 
 
         // __ Keyboard shortcuts ______________________________________________
 
 
-        private void MainTextBox_KeyDown(object sender, KeyEventArgs e)
+
+        void mMainTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
+            if (e.Control)
             { 
-                switch (e.Key)
+                switch (e.KeyCode)
                 {
-                    case Key.S: SaveFile(); break;
-                    case Key.W: break;
+                    case System.Windows.Forms.Keys.S: SaveFile(); break;
                 }
             }
 
-            switch (e.Key)
+            switch (e.KeyCode)
             {
-                case Key.F9:  // Toggle breakpoint
-                    var lineNumber = MainTextBox.GetLineIndexFromCharacterIndex(MainTextBox.CaretIndex) + 1;
-                    
+                case System.Windows.Forms.Keys.F9: // Toggle breakpoint
+                    var lineNumber = mMainTextBox.Selection.End.iLine + 1;
+
                     if (mBreakpoints.ContainsKey(lineNumber))
                     {
                         IdeManager.Debugger.BreakPoints.Remove(mBreakpoints[lineNumber]);
@@ -183,37 +192,40 @@ namespace arduino.net
                     {
                         IdeManager.Debugger.BreakPoints.Add(mFileName, lineNumber);
                     }
-                    break;  
+                    break;
             }
         }
 
-        private void MainTextBox_BeforeDrawingLineNumber(int lineNumber, DrawingContext dc, Rect lineRect)
-        {
-            foreach (var i in mBreakpoints)
-            { 
-                if (i.Key == lineNumber + 1)
-                {
-                    bool isUpToDate = i.Value.IsDeployedOnDevice(IdeManager.Compiler);
-
-                    var brush = isUpToDate ? Brushes.Red : Brushes.Orange;
-
-                    dc.DrawRectangle(brush, null, lineRect);
-                    return;
-                }
-            }
-        }
-
-
+        
         // __ Breakpoint handling _____________________________________________
 
 
+        void mMainTextBox_PaintLine(object sender, PaintLineEventArgs e)
+        {
+            foreach (var i in mBreakpoints)
+            {
+                if (i.Key == e.LineIndex + 1)
+                {
+                    bool isUpToDate = i.Value.IsDeployedOnDevice(IdeManager.Compiler);
+
+                    var brush = isUpToDate ? System.Drawing.Brushes.Red : System.Drawing.Brushes.Orange;
+
+                    e.Graphics.FillEllipse(brush, new System.Drawing.Rectangle(0, e.LineRect.Top, 15, 15));
+                    return;
+                }
+            }
+
+            // TODO: add some code to draw the current line where program is stopped at.
+        }
+
+        
         void Debugger_BreakPointRemoved(object sender, BreakPointInfo breakpoint)
         {
             if (breakpoint.SourceFileName != mFileName) return;
 
             mBreakpoints.Remove(breakpoint.LineNumber);
 
-            MainTextBox.InvalidateVisual();
+            mMainTextBox.Invalidate();
         }
 
         void Debugger_BreakPointAdded(object sender, BreakPointInfo breakpoint)
@@ -222,7 +234,7 @@ namespace arduino.net
 
             mBreakpoints[breakpoint.LineNumber] = breakpoint;
             
-            MainTextBox.InvalidateVisual();
+            mMainTextBox.Invalidate();
         }
     }
 }
