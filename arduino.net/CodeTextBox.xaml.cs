@@ -161,6 +161,8 @@ namespace arduino.net
 
         private void ApplySyntaxHighlight(string ext)
         {
+            if (ext == null) return;
+
             switch (ext.Trim('.').ToLower())
             {
                 case "s": mSyntaxHighlighter = SyntaxHighlightApplier.Cpp;  break;

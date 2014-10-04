@@ -18,6 +18,8 @@ namespace arduino.net
         static TextStyle GreenStyle = new TextStyle(Brushes.Green, null, FontStyle.Regular);
         static TextStyle BrownStyle = new TextStyle(Brushes.Brown, null, FontStyle.Regular);
         static TextStyle MaroonStyle = new TextStyle(Brushes.Maroon, null, FontStyle.Regular);
+        static TextStyle OrangeStyle = new TextStyle(Brushes.Orange, null, FontStyle.Regular);
+        static TextStyle RedStyle = new TextStyle(Brushes.Red, null, FontStyle.Regular);
         static MarkerStyle SameWordsStyle = new MarkerStyle(new SolidBrush(Color.FromArgb(40, Color.Gray)));
 
 
@@ -64,6 +66,29 @@ namespace arduino.net
             e.ChangedRange.SetFoldingMarkers("{", "}");                         //allow to collapse brackets block
             //e.ChangedRange.SetFoldingMarkers(@"#region\b", @"#endregion\b");    //allow to collapse #region blocks
             e.ChangedRange.SetFoldingMarkers(@"/\*", @"\*/");                   //allow to collapse comment block
+        }
+
+        
+        public const string ErrorRegexString = @".*:(?<line>[0-9]+): error: .*$";
+        public const string WarningRegexString = @".*:(?<line>[0-9]+): warning: .*$";
+
+
+        public static void Compiler(FastColoredTextBox fctb, TextChangedEventArgs e)
+        {
+            //clear style of changed range
+            e.ChangedRange.ClearStyle(BlueStyle, BoldStyle, GrayStyle, MagentaStyle, GreenStyle, BrownStyle);
+
+
+            // Error highlight
+            // Debugger\Debugger.ino: In function 'void loop()':
+            // Debugger\Debugger.ino:24: error: 'myfunfc' was not declared in this scope
+            e.ChangedRange.SetStyle(MaroonStyle, @"(.*: In .*$)", RegexOptions.Singleline);     // error context
+            e.ChangedRange.SetStyle(RedStyle, ErrorRegexString, RegexOptions.Singleline);
+
+            // Warning highlight
+            // Debugger\Debugger.ino:24: warning: unused variable 'test'
+            e.ChangedRange.SetStyle(OrangeStyle, WarningRegexString, RegexOptions.Singleline);
+
         }
     }
 }

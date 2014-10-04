@@ -56,10 +56,18 @@ namespace arduino.net
         {
             mContentTextBox = new FastColoredTextBox()
             {
-                Dock = System.Windows.Forms.DockStyle.Fill
+                Dock = System.Windows.Forms.DockStyle.Fill,
+                ShowLineNumbers = false
             };
 
+            mContentTextBox.TextChanged += mContentTextBox_TextChanged;
+
             WFHost.Child = mContentTextBox;
+        }
+
+        void mContentTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
+        {
+            SyntaxHighlightApplier.Compiler(mContentTextBox, e);
         }
     }
 }
