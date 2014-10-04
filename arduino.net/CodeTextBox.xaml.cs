@@ -22,6 +22,7 @@ namespace arduino.net
         private string mFileName;
         private Dictionary<int, BreakPointInfo> mBreakpoints = new Dictionary<int, BreakPointInfo>();
         private FastColoredTextBox mMainTextBox;
+        private Action<FastColoredTextBox, FastColoredTextBoxNS.TextChangedEventArgs> mSyntaxHighlighter;
 
         public string FullFileName
         {
@@ -47,10 +48,17 @@ namespace arduino.net
 
         private void InitializeTextBox()
         {
-            mMainTextBox = new FastColoredTextBox();
-            mMainTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            mMainTextBox = new FastColoredTextBox()
+            {
+                Dock = System.Windows.Forms.DockStyle.Fill,
+                Font = new System.Drawing.Font("Consolas", 11f),
+                AutoIndent = true,
+                ReservedCountOfLineNumberChars = 5,
+            };
+
             mMainTextBox.PaintLine += mMainTextBox_PaintLine;
             mMainTextBox.KeyDown += mMainTextBox_KeyDown;
+            mMainTextBox.TextChanged += mMainTextBox_TextChanged;
 
             
             WFHost.Child = mMainTextBox;
@@ -60,29 +68,32 @@ namespace arduino.net
             IdeManager.Debugger.BreakPoints.BreakPointAdded += Debugger_BreakPointAdded;
             IdeManager.Debugger.BreakPoints.BreakPointRemoved += Debugger_BreakPointRemoved;
         }
-        
+
         
         public void OpenFile(string fileName)
         {
             if (!CheckChanges()) return;
+
+            mFileName = fileName;
+
+            ApplySyntaxHighlight(Path.GetExtension(mFileName));
 
             using (var f = new StreamReader(fileName))
             {
                 mMainTextBox.Text = f.ReadToEnd();
             }
 
-            mFileName = fileName;
-
-            ApplySyntaxHighlight();
         }
 
-        public void OpenContent(string content, string highlighter)
+        public void OpenContent(string content, string highlightExt)
         {
+            ApplySyntaxHighlight(highlightExt);
+
             mMainTextBox.Text = content;
 
-            if (highlighter == null) return;
+            if (highlightExt == null) return;
 
-            ApplySyntaxHighlight();
+            
         }
 
         public void SaveFile()
@@ -140,28 +151,26 @@ namespace arduino.net
             return true;
         }
 
-        private void ApplySyntaxHighlight()
-        {
-            string ext = Path.GetExtension(mFileName);
-            string hl = null;
 
+        void mMainTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
+        {
+            if (mSyntaxHighlighter == null) return;
+
+            mSyntaxHighlighter(mMainTextBox, e);
+        }
+
+        private void ApplySyntaxHighlight(string ext)
+        {
             switch (ext.Trim('.').ToLower())
             {
-                case "s": hl = "assembler";  break;
+                case "s": mSyntaxHighlighter = SyntaxHighlightApplier.Cpp;  break;
                     
                 case "c":
                 case "cpp":
                 case "h":
                 case "hpp":
-                case "ino": hl = "cpp"; break;
-
-                default: break;
+                case "ino": mSyntaxHighlighter = SyntaxHighlightApplier.Cpp; break;
             }
-
-            if (hl == null) return;
-
-            
-            // TODO: Apply syntax highlight based
         }
 
 

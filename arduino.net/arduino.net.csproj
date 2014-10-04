@@ -78,6 +78,7 @@
     <Compile Include="StatusHeaderControl.xaml.cs">
       <DependentUpon>StatusHeaderControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SyntaxHighlightApplier.cs" />
     <Compile Include="SystemButtons.xaml.cs">
       <DependentUpon>SystemButtons.xaml</DependentUpon>
     </Compile>
