@@ -7,6 +7,8 @@ namespace arduino.net
 {
     public class Project
     {
+        private const string IdeSettingsExtension = ".ide_settings.user";
+
         private string mProjectPath;
         private string mSketchFile;
 
@@ -47,6 +49,12 @@ namespace arduino.net
             }
 
             return result;            
+        }
+
+        public string GetSettingsFileName()
+        {
+            var fileName = Path.GetFileNameWithoutExtension(mSketchFile) + IdeSettingsExtension;
+            return Path.Combine(mProjectPath, fileName);
         }
 
         public string GetFileContent(string fileName)

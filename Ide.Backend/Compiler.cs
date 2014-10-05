@@ -94,6 +94,8 @@ namespace arduino.net
 
             mLastSuccessfulDeploymentDate = DateTime.Now;
 
+            PersistenceManager.Save();
+
             return true;
         }
         

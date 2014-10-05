@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace arduino.net
 {
+    [Serializable]
     public class ControlPointInfo
     {
         public int Id = 0;
@@ -19,12 +20,14 @@ namespace arduino.net
         }
     }
 
+    [Serializable]
     public class BreakPointInfo: ControlPointInfo
     {
         public int HitCount = 0;
     }
 
-    
+
+    [Serializable]
     public class TracepointInfo: ControlPointInfo
     {
         public string SymbolToTrace;

@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BreakPointManager.cs" />
@@ -48,6 +49,7 @@
     <Compile Include="IdeManager.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ObjectDumper.cs" />
+    <Compile Include="PersistenceManager.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegisterManager.cs" />

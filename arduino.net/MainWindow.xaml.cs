@@ -47,8 +47,9 @@ namespace arduino.net
                 //IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
 
-
                 foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
+
+                PersistenceManager.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
 
                 StatusControl.SetState(0, "");
             }
