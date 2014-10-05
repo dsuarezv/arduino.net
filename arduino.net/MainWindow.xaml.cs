@@ -270,10 +270,10 @@ namespace arduino.net
                 { 
                     StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", 
                         bi.LineNumber, System.IO.Path.GetFileName(bi.SourceFileName));
-                }
 
-                var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber);
-                if (editor != null) editor.SetActiveLine(bi.LineNumber);
+                    var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber);
+                    if (editor != null) editor.SetActiveLine(bi.LineNumber);
+                }
             });
 
             InitDwarf();
