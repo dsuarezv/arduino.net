@@ -200,7 +200,7 @@ namespace arduino.net
                 ObjectDumper.GetSingleString(
                     ObjectDumper.GetNmSymbolTable(elfFile)));
 
-            InitDwarf();
+            UpdateDwarf();
 
             if (result)
             {
@@ -214,12 +214,11 @@ namespace arduino.net
             return result;
         }
 
-        private void InitDwarf()
+        private void UpdateDwarf()
         {
             if (IdeManager.Dwarf != null) return;
-            var compiler = IdeManager.Compiler;
-            var elfFile = compiler.GetElfFile(compiler.GetTempDirectory());
-            IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(elfFile));
+            
+            IdeManager.Compiler.BuildDwarf();
         }
 
         private async Task<bool> LaunchDeploy()
@@ -242,7 +241,7 @@ namespace arduino.net
             //    StatusControl.SetState(1, "Deploy failed");
             //}
 
-            InitDwarf();
+            UpdateDwarf();
 
             return success;
         }
@@ -276,7 +275,7 @@ namespace arduino.net
                 }
             });
 
-            InitDwarf();
+            UpdateDwarf();
         }
         
         private void Debugger_SerialCharWorker(object state)

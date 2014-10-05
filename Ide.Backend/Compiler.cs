@@ -92,13 +92,19 @@ namespace arduino.net
 
             if (!RunCommands(deployCmds, tempDir)) return false;
 
-            mLastSuccessfulDeploymentDate = DateTime.Now;
+            // Post deploy actions
 
+            mLastSuccessfulDeploymentDate = DateTime.Now;
             PersistenceManager.Save();
+            BuildDwarf();
 
             return true;
         }
         
+        public void BuildDwarf()
+        {
+            IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(GetElfFile(null)));
+        }
 
         private void SetupBoardName(string boardName)
         {
@@ -271,21 +277,29 @@ namespace arduino.net
 
         public string GetElfFile(string tempDir)
         {
+            if (tempDir == null) tempDir = GetTempDirectory();
+
             return Path.Combine(tempDir, mProject.SketchFile + ".elf");
         }
 
         private string GetEepromFile(string tempDir)
         {
+            if (tempDir == null) tempDir = GetTempDirectory();
+
             return Path.Combine(tempDir, mProject.SketchFile + ".eep");
         }
 
         private string GetHexFile(string tempDir)
         {
+            if (tempDir == null) tempDir = GetTempDirectory();
+
             return Path.Combine(tempDir, mProject.SketchFile + ".hex");
         }
 
         private string GetCoreLibraryFile(string tempDir)
         {
+            if (tempDir == null) tempDir = GetTempDirectory();
+
             return Path.Combine(tempDir, "core.a");
         }
 
