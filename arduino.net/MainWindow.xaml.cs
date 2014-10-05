@@ -94,6 +94,12 @@ namespace arduino.net
         {
             IdeManager.Debugger.TargetContinue();
             StatusControl.SetState(0, "Running...");
+
+            if (IdeManager.Debugger.LastBreakpoint != null)
+            {
+                var editor = GetEditor(IdeManager.Debugger.LastBreakpoint.SourceFileName);
+                if (editor != null) editor.ClearActiveLine();
+            }
         }
 
 
@@ -250,21 +256,24 @@ namespace arduino.net
 
         }
 
-        private void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
+        private void Debugger_BreakPointHit(object sender, BreakPointInfo bi)
         {
             Dispatcher.Invoke(() =>
             {
                 RegistersPad.UpdateRegisters(IdeManager.Debugger.RegManager);
 
-                if (breakpoint == null)
+                if (bi == null)
                 {
                     StatusControl.SetState(1, "Unknown breakpoint hit. Target is stopped. Hit 'debug' to continue.");
                 }
                 else
                 { 
                     StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", 
-                        breakpoint.LineNumber, System.IO.Path.GetFileName(breakpoint.SourceFileName));
+                        bi.LineNumber, System.IO.Path.GetFileName(bi.SourceFileName));
                 }
+
+                var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber);
+                if (editor != null) editor.SetActiveLine(bi.LineNumber);
             });
 
             InitDwarf();
@@ -313,19 +322,27 @@ namespace arduino.net
             OpenFileAtLine(fileName, lineNumber);
         }
 
-
-        private void OpenFileAtLine(string fileName, int lineNumber)
+        private CodeTextBox GetEditor(string fileName)
         {
             var tab = GetTabForFileName(fileName);
-            if (tab == null) return;
+            if (tab == null) return null;
 
             tab.IsSelected = true;
 
             var editor = tab.Content as CodeTextBox;
-            if (editor == null) return;
+            if (editor == null) return null;
+
+            return editor;
+        }
+
+        private CodeTextBox OpenFileAtLine(string fileName, int lineNumber)
+        {
+            var editor = GetEditor(fileName);
 
             editor.SetCursorAt(lineNumber, 0);
             editor.FocusEditor();
+
+            return editor;
         }
 
     }

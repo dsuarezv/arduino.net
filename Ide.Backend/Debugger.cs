@@ -20,6 +20,7 @@ namespace arduino.net
         private ConcurrentQueue<byte> mReceivedCharsQueue = new ConcurrentQueue<byte>();
         private byte[] mTraceQueryBuffer;
         private DebuggerState mStatus = DebuggerState.Stopped;
+        private BreakPointInfo mLastBreakPoint;
 
         public event TargetConnectedDelegate TargetConnected;
         public event BreakPointDelegate BreakPointHit;
@@ -59,6 +60,11 @@ namespace arduino.net
         public bool IsAttached
         {
             get { return mSerialPort != null; }
+        }
+
+        public BreakPointInfo LastBreakpoint
+        {
+            get { return mLastBreakPoint; }
         }
 
 
@@ -239,6 +245,8 @@ namespace arduino.net
 
             br = mBreakPoints[breakpointId];
             if (br != null) br.HitCount++;
+
+            mLastBreakPoint = br;
 
             if (BreakPointHit != null) 
             {

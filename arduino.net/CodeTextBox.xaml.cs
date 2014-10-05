@@ -20,9 +20,11 @@ namespace arduino.net
     public partial class CodeTextBox : UserControl
     {
         private string mFileName;
+        private int mActiveLine = -1;
         private Dictionary<int, BreakPointInfo> mBreakpoints = new Dictionary<int, BreakPointInfo>();
         private FastColoredTextBox mMainTextBox;
         private Action<FastColoredTextBox, FastColoredTextBoxNS.TextChangedEventArgs> mSyntaxHighlighter;
+        
 
         public string FullFileName
         {
@@ -160,6 +162,18 @@ namespace arduino.net
             mMainTextBox.Focus();
         }
 
+        public void SetActiveLine(int lineNumber)
+        {
+            mActiveLine = lineNumber;
+
+            mMainTextBox.Invalidate();
+        }
+
+        public void ClearActiveLine()
+        {
+            SetActiveLine(-1);
+        }
+
 
         private bool CheckChanges()
         {
@@ -241,20 +255,29 @@ namespace arduino.net
 
         void mMainTextBox_PaintLine(object sender, PaintLineEventArgs e)
         {
+            var re = e.LineRect;
+
             foreach (var i in mBreakpoints)
             {
-                if (i.Key == e.LineIndex + 1)
+                var l = e.LineIndex + 1;
+
+                if (i.Key == l)
                 {
                     bool isUpToDate = i.Value.IsDeployedOnDevice(IdeManager.Compiler);
 
                     var brush = isUpToDate ? System.Drawing.Brushes.Red : System.Drawing.Brushes.Orange;
 
-                    e.Graphics.FillEllipse(brush, new System.Drawing.Rectangle(0, e.LineRect.Top, 15, 15));
+                    e.Graphics.FillEllipse(brush, new System.Drawing.Rectangle(0, re.Top, 15, 15));
+
+                    if (mActiveLine == l)
+                    {
+                        const int xStart = 50;
+                        e.Graphics.FillRectangle(System.Drawing.Brushes.Yellow, new System.Drawing.Rectangle(xStart, re.Top, re.Width - xStart, re.Height));
+                    }
+
                     return;
                 }
             }
-
-            // TODO: add some code to draw the current line where program is stopped at.
         }
 
         
