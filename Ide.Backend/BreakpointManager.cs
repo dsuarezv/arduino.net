@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 
 namespace arduino.net
 {
     public class BreakPointManager
     {
-        private List<BreakPointInfo> mBreakPoints = new List<BreakPointInfo>();
+        private ObservableCollection<BreakPointInfo> mBreakPoints = new ObservableCollection<BreakPointInfo>();
         private byte mNewBreakPointIndex = 10;
 
         public event BreakPointDelegate BreakPointAdded;

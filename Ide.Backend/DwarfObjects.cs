@@ -88,6 +88,8 @@ namespace arduino.net
             LowPc = node.GetAttr("low_pc").GetHexValue();
             LinkageName = node.GetAttr("MIPS_linkage_name").GetStringValue();
             External = node.GetAttr("external").GetBoolValue();
+
+            if (Name == "loop") System.Diagnostics.Debugger.Break();
         }
     }
 

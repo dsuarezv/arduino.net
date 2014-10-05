@@ -59,6 +59,8 @@ namespace arduino.net
             mMainTextBox.PaintLine += mMainTextBox_PaintLine;
             mMainTextBox.KeyDown += mMainTextBox_KeyDown;
             mMainTextBox.TextChanged += mMainTextBox_TextChanged;
+            mMainTextBox.ToolTipNeeded += mMainTextBox_ToolTipNeeded;
+
 
             
             WFHost.Child = mMainTextBox;
@@ -69,6 +71,7 @@ namespace arduino.net
             IdeManager.Debugger.BreakPoints.BreakPointRemoved += Debugger_BreakPointRemoved;
         }
 
+        
         
         public void OpenFile(string fileName)
         {
@@ -165,8 +168,19 @@ namespace arduino.net
             return true;
         }
 
+        void mMainTextBox_ToolTipNeeded(object sender, ToolTipNeededEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.HoveredWord)) return;
 
-        void mMainTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
+            if (IdeManager.Debugger.Status == DebuggerState.Break)
+            {
+                var val = Watch.GetWatchValue(e.HoveredWord);
+
+                e.ToolTipText = val;
+            }
+        }
+
+        private void mMainTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
         {
             if (mSyntaxHighlighter == null) return;
 

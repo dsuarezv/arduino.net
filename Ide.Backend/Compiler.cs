@@ -86,6 +86,8 @@ namespace arduino.net
                 if (!Build(boardName, debug)) return false;
             }
 
+            IdeManager.Debugger.Detach();
+
             var deployCmds = CreateDeployCommands(tempDir, programmerName);
 
             if (!RunCommands(deployCmds, tempDir)) return false;

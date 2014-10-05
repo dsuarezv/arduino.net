@@ -29,7 +29,7 @@
             <StackPanel Orientation="Horizontal">
                 <Button x:Name="BuildButton" Template="{StaticResource ActionButton}" Content="build" Click="BuildButton_Click"/>
                 <Button x:Name="DeployButton" Template="{StaticResource ActionButton}" Content="deploy" Click="DeployButton_Click"/>
-                <Button x:Name="DebugButton" Template="{StaticResource ActionButton}" Content="debug" Click="DebugButton_Click"/>
+                <Button x:Name="DebugButton" Template="{StaticResource ActionButton}" Content="debug" Click="DebugButton_Click" Height="24" VerticalAlignment="Top"/>
             </StackPanel>
         </Border>
 
@@ -53,10 +53,15 @@
 				Width="1"/>
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
+                
                 <local:RegistersPad x:Name="RegistersPad" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                <local:MemoryDumpPad x:Name="MemDumpPad" Grid.Row="1"/>
+                <local:WatchesPad x:Name="WatchesPad" Grid.Row="2" />
+                
                 <GridSplitter
                     Grid.Row="0"
                     VerticalAlignment="Bottom"
@@ -64,7 +69,17 @@
                     Background="#b6b6b6" 
 				    ShowsPreview="True"
 				    Height="1"/>
-                <local:MemoryDumpPad x:Name="MemDumpPad1" Grid.Row="1"/>
+
+                <GridSplitter
+                    Grid.Row="1"
+                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Stretch"
+                    Background="#b6b6b6" 
+				    ShowsPreview="True"
+				    Height="1"/>
+
+
+
             </Grid>
             
             <Grid Grid.Column="1">

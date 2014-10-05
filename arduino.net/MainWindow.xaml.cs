@@ -60,9 +60,6 @@ namespace arduino.net
 
         
 
-
-
-
         protected async override void OnPreviewKeyDown(KeyEventArgs e)
         {
             bool ctrl = ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control);
@@ -256,7 +253,7 @@ namespace arduino.net
         {
             Dispatcher.Invoke(() =>
             {
-                RegistersPad.UpdateRegisters(IdeManager.Debugger.Registers);
+                RegistersPad.UpdateRegisters(IdeManager.Debugger.RegManager);
 
                 if (breakpoint == null)
                 {
