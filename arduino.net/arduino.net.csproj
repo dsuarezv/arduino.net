@@ -37,8 +37,15 @@
     <ApplicationIcon>arduino-icon2.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FastColoredTextBox">
-      <HintPath>..\libs\FastColoredTextBox\FastColoredTextBox.dll</HintPath>
+    <Reference Include="FastColoredTextBox, Version=2.15.11.0, Culture=neutral, PublicKeyToken=fb8aa12b994ef61b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\FastColoredTextBox\lib\FastColoredTextBox.dll</HintPath>
+    </Reference>
+    <Reference Include="Selen.Wpf.Core">
+      <HintPath>..\libs\Selen.Wpf\lib\Debug\Selen.Wpf.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Selen.Wpf.SystemStyles">
+      <HintPath>..\libs\Selen.Wpf\lib\Debug\Selen.Wpf.SystemStyles.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
