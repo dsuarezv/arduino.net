@@ -15,29 +15,18 @@
         </Grid.RowDefinitions>
 
 
-        <TextBlock x:Name="TitleLabel" 
-			Grid.Row="0"
-			Grid.Column="0" 
-
-			Padding="10,5"
-			FontWeight="Light"
-			FontSize="36"
-			Foreground="#FFA1A1A1" ><Run Text="Blink sample - arduino.net"/></TextBlock>
-
-
-        <Border Grid.Row="1" Padding="10,0,10,10">
+        <Border Grid.Row="1" Padding="10,10,10,10">
             <StackPanel Orientation="Horizontal">
-                <Button x:Name="BuildButton" Template="{StaticResource ActionButton}" Content="build" Click="BuildButton_Click"/>
-                <Button x:Name="DeployButton" Template="{StaticResource ActionButton}" Content="deploy" Click="DeployButton_Click"/>
-                <Button x:Name="DebugButton" Template="{StaticResource ActionButton}" Content="debug" Click="DebugButton_Click" Height="24" VerticalAlignment="Top"/>
+                <Button x:Name="BuildButton" Content="build" Click="BuildButton_Click"/>
+                <Button x:Name="DeployButton" Content="deploy" Click="DeployButton_Click"/>
+                <Button x:Name="RunButton" Content="run" Click="RunButton_Click"/>
+                <Button x:Name="StopButton" Content="stop" Click="StopButton_Click" IsEnabled="False"/>
+                <ComboBox x:Name="DebugReleaseCombo"/>
+                <local:StatusHeaderControl x:Name="StatusControl" Width="auto" HorizontalAlignment="Left"/>
             </StackPanel>
         </Border>
 
-        <local:StatusHeaderControl 
-			x:Name="StatusControl"
-			Width="auto"
-			Grid.Row="2" 
-			HorizontalAlignment="Left"/>
+        
 
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
@@ -57,11 +46,11 @@
                     <RowDefinition Height="1*"/>
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
-                
+
                 <local:RegistersPad x:Name="RegistersPad" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
                 <local:MemoryDumpPad x:Name="MemDumpPad" Grid.Row="1"/>
                 <local:WatchesPad x:Name="WatchesPad" Grid.Row="2" />
-                
+
                 <GridSplitter
                     Grid.Row="0"
                     VerticalAlignment="Bottom"
@@ -81,8 +70,13 @@
 
 
             </Grid>
-            
+
             <Grid Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="109*"/>
+                    <ColumnDefinition Width="9*"/>
+                    <ColumnDefinition Width="574*"/>
+                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="150px"/>
@@ -94,17 +88,17 @@
 					VerticalAlignment="Bottom"
 					Background="#b6b6b6" 
 					ShowsPreview="True"
-					Height="1"/>
+					Height="1" Grid.ColumnSpan="3"/>
 
-                <TabControl Name="OpenFilesTab" BorderThickness="0,1,0,0" Grid.Row="0" Margin="0,5">
-                    
+                <TabControl Name="OpenFilesTab" BorderThickness="0,1,0,0" Grid.Row="0" Margin="0,5" Grid.ColumnSpan="3">
+
                 </TabControl>
-                <local:OutputTextBox x:Name="OutputTextBox1" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch" Padding="5"/>
+                <local:OutputTextBox x:Name="OutputTextBox1" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch" Padding="5" Grid.ColumnSpan="3"/>
 
 
 
             </Grid>
-            
+
         </Grid>
     </Grid>
 </Window>

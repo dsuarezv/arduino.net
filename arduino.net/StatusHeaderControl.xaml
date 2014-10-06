@@ -5,31 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="50" d:DesignWidth="300">
-    
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <SolidColorBrush x:Key="SuccessColor" Color="#FFFFFF"/>
-            <SolidColorBrush x:Key="FailColor" Color="#9e0303"/>
-        </ResourceDictionary>
-    </UserControl.Resources>
-    
     <Grid>
-        
-        <Border Name="InternalBar">
-            <Border Height="50px" Padding="10px">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#688835" Offset="0.0" />
-                        <GradientStop Color="#a2c5fb" Offset="0.45" />
-                        <GradientStop Color="#f2aea1" Offset="0.55" />
-                        <GradientStop Color="#f2d5a3" Offset="1.0" />
-                    </LinearGradientBrush>
-                </Border.Background>
-            </Border>
-        </Border>
         <TextBlock 
             Name="MessageLabel" 
-            Foreground="White" 
             VerticalAlignment="Center" 
             HorizontalAlignment="Left" 
             FontSize="18"

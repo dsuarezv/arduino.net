@@ -46,6 +46,7 @@ typedef struct
 
 
 static void DbgSendTrace(uint32_t address, uint8_t size);
+static void DbgLoop();
 
 
 void DbgConnect()
@@ -57,6 +58,8 @@ void DbgConnect()
     p.Header.Type = DBG_HEADER_CONNECT_TYPE;
     
     Serial.write((uint8_t*)&p, sizeof(DbgConnectPacket));
+
+    DbgLoop();  // Wait for host to connect
 }
 
 

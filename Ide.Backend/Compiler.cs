@@ -92,7 +92,7 @@ namespace arduino.net
 
             if (!RunCommands(deployCmds, tempDir)) return false;
 
-            // Post deploy actions
+            // Successful deploy. Post actions.
 
             mLastSuccessfulDeploymentDate = DateTime.Now;
             PersistenceManager.Save();

@@ -19,6 +19,7 @@ namespace arduino.net
 {
     public partial class CodeTextBox : UserControl
     {
+        private bool mReadOnly = false;
         private string mFileName;
         private int mActiveLine = -1;
         private Dictionary<int, BreakPointInfo> mBreakpoints = new Dictionary<int, BreakPointInfo>();
@@ -60,8 +61,8 @@ namespace arduino.net
 
             mMainTextBox.PaintLine += mMainTextBox_PaintLine;
             mMainTextBox.KeyDown += mMainTextBox_KeyDown;
+            mMainTextBox.KeyPress += mMainTextBox_KeyPress;
             mMainTextBox.TextChanged += mMainTextBox_TextChanged;
-            //mMainTextBox.TextChanging += mMainTextBox_TextChanging;
             mMainTextBox.ToolTipNeeded += mMainTextBox_ToolTipNeeded;
             
             WFHost.Child = mMainTextBox;
@@ -72,8 +73,6 @@ namespace arduino.net
             IdeManager.Debugger.BreakPoints.BreakPointRemoved += Debugger_BreakPointRemoved;
         }
 
-
-        
         
         public void OpenFile(string fileName)
         {
@@ -173,6 +172,13 @@ namespace arduino.net
             SetActiveLine(-1);
         }
 
+        public void SetReadOnly(bool readOnly)
+        {
+            mReadOnly = readOnly;
+
+            mMainTextBox.ReadOnly = readOnly;
+        }
+
 
         private bool CheckChanges()
         {
@@ -191,12 +197,6 @@ namespace arduino.net
 
                 e.ToolTipText = val;
             }
-        }
-
-
-        void mMainTextBox_TextChanging(object sender, TextChangingEventArgs e)
-        {
-
         }
 
         private void mMainTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
@@ -238,6 +238,8 @@ namespace arduino.net
 
         void mMainTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
+            if (mReadOnly) return;
+
             if (e.Control)
             { 
                 switch (e.KeyCode)
@@ -260,6 +262,15 @@ namespace arduino.net
                         IdeManager.Debugger.BreakPoints.Add(mFileName, lineNumber);
                     }
                     break;
+            }
+        }
+
+        void mMainTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
+        {
+            if (mReadOnly)
+            {
+                MessageBox.Show("While the debugger is running no changes are allowed to the code. Stop the debugger to make changes.", "Attention", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                e.Handled = true;
             }
         }
 
