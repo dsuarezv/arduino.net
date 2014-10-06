@@ -43,6 +43,7 @@ namespace arduino.net
                 IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
+                IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
                 IdeManager.GoToLineRequested += IdeManager_GoToLineRequested;
                 //IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
@@ -58,6 +59,7 @@ namespace arduino.net
                 DisplayException(ex);
             }
         }
+
 
         
 
@@ -187,23 +189,22 @@ namespace arduino.net
 
             SaveAll();
 
-            bool result = await IdeManager.Compiler.BuildAsync("atmega328", true);
-            
             var compiler = IdeManager.Compiler;
-            var elfFile = compiler.GetElfFile(compiler.GetTempDirectory());
-            
-            OpenContent("Sketch dissasembly",
-                ObjectDumper.GetSingleString(
-                    ObjectDumper.GetDisassemblyWithSource(elfFile)));
-
-            OpenContent("Symbol table",
-                ObjectDumper.GetSingleString(
-                    ObjectDumper.GetNmSymbolTable(elfFile)));
-
-            UpdateDwarf();
+            bool result = await compiler.BuildAsync("atmega328", true);
+            var elfFile = compiler.GetElfFile();
 
             if (result)
             {
+                OpenContent("Sketch dissasembly",
+                    ObjectDumper.GetSingleString(
+                        ObjectDumper.GetDisassemblyWithSource(elfFile)));
+
+                OpenContent("Symbol table",
+                    ObjectDumper.GetSingleString(
+                        ObjectDumper.GetNmSymbolTable(elfFile)));
+
+                UpdateDwarf();
+
                 StatusControl.SetState(0, "Build succeeded");
             }
             else
@@ -249,6 +250,13 @@ namespace arduino.net
 
         // __ Debugger events _________________________________________________
 
+        private void Debugger_StatusChanged(object sender, DebuggerStatus newState)
+        {
+            Dispatcher.Invoke( () =>
+            {
+                // Update UI, what buttons are enabled and disabled.
+            });
+        }
 
         private void Debugger_TargetConnected(object sender)
         {

@@ -19,12 +19,14 @@ namespace arduino.net
         private ObservableCollection<TracepointInfo> mTracePoints = new ObservableCollection<TracepointInfo>();
         private ConcurrentQueue<byte> mReceivedCharsQueue = new ConcurrentQueue<byte>();
         private byte[] mTraceQueryBuffer;
-        private DebuggerState mStatus = DebuggerState.Stopped;
+        private DebuggerStatus mStatus = DebuggerStatus.Stopped;
         private BreakPointInfo mLastBreakPoint;
+
 
         public event TargetConnectedDelegate TargetConnected;
         public event BreakPointDelegate BreakPointHit;
         public event ByteDelegate SerialCharReceived;
+        public event StatusChangedDelegate StatusChanged;
 
 
         public ConcurrentQueue<byte> ReceivedCharsQueue
@@ -52,7 +54,7 @@ namespace arduino.net
             get { return mWatches; }
         }
 
-        public DebuggerState Status
+        public DebuggerStatus Status
         {
             get { return mStatus; }
         }
@@ -85,7 +87,7 @@ namespace arduino.net
 
         public void Detach()
         {
-            SetStatus(DebuggerState.Stopped);
+            SetStatus(DebuggerStatus.Stopped);
 
             if (mSerialPort == null) return;
 
@@ -122,7 +124,7 @@ namespace arduino.net
 
             mSerialPort.BaseStream.WriteByte(255);
             mSerialPort.BaseStream.WriteByte((byte)DebuggerPacketType.Continue);
-            SetStatus(DebuggerState.Running);
+            SetStatus(DebuggerStatus.Running);
         }
                 
 
@@ -229,7 +231,7 @@ namespace arduino.net
 
         private void OnTargetInit()
         {
-            SetStatus(DebuggerState.Running);
+            SetStatus(DebuggerStatus.Running);
 
             if (TargetConnected != null)
             {
@@ -241,7 +243,7 @@ namespace arduino.net
         {
             BreakPointInfo br = null;
 
-            SetStatus(DebuggerState.Break);
+            SetStatus(DebuggerStatus.Break);
 
             br = mBreakPoints[breakpointId];
             if (br != null) br.HitCount++;
@@ -250,7 +252,7 @@ namespace arduino.net
 
             if (BreakPointHit != null) 
             {
-                ThreadPool.QueueUserWorkItem((a) => BreakPointHit(this, br));
+                ThreadPool.QueueUserWorkItem( a => BreakPointHit(this, br) );
             }
         }
 
@@ -265,7 +267,7 @@ namespace arduino.net
 
             if (SerialCharReceived != null) 
             {
-                //ThreadPool.QueueUserWorkItem((a) => SerialCharReceived(this, b));
+                //ThreadPool.QueueUserWorkItem( a => SerialCharReceived(this, b) );
                 SerialCharReceived(this, b);
             }
         }
@@ -274,14 +276,14 @@ namespace arduino.net
         // __ Status __________________________________________________________
 
 
-        private void SetStatus(DebuggerState state)
+        private void SetStatus(DebuggerStatus status)
         {
-            if (mStatus != state)
+            if (mStatus != status)
             { 
-                // invoke state changed
+                if (StatusChanged != null) ThreadPool.QueueUserWorkItem( a => StatusChanged(this, status) );
             }
 
-            mStatus = state;
+            mStatus = status;
         }
     }
 
@@ -291,13 +293,16 @@ namespace arduino.net
 
     public delegate void ByteDelegate(object sender, byte b);
 
+    public delegate void StatusChangedDelegate(object sender, DebuggerStatus newState);
     
-    public enum DebuggerState
+    public enum DebuggerStatus
     { 
         Stopped, 
         Running, 
         Break
     }
+
+
     
     public class Watch
     {

@@ -18,6 +18,10 @@ namespace arduino.net
         public static string CurrentProgrammer;
         public static string CurrentComPort;
 
+        public static string EditorFontName = "Consolas";
+        public static float EditorFontSize = 11f;
+        public static bool EditorAutoIndent = true;
+
 
         public static string ToolkitPath
         {

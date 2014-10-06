@@ -53,17 +53,16 @@ namespace arduino.net
             mMainTextBox = new FastColoredTextBox()
             {
                 Dock = System.Windows.Forms.DockStyle.Fill,
-                Font = new System.Drawing.Font("Consolas", 11f),
-                AutoIndent = true,
+                Font = new System.Drawing.Font(Configuration.EditorFontName, Configuration.EditorFontSize),
+                AutoIndent = Configuration.EditorAutoIndent,
                 ReservedCountOfLineNumberChars = 5,
             };
 
             mMainTextBox.PaintLine += mMainTextBox_PaintLine;
             mMainTextBox.KeyDown += mMainTextBox_KeyDown;
             mMainTextBox.TextChanged += mMainTextBox_TextChanged;
+            //mMainTextBox.TextChanging += mMainTextBox_TextChanging;
             mMainTextBox.ToolTipNeeded += mMainTextBox_ToolTipNeeded;
-
-
             
             WFHost.Child = mMainTextBox;
 
@@ -72,6 +71,7 @@ namespace arduino.net
             IdeManager.Debugger.BreakPoints.BreakPointAdded += Debugger_BreakPointAdded;
             IdeManager.Debugger.BreakPoints.BreakPointRemoved += Debugger_BreakPointRemoved;
         }
+
 
         
         
@@ -158,7 +158,6 @@ namespace arduino.net
 
         public void FocusEditor()
         {
-            //WFHost.Focus();
             mMainTextBox.Focus();
         }
 
@@ -186,7 +185,7 @@ namespace arduino.net
         {
             if (string.IsNullOrEmpty(e.HoveredWord)) return;
 
-            if (IdeManager.Debugger.Status == DebuggerState.Break)
+            if (IdeManager.Debugger.Status == DebuggerStatus.Break)
             {
                 var val = Watch.GetWatchValue(e.HoveredWord);
 
@@ -194,11 +193,26 @@ namespace arduino.net
             }
         }
 
+
+        void mMainTextBox_TextChanging(object sender, TextChangingEventArgs e)
+        {
+
+        }
+
         private void mMainTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
         {
             if (mSyntaxHighlighter == null) return;
 
             mSyntaxHighlighter(mMainTextBox, e);
+
+            var shift = e.ChangedRange.ToLine - e.ChangedRange.FromLine;
+            var fromLine = shift > 0 ? e.ChangedRange.FromLine : e.ChangedRange.ToLine;
+            //IdeManager.Debugger.BreakPoints.ShiftBreakpointsForFile(mFileName, fromLine, shift);
+            
+            // DAVE: the textbox only gives insertions. Doesn't provide correct info on deletions.
+
+            return;            
+
         }
 
         private void ApplySyntaxHighlight(string ext)

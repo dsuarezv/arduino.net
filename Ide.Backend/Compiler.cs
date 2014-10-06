@@ -103,7 +103,7 @@ namespace arduino.net
         
         public void BuildDwarf()
         {
-            IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(GetElfFile(null)));
+            IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(GetElfFile()));
         }
 
         private void SetupBoardName(string boardName)
@@ -275,28 +275,28 @@ namespace arduino.net
             return Path.Combine(tempDir, dirName);
         }
 
-        public string GetElfFile(string tempDir)
+        public string GetElfFile(string tempDir = null)
         {
             if (tempDir == null) tempDir = GetTempDirectory();
 
             return Path.Combine(tempDir, mProject.SketchFile + ".elf");
         }
 
-        private string GetEepromFile(string tempDir)
+        private string GetEepromFile(string tempDir = null)
         {
             if (tempDir == null) tempDir = GetTempDirectory();
 
             return Path.Combine(tempDir, mProject.SketchFile + ".eep");
         }
 
-        private string GetHexFile(string tempDir)
+        private string GetHexFile(string tempDir = null)
         {
             if (tempDir == null) tempDir = GetTempDirectory();
 
             return Path.Combine(tempDir, mProject.SketchFile + ".hex");
         }
 
-        private string GetCoreLibraryFile(string tempDir)
+        private string GetCoreLibraryFile(string tempDir = null)
         {
             if (tempDir == null) tempDir = GetTempDirectory();
 

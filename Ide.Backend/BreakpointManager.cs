@@ -71,5 +71,16 @@ namespace arduino.net
 
             return result;
         }
+
+        public void ShiftBreakpointsForFile(string fileName, int fromLine, int shift)
+        {
+            foreach (var br in GetBreakpointsForFile(fileName))
+            { 
+                if (br.LineNumber >= fromLine)
+                {
+                    br.LineNumber += shift;
+                }
+            }
+        }
     }
 }

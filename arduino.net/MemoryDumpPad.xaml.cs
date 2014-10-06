@@ -27,7 +27,7 @@ namespace arduino.net
         {
             var debugger = IdeManager.Debugger;
 
-            if (debugger.Status != DebuggerState.Break) return;
+            if (debugger.Status != DebuggerStatus.Break) return;
 
             int? address = ParseHexOrDecimal(AddressTextBox.Text);
             int? size = ParseHexOrDecimal(SizeTextBox.Text);

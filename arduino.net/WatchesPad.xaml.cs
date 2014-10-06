@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,9 +28,11 @@ namespace arduino.net
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            WatchesGrid.ItemsSource = IdeManager.Debugger.Watches;
-
-            IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
+            if (!DesignerProperties.GetIsInDesignMode(this))
+            { 
+                WatchesGrid.ItemsSource = IdeManager.Debugger.Watches;
+                IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
+            }
         }
 
         private void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
@@ -46,8 +49,5 @@ namespace arduino.net
 
             });
         }
-
-        
-                
     }
 }
