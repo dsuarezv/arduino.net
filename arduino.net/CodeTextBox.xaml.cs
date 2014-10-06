@@ -9,9 +9,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using System.Drawing;
 
 using FastColoredTextBoxNS;
 
@@ -54,7 +53,7 @@ namespace arduino.net
             mMainTextBox = new FastColoredTextBox()
             {
                 Dock = System.Windows.Forms.DockStyle.Fill,
-                Font = new System.Drawing.Font(Configuration.EditorFontName, Configuration.EditorFontSize),
+                Font = new Font(Configuration.EditorFontName, Configuration.EditorFontSize),
                 AutoIndent = Configuration.EditorAutoIndent,
                 ReservedCountOfLineNumberChars = 5,
             };
@@ -269,7 +268,7 @@ namespace arduino.net
         {
             if (mReadOnly)
             {
-                MessageBox.Show("While the debugger is running no changes are allowed to the code. Stop the debugger to make changes.", "Attention", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                MessageBox.Show("No changes are allowed while the debugger is running. You can stop the debugger to edit the code or modify breakpoints.", "Hey...", MessageBoxButton.OK, MessageBoxImage.Asterisk);
                 e.Handled = true;
             }
         }
@@ -290,14 +289,14 @@ namespace arduino.net
                 {
                     bool isUpToDate = i.Value.IsDeployedOnDevice(IdeManager.Compiler);
 
-                    var brush = isUpToDate ? System.Drawing.Brushes.Red : System.Drawing.Brushes.Orange;
+                    var brush = isUpToDate ? Brushes.Red : Brushes.Orange;
 
-                    e.Graphics.FillEllipse(brush, new System.Drawing.Rectangle(0, re.Top, 15, 15));
+                    e.Graphics.FillEllipse(brush, new Rectangle(0, re.Top, 15, 15));
 
                     if (mActiveLine == l)
                     {
                         const int xStart = 50;
-                        e.Graphics.FillRectangle(System.Drawing.Brushes.Yellow, new System.Drawing.Rectangle(xStart, re.Top, re.Width - xStart, re.Height));
+                        e.Graphics.FillRectangle(Brushes.Yellow, new Rectangle(xStart, re.Top, re.Width - xStart, re.Height));
                     }
 
                     return;

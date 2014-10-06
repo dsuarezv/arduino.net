@@ -11,14 +11,14 @@ namespace arduino.net
 {
     public class SyntaxHighlightApplier
     {
-        static TextStyle BlueStyle = new TextStyle(Brushes.Blue, null, FontStyle.Regular);
+        static TextStyle BlueStyle = new TextStyle(new SolidBrush(Color.FromArgb(86, 156, 214)), null, FontStyle.Regular);
         static TextStyle BoldStyle = new TextStyle(null, null, FontStyle.Bold | FontStyle.Underline);
         static TextStyle GrayStyle = new TextStyle(Brushes.Gray, null, FontStyle.Regular);
-        static TextStyle MagentaStyle = new TextStyle(Brushes.Magenta, null, FontStyle.Regular);
-        static TextStyle GreenStyle = new TextStyle(Brushes.Green, null, FontStyle.Regular);
+        static TextStyle MagentaStyle = new TextStyle(new SolidBrush(Color.FromArgb(189, 99, 197)), null, FontStyle.Regular);
+        static TextStyle GreenStyle = new TextStyle(new SolidBrush(Color.FromArgb(0, 0, 0)), null, FontStyle.Regular);
         static TextStyle BrownStyle = new TextStyle(Brushes.Brown, null, FontStyle.Regular);
         static TextStyle MaroonStyle = new TextStyle(Brushes.Maroon, null, FontStyle.Regular);
-        static TextStyle OrangeStyle = new TextStyle(Brushes.Orange, null, FontStyle.Regular);
+        static TextStyle OrangeStyle = new TextStyle(new SolidBrush(Color.FromArgb(0, 0, 0)), null, FontStyle.Regular);
         static TextStyle RedStyle = new TextStyle(Brushes.Red, null, FontStyle.Regular);
         static MarkerStyle SameWordsStyle = new MarkerStyle(new SolidBrush(Color.FromArgb(40, Color.Gray)));
 
@@ -36,16 +36,16 @@ namespace arduino.net
             e.ChangedRange.ClearStyle(BlueStyle, BoldStyle, GrayStyle, MagentaStyle, GreenStyle, BrownStyle);
 
             //string highlighting
-            e.ChangedRange.SetStyle(BrownStyle, @"""""|@""""|''|@"".*?""|(?<!@)(?<range>"".*?[^\\]"")|'.*?[^\\]'");
+            e.ChangedRange.SetStyle(MagentaStyle, @"""""|@""""|''|@"".*?""|(?<!@)(?<range>"".*?[^\\]"")|'.*?[^\\]'");
             
             //comment highlighting
-            e.ChangedRange.SetStyle(GreenStyle, @"//.*$", RegexOptions.Multiline);
-            e.ChangedRange.SetStyle(GreenStyle, @"(/\*.*?\*/)|(/\*.*)", RegexOptions.Singleline);
-            e.ChangedRange.SetStyle(GreenStyle, @"(/\*.*?\*/)|(.*\*/)", RegexOptions.Singleline | RegexOptions.RightToLeft);
-            e.ChangedRange.SetStyle(GreenStyle, @"(/\*.*?\*/)", RegexOptions.Multiline);
+            e.ChangedRange.SetStyle(OrangeStyle, @"//.*$", RegexOptions.Multiline);
+            e.ChangedRange.SetStyle(OrangeStyle, @"(/\*.*?\*/)|(/\*.*)", RegexOptions.Singleline);
+            e.ChangedRange.SetStyle(OrangeStyle, @"(/\*.*?\*/)|(.*\*/)", RegexOptions.Singleline | RegexOptions.RightToLeft);
+            e.ChangedRange.SetStyle(OrangeStyle, @"(/\*.*?\*/)", RegexOptions.Multiline);
 
             // preprocessor
-            e.ChangedRange.SetStyle(GreenStyle, @"(#.*$)", RegexOptions.Multiline);
+            e.ChangedRange.SetStyle(MagentaStyle, @"(#.*$)", RegexOptions.Multiline);
 
             //number highlighting
             e.ChangedRange.SetStyle(MagentaStyle, @"\b\d+[\.]?\d*([eE]\-?\d+)?[lLdDfF]?\b|\b0x[a-fA-F\d]+\b");
@@ -54,7 +54,7 @@ namespace arduino.net
             e.ChangedRange.SetStyle(GrayStyle, @"^\s*(?<range>\[.+?\])\s*$", RegexOptions.Multiline);
             
             //class name highlighting
-            e.ChangedRange.SetStyle(BoldStyle, @"\b(class|struct|enum|interface)\s+(?<range>\w+?)\b");
+            e.ChangedRange.SetStyle(BlueStyle, @"\b(class|struct|enum|interface)\s+(?<range>\w+?)\b");
             
             //keyword highlighting
             e.ChangedRange.SetStyle(BlueStyle, @"\b(abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|true|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|virtual|void|volatile|while|add|alias|ascending|descending|dynamic|from|get|global|group|into|join|let|orderby|partial|remove|select|set|value|var|where|yield)\b|#region\b|#endregion\b");
