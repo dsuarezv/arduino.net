@@ -18,8 +18,8 @@ namespace arduino.net
         public static string CurrentProgrammer = "usbasp";
         public static string CurrentComPort;
 
-        public static string EditorFontName = "Consolas";
-        public static float EditorFontSize = 9f;
+        public static string EditorFontName = "Times New Roman";
+        public static float EditorFontSize = 10f;
         public static bool EditorAutoIndent = true;
 
 
