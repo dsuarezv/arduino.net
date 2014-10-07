@@ -4,23 +4,20 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
 
-        <ControlTemplate TargetType="Button" x:Key="ActionButton">
-            <Grid 
-                Width="{TemplateBinding Width}" 
-                Height="{TemplateBinding Height}" 
-                ClipToBounds="True">
+		<SolidColorBrush x:Key="C0" Color="#FF2c333d"/>
+    	<SolidColorBrush x:Key="C1" Color="#FF6A869B"/>
+    	<SolidColorBrush x:Key="C2" Color="#FFB7D1DE"/>
+		
 
-                <Rectangle x:Name="outerRectangle"  
-                    Margin="5, 0"
-                    Stroke="#000000"  
-                    StrokeThickness="1"
-                    RadiusX="5" RadiusY="5" 
-                    Fill="Transparent" />
-                <DockPanel>
-                    <ContentPresenter 
-                        Content="{TemplateBinding  Content}"
-                        Margin="25,4"/>
-                </DockPanel>
+        <ControlTemplate TargetType="{x:Type Button}" x:Key="LargeActionButton">
+            <Grid 
+                Width="{TemplateBinding Height}" 
+                Height="{TemplateBinding Height}" 
+                >
+                <TextBlock Foreground="{DynamicResource C2}" FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Center" VerticalAlignment="Center">
+					<ContentPresenter/>
+				</TextBlock>
+                <Ellipse  Fill="Transparent" HorizontalAlignment="Stretch" Height="Auto" Stroke="{DynamicResource C1}" StrokeThickness="4" VerticalAlignment="Stretch" Width="Auto" />
             </Grid>
         </ControlTemplate>
 
