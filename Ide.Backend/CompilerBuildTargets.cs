@@ -403,7 +403,7 @@ namespace arduino.net
                 result.Add("#include \"Arduino.h\"");
                 foreach (var prototype in mParser.UniqueFunctionDeclarations) result.Add(prototype + ";");
 
-                if (!mParser.HasSetupFunction)
+                if (Debugger != null && !mParser.HasSetupFunction)
                 {
                     result.Add("void setup()");
                     result.Add("{ ");
@@ -418,7 +418,7 @@ namespace arduino.net
             }
             else if (lineNumber == mParser.SetupFunctionFirstLine + 1)
             {
-                if (mParser.HasSetupFunction)
+                if (Debugger != null && mParser.HasSetupFunction)
                 { 
                     // Inserting this as the first line in the setup() function effectively prevents user code from 
                     // being executed first. If there is a watchdog reset (soft reset) in place, the watchdog 
