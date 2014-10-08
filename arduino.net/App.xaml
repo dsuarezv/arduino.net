@@ -7,6 +7,9 @@
 		<SolidColorBrush x:Key="C0" Color="#FF2c333d"/>
     	<SolidColorBrush x:Key="C1" Color="#FF6A869B"/>
     	<SolidColorBrush x:Key="C2" Color="#FFB7D1DE"/>
+		<SolidColorBrush x:Key="C1-Highlight" Color="#FFA0B6C7"/>
+		<SolidColorBrush x:Key="C1-Pressed" Color="#FFCDE4F0"/>
+		<SolidColorBrush x:Key="C1-Disabled" Color="#FF3D444E"/>
 		
 
         <ControlTemplate TargetType="{x:Type Button}" x:Key="LargeActionButton">
@@ -14,11 +17,43 @@
                 Width="{TemplateBinding Height}" 
                 Height="{TemplateBinding Height}" 
                 >
-                <TextBlock Foreground="{DynamicResource C2}" FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Center" VerticalAlignment="Center">
-					<ContentPresenter/>
-				</TextBlock>
-                <Ellipse  Fill="Transparent" HorizontalAlignment="Stretch" Height="Auto" Stroke="{DynamicResource C1}" StrokeThickness="4" VerticalAlignment="Stretch" Width="Auto" />
+                <Ellipse x:Name="ellipse"  Fill="Transparent" HorizontalAlignment="Stretch" Height="Auto" Stroke="{DynamicResource C1}" StrokeThickness="4" VerticalAlignment="Stretch" Width="Auto" />
+            	<TextBlock x:Name="textBlock" Foreground="{DynamicResource C2}" FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"><InlineUIContainer>
+            			<ContentPresenter x:Name="contentPresenter"/>
+            		</InlineUIContainer></TextBlock>
             </Grid>
+        	<ControlTemplate.Triggers>
+        		<Trigger Property="IsEnabled" Value="False">
+        			<Setter Property="Stroke" TargetName="ellipse" Value="{DynamicResource C1-Disabled}"/>
+        			<Setter Property="Foreground" TargetName="textBlock" Value="{DynamicResource C1-Disabled}"/>
+        		</Trigger>
+        		<Trigger Property="IsMouseOver" Value="True">
+        			<Setter Property="Stroke" TargetName="ellipse" Value="{DynamicResource C1-Highlight}"/>
+        			<Setter Property="Fill" TargetName="ellipse" Value="{DynamicResource C1-Disabled}"/>
+        		</Trigger>
+        		<Trigger Property="IsPressed" Value="True">
+        			<Setter Property="Stroke" TargetName="ellipse" Value="{DynamicResource C1-Pressed}"/>
+        			<Setter Property="Foreground" TargetName="textBlock" Value="{DynamicResource C1-Pressed}"/>
+        			<Setter Property="Fill" TargetName="ellipse" Value="{DynamicResource C1-Disabled}"/>
+        		</Trigger>
+        	</ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="HeaderCheckbox" TargetType="{x:Type CheckBox}">
+        	<Grid x:Name="grid" Margin="0,0,-3.5,0">
+        		<TextBlock x:Name="textBlock" HorizontalAlignment="Stretch" Margin="20.125,0,0,0" TextWrapping="Wrap" VerticalAlignment="Stretch" Height="Auto" Width="Auto" Foreground="{DynamicResource C2}"><InlineUIContainer>
+        				<ContentPresenter x:Name="contentPresenter"/>
+        			</InlineUIContainer></TextBlock>
+        		<Ellipse x:Name="ellipse" Fill="Transparent" HorizontalAlignment="Left" Height="16" Margin="0" Stroke="{DynamicResource C1}" VerticalAlignment="Top" Width="16" StrokeThickness="3"/>
+        	</Grid>
+        	<ControlTemplate.Triggers>
+        		<Trigger Property="IsChecked" Value="True">
+        			<Setter Property="Fill" TargetName="ellipse" Value="{DynamicResource C2}"/>
+        		</Trigger>
+        		<Trigger Property="IsMouseOver" Value="True">
+        			<Setter Property="Foreground" TargetName="textBlock" Value="{DynamicResource C1-Highlight}"/>
+        			<Setter Property="Stroke" TargetName="ellipse" Value="{DynamicResource C1-Highlight}"/>
+        		</Trigger>
+        	</ControlTemplate.Triggers>
         </ControlTemplate>
 
 

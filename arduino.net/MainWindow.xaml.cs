@@ -31,9 +31,10 @@ namespace arduino.net
         {
             try
             {
-                Configuration.Initialize(@"C:\Users\dave\Documents\develop\Arduino\ArduinoIDE.net\deploy");
+                Configuration.Initialize(@"..\");
 
-                var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
+                //var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
+                var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
 
                 IdeManager.CurrentProject = new Project(sketch);
                 IdeManager.Debugger = new Debugger("COM3");
@@ -90,7 +91,7 @@ namespace arduino.net
             var success = await LaunchDeploy();
         }
 
-        private async void RunButton_Click(object sender, RoutedEventArgs e)
+        private void RunButton_Click(object sender, RoutedEventArgs e)
         {
             switch (IdeManager.Debugger.Status)
             {

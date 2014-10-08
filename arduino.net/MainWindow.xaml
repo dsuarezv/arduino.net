@@ -15,13 +15,14 @@
         </Grid.RowDefinitions>
 
 
-        <Border Grid.Row="1" Padding="10,10,10,10" Background="{DynamicResource C0}">
+        <Border Grid.Row="1" Padding="15" Background="{DynamicResource C0}">
             <Grid Grid.Row="1">
-                <Button x:Name="BuildButton" Content="Build" Click="BuildButton_Click" Template="{DynamicResource LargeActionButton}" Width="76" Height="76" FontSize="18.667" BorderThickness="1" Margin="0,0,796,1"/>
-                <Button x:Name="DeployButton" Content="Deploy" Click="DeployButton_Click" Template="{DynamicResource LargeActionButton}" Margin="81,1.271,715,-0.272" Width="76" Height="76" FontSize="18.667"/>
-                <Button x:Name="RunButton" Content="Run" Click="RunButton_Click" Template="{DynamicResource LargeActionButton}" Height="47" Margin="165.404,0,659.595,0" VerticalAlignment="Top" Width="47"/>
-                <Button x:Name="StopButton" Content="Stop" Click="StopButton_Click" IsEnabled="False" Template="{DynamicResource LargeActionButton}" Height="47" Margin="219.831,0,605.168,0" VerticalAlignment="Top" Width="47"/>
+                <Button x:Name="BuildButton" Content="Verify" Click="BuildButton_Click" Template="{DynamicResource LargeActionButton}" Width="76" Height="76" FontSize="18.667" BorderThickness="1" Margin="0,0,0,0" HorizontalAlignment="Left"/>
+                <Button x:Name="DeployButton" Content="Deploy" Click="DeployButton_Click" Template="{DynamicResource LargeActionButton}" Margin="81,0.272,0,-0.272" Width="76" FontSize="18.667" HorizontalAlignment="Left"/>
+                <Button x:Name="RunButton" Content="Run" Click="RunButton_Click" Template="{DynamicResource LargeActionButton}" Height="47" Margin="165.404,0,0,0" VerticalAlignment="Top" Width="47" HorizontalAlignment="Left"/>
+                <Button x:Name="StopButton" Content="Stop" Click="StopButton_Click" IsEnabled="False" Template="{DynamicResource LargeActionButton}" Height="47" Margin="219.831,0,0,0" VerticalAlignment="Top" Width="47" HorizontalAlignment="Left"/>
                 <local:StatusHeaderControl x:Name="StatusControl" Width="auto" HorizontalAlignment="Left" Margin="271.831,1.272,0,-1.272"/>
+                <CheckBox x:Name="DebuggerCheckbox" Content="Debugger" HorizontalAlignment="Left" Margin="156.499,59.5,0,-0.127" VerticalAlignment="Top" Template="{DynamicResource HeaderCheckbox}" Width="78.333" Height="16.627"/>
             </Grid>
         </Border>
 

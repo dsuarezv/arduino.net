@@ -226,6 +226,7 @@ namespace arduino.net
                 case "cpp":
                 case "h":
                 case "hpp":
+                case "pde":
                 case "ino": mSyntaxHighlighter = SyntaxHighlightApplier.Cpp; break;
             }
         }
