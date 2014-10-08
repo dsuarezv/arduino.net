@@ -216,11 +216,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\CloseDisabled.png" />
-    <Resource Include="resources\CloseNormal.png" />
-    <Resource Include="resources\ClosePressed.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="arduino-icon2.ico" />
   </ItemGroup>
   <ItemGroup>

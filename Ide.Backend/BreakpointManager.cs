@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 
 namespace arduino.net
 {
-    public class BreakPointManager
+    public class BreakPointManager: IPersistenceListener
     {
         private List<BreakPointInfo> mBreakPoints = new List<BreakPointInfo>();
         private byte mNewBreakPointIndex = 10;
@@ -37,11 +37,18 @@ namespace arduino.net
             }
         }
 
+        public BreakPointManager()
+        {
+            SessionSettings.RegisterPersistenceListener(this);
+        }
+
         internal void Add(BreakPointInfo bi)
         {
             mBreakPoints.Add(bi);
 
             if (BreakPointAdded != null) BreakPointAdded(this, bi);
+
+            SessionSettings.Save();
         }
 
         public BreakPointInfo Add(string sourceFile, int lineNumber)
@@ -58,6 +65,8 @@ namespace arduino.net
             if (!mBreakPoints.Remove(br)) return;
 
             if (BreakPointRemoved != null) BreakPointRemoved(this, br);
+
+            SessionSettings.Save();
         }
 
         public List<BreakPointInfo> GetBreakpointsForFile(string fileName)
@@ -81,6 +90,19 @@ namespace arduino.net
                     br.LineNumber += shift;
                 }
             }
+        }
+
+        object IPersistenceListener.GetObjectToPersist()
+        {
+            return mBreakPoints;
+        }
+
+        void IPersistenceListener.RestorePersistedObject(object obj)
+        {
+            var breakpoints = obj as List<BreakPointInfo>;
+            if (breakpoints == null) return;
+
+            foreach (var bi in breakpoints) Add(bi);
         }
     }
 }

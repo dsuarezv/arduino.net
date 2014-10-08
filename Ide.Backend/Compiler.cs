@@ -95,7 +95,7 @@ namespace arduino.net
             // Successful deploy. Post actions.
 
             mLastSuccessfulDeploymentDate = DateTime.Now;
-            PersistenceManager.Save();
+            SessionSettings.Save();
             BuildDwarf();
 
             return true;

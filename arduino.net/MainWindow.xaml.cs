@@ -48,7 +48,7 @@ namespace arduino.net
 
                 foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
 
-                PersistenceManager.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
+                SessionSettings.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
 
                 StatusControl.SetState(0, "");
             }
