@@ -43,7 +43,7 @@
         		<TextBlock x:Name="textBlock" HorizontalAlignment="Stretch" Margin="20.125,0,0,0" TextWrapping="Wrap" VerticalAlignment="Stretch" Height="Auto" Width="Auto" Foreground="{DynamicResource C2}"><InlineUIContainer>
         				<ContentPresenter x:Name="contentPresenter"/>
         			</InlineUIContainer></TextBlock>
-        		<Ellipse x:Name="ellipse" Fill="Transparent" HorizontalAlignment="Left" Height="16" Margin="0" Stroke="{DynamicResource C1}" VerticalAlignment="Top" Width="16" StrokeThickness="3"/>
+        		<Ellipse x:Name="ellipse" Fill="Transparent" HorizontalAlignment="Left" Height="16" Margin="0" Stroke="{DynamicResource C1}" VerticalAlignment="Top" Width="16" StrokeThickness="2"/>
         	</Grid>
         	<ControlTemplate.Triggers>
         		<Trigger Property="IsChecked" Value="True">
@@ -55,6 +55,7 @@
         		</Trigger>
         	</ControlTemplate.Triggers>
         </ControlTemplate>
+        <SolidColorBrush x:Key="B1" Color="#FFE5E5E5"/>
 
 
     </Application.Resources>
