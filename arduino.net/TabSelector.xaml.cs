@@ -20,6 +20,18 @@ namespace arduino.net
     /// </summary>
     public partial class TabSelector : UserControl
     {
+        private TabControl mTarget;
+
+        public TabControl TargetTabControl
+        {
+            get { return mTarget; }
+            set 
+            { 
+                mTarget = value;
+                TabItemsListBox.ItemsSource = mTarget.Items;
+            }
+        }
+
         public TabSelector()
         {
             InitializeComponent();

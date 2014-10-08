@@ -8,9 +8,9 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
 
-        <local:BasePad Title="Project">
-            <TextBlock><Run Text="Hola"/></TextBlock>
-        </local:BasePad>
+        <local:BasePad Title="Project"/>
+
+        <local:TabSelector x:Name="MainTabSelector"/>
 
     </Grid>
 </UserControl>

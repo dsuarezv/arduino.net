@@ -43,7 +43,7 @@ namespace arduino.net
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
                 IdeManager.GoToLineRequested += IdeManager_GoToLineRequested;
-                //IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
+                
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
 
                 foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
@@ -51,6 +51,9 @@ namespace arduino.net
                 SessionSettings.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
 
                 StatusControl.SetState(0, "");
+
+                ProjectPad1.TargetTabControl = OpenFilesTab;
+
             }
             catch (Exception ex)
             {

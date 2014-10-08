@@ -4,13 +4,8 @@
         xmlns:local="clr-namespace:arduino.net" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         mc:Ignorable="d" x:Class="arduino.net.MainWindow"
-        Title="MainWindow" Height="900" Width="900"
+        Title="MainWindow" Height="900" Width="1000"
         WindowStyle="SingleBorderWindow" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded" Icon="arduino-icon2.ico">
-	<Window.Resources>
-		<SolidColorBrush x:Key="B0" Color="#FFF0F0F0"/>
-
-
-	</Window.Resources>
     <Grid Width="auto">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -22,11 +17,11 @@
 
         <Border Grid.Row="1" Padding="15" Background="{DynamicResource C0}">
             <Grid Grid.Row="1">
-                <Button x:Name="BuildButton" Content="Verify" Click="BuildButton_Click" Template="{DynamicResource LargeActionButton}" Width="76" Height="76" FontSize="18.667" BorderThickness="1" Margin="0,0,0,0" HorizontalAlignment="Left"/>
-                <Button x:Name="DeployButton" Content="Deploy" Click="DeployButton_Click" Template="{DynamicResource LargeActionButton}" Margin="81,0.272,0,-0.272" Width="76" FontSize="18.667" HorizontalAlignment="Left"/>
-                <Button x:Name="RunButton" Content="Run" Click="RunButton_Click" Template="{DynamicResource LargeActionButton}" Height="47" Margin="165.404,0,0,0" VerticalAlignment="Top" Width="47" HorizontalAlignment="Left" FontSize="13.333"/>
-                <Button x:Name="StopButton" Content="Stop" Click="StopButton_Click" IsEnabled="False" Template="{DynamicResource LargeActionButton}" Height="47" Margin="219.831,0,0,0" VerticalAlignment="Top" Width="47" HorizontalAlignment="Left" FontSize="13.333"/>
-                <local:StatusHeaderControl x:Name="StatusControl" Width="auto" HorizontalAlignment="Left" Margin="271.831,1.272,0,-1.272"/>
+                <Button x:Name="BuildButton" Content="Verify" Click="BuildButton_Click" Template="{DynamicResource HeaderRoundButton}" Width="76" Height="76" FontSize="18.667" BorderThickness="1" Margin="0,0,0,0" HorizontalAlignment="Left"/>
+                <Button x:Name="DeployButton" Content="Deploy" Click="DeployButton_Click" Template="{DynamicResource HeaderRoundButton}" Margin="81,0.272,0,-0.272" Width="76" FontSize="18.667" HorizontalAlignment="Left"/>
+                <Button x:Name="RunButton" Content="Run" Click="RunButton_Click" Template="{DynamicResource HeaderRoundButton}" Height="47" Margin="165.404,0,0,0" VerticalAlignment="Top" Width="47" HorizontalAlignment="Left" FontSize="13.333"/>
+                <Button x:Name="StopButton" Content="Stop" Click="StopButton_Click" IsEnabled="False" Template="{DynamicResource HeaderRoundButton}" Height="47" Margin="219.831,0,0,0" VerticalAlignment="Top" Width="47" HorizontalAlignment="Left" FontSize="13.333"/>
+                <local:StatusHeaderControl x:Name="StatusControl" Margin="272,1,197,-1"/>
                 <CheckBox x:Name="DebuggerCheckbox" Content="Debugger" HorizontalAlignment="Left" Margin="156.499,59.5,0,-0.127" VerticalAlignment="Top" Template="{DynamicResource HeaderCheckbox}" Width="78.333" Height="16.627"/>
             </Grid>
         </Border>
@@ -35,15 +30,15 @@
 
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200px" />
+                <ColumnDefinition Width="250px" />
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <GridSplitter Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Stretch" Background="{DynamicResource C0}" ShowsPreview="True" Width="2"/>
 
-			<StackPanel Grid.Column="0" Orientation="Vertical" Background="{DynamicResource B1}" Margin="0,0,2,0">
-                <local:ProjectPad />
-			</StackPanel>
+            <StackPanel Grid.Column="0" Orientation="Vertical" Background="{DynamicResource B1}" Margin="0,0,2,0">
+                <local:ProjectPad x:Name="ProjectPad1" />
+            </StackPanel>
 
             <Grid Grid.Column="1" Background="{DynamicResource B0}">
                 <Grid.RowDefinitions>
@@ -52,6 +47,7 @@
                 </Grid.RowDefinitions>
 
                 <TabControl Name="OpenFilesTab" BorderThickness="0,1,0,0" Grid.Row="0" Margin="0,5" Grid.ColumnSpan="3" Background="{DynamicResource B0}" BorderBrush="{x:Null}" />
+				
 
                 <GridSplitter Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Background="{DynamicResource C0}" ShowsPreview="True" Height="2"/>
 

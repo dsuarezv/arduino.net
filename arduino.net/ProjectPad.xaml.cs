@@ -20,9 +20,17 @@ namespace arduino.net
     /// </summary>
     public partial class ProjectPad : UserControl
     {
+        public TabControl TargetTabControl
+        {
+            get { return MainTabSelector.TargetTabControl; }
+            set { MainTabSelector.TargetTabControl = value; }
+        }
+
         public ProjectPad()
         {
             InitializeComponent();
         }
+
+
     }
 }
