@@ -314,7 +314,7 @@ namespace arduino.net
             var ext = Path.GetExtension(fileName).ToLower();
 
             if (ext.StartsWith(".c")) return FileType.Code;
-            else if (ext == ".ino") return FileType.Sketch;
+            else if (ext == ".ino" || ext == ".pde") return FileType.Sketch;
             else if (ext.StartsWith(".h")) return FileType.Include;
             else if (ext == ".s") return FileType.Assembler;
 

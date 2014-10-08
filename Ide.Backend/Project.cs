@@ -41,7 +41,7 @@ namespace arduino.net
         {
             List<string> result = new List<string>();
 
-            var extensions = new string[] { "h", "hpp", "s", "c", "cpp", "ino" };
+            var extensions = new string[] { "h", "hpp", "s", "c", "cpp", "ino", "pde" };
 
             foreach (var ext in extensions)
             {
