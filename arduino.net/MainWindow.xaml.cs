@@ -33,8 +33,8 @@ namespace arduino.net
             {
                 Configuration.Initialize(@"..\");
 
-                //var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
-                var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
+                var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
+                //var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
 
                 IdeManager.CurrentProject = new Project(sketch);
                 IdeManager.Debugger = new Debugger("COM3");
@@ -138,7 +138,8 @@ namespace arduino.net
 
         private bool IsDebugBuild()
         {
-            return true;
+            var c = DebuggerCheckbox.IsChecked;
+            return (c.HasValue ? c.Value : false);
         }
 
 
@@ -214,6 +215,16 @@ namespace arduino.net
         // __ Debugger events _________________________________________________
 
 
+        private void DebuggerCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            RunButton.IsEnabled = true;
+        }
+
+        private void DebuggerCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            RunButton.IsEnabled = false;
+        }
+
         private void Debugger_StatusChanged(object sender, DebuggerStatus newState)
         {
             Dispatcher.Invoke( () =>
@@ -227,6 +238,7 @@ namespace arduino.net
                         StopButton.IsEnabled = false;
                         RunButton.IsEnabled = true;
                         DeployButton.IsEnabled = true;
+                        DebuggerCheckbox.IsEnabled = true;
                         break;
                     case DebuggerStatus.Running:
                         SetAllDocumentsReadOnly(true);
@@ -234,6 +246,7 @@ namespace arduino.net
                         StopButton.IsEnabled = true;
                         RunButton.IsEnabled = false;
                         DeployButton.IsEnabled = false;
+                        DebuggerCheckbox.IsEnabled = false;
                         break;
                     case DebuggerStatus.Break:
                         SetAllDocumentsReadOnly(true);
@@ -241,6 +254,7 @@ namespace arduino.net
                         RunButton.IsEnabled = true;
                         StopButton.IsEnabled = true;
                         DeployButton.IsEnabled = false;
+                        DebuggerCheckbox.IsEnabled = false;
                         break;
 
                 }
