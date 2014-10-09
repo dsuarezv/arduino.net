@@ -70,9 +70,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BasePad.xaml.cs">
-      <DependentUpon>BasePad.xaml</DependentUpon>
-    </Compile>
     <Compile Include="MemoryDumpPad.xaml.cs">
       <DependentUpon>MemoryDumpPad.xaml</DependentUpon>
     </Compile>
@@ -101,10 +98,6 @@
     <Compile Include="WatchesPad.xaml.cs">
       <DependentUpon>WatchesPad.xaml</DependentUpon>
     </Compile>
-    <Page Include="BasePad.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="CodeTextBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

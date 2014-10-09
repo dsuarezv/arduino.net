@@ -65,7 +65,7 @@ namespace arduino.net
         {
             foreach (var f in IdeManager.CurrentProject.GetFileList()) await OpenFile(f);
             
-            OpenFile(IdeManager.CurrentProject.GetSketchFileName());
+            await OpenFile(IdeManager.CurrentProject.GetSketchFileName());
         }
 
         protected async override void OnPreviewKeyDown(KeyEventArgs e)
