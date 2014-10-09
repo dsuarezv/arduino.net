@@ -49,7 +49,7 @@
     <Compile Include="IdeManager.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ObjectDumper.cs" />
-    <Compile Include="PersistenceManager.cs" />
+    <Compile Include="SessionSettings.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegisterManager.cs" />

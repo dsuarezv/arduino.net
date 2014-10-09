@@ -43,14 +43,17 @@ namespace arduino.net
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
                 IdeManager.GoToLineRequested += IdeManager_GoToLineRequested;
-                //IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
+                
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
 
                 foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
 
-                PersistenceManager.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
+                SessionSettings.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
 
                 StatusControl.SetState(0, "");
+
+                ProjectPad1.TargetTabControl = OpenFilesTab;
+
             }
             catch (Exception ex)
             {
@@ -268,22 +271,22 @@ namespace arduino.net
 
         private void Debugger_BreakPointHit(object sender, BreakPointInfo bi)
         {
-            Dispatcher.Invoke(() =>
-            {
-                RegistersPad.UpdateRegisters(IdeManager.Debugger.RegManager);
+            //Dispatcher.Invoke(() =>
+            //{
+            //    RegistersPad.UpdateRegisters(IdeManager.Debugger.RegManager);
 
-                if (bi == null)
-                {
-                    StatusControl.SetState(1, "Unknown breakpoint hit. Target is stopped. Hit 'debug' to continue.");
-                }
-                else
-                {
-                    StatusControl.SetState(0, "Stopped at breakpoint. Hit 'debug' to continue.");
+            //    if (bi == null)
+            //    {
+            //        StatusControl.SetState(1, "Unknown breakpoint hit. Target is stopped. Hit 'debug' to continue.");
+            //    }
+            //    else
+            //    {
+            //        StatusControl.SetState(0, "Stopped at breakpoint. Hit 'debug' to continue.");
 
-                    var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber);
-                    if (editor != null) editor.SetActiveLine(bi.LineNumber);
-                }
-            });
+            //        var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber);
+            //        if (editor != null) editor.SetActiveLine(bi.LineNumber);
+            //    }
+            //});
 
             UpdateDwarf();
         }
@@ -366,7 +369,7 @@ namespace arduino.net
         {
             var codeEditor = new CodeTextBox() { Padding = new Thickness(0, 5, 0, 5) };
 
-            TabItem t = new TabItem() { Header = System.IO.Path.GetFileName(fileName), Tag = fileName, Content = codeEditor };
+            TabItem t = new TabItem() { Header = System.IO.Path.GetFileName(fileName), Tag = fileName, Content = codeEditor, Visibility = Visibility.Collapsed };
 
             OpenFilesTab.Items.Add(t);
 

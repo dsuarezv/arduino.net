@@ -8,9 +8,10 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace arduino.net
 {
-    public class PersistenceManager
+    public class SessionSettings
     {
         private static string mFileName;
+        private static List<IPersistenceListener> mListeners = new List<IPersistenceListener>();
 
         public static void Initialize(string fileName)
         {
@@ -26,7 +27,11 @@ namespace arduino.net
             using (var writer = new FileStream(mFileName, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 var f = new BinaryFormatter();
-                f.Serialize(writer, IdeManager.Debugger.BreakPoints.BreakPoints);
+
+                foreach (var l in mListeners)
+                {
+                    f.Serialize(writer, l.GetObjectToPersist());
+                }
             }
         }
 
@@ -39,11 +44,10 @@ namespace arduino.net
                 using (var reader = new FileStream(mFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     var f = new BinaryFormatter();
-                    var breakpoints = f.Deserialize(reader) as List<BreakPointInfo>;
 
-                    foreach (var bi in breakpoints)
+                    foreach (var l in mListeners)
                     {
-                        IdeManager.Debugger.BreakPoints.Add(bi);
+                        l.RestorePersistedObject(f.Deserialize(reader));
                     }
                 }
             }
@@ -52,5 +56,16 @@ namespace arduino.net
                 // ignore. We simply do not restore any options.
             }
         }
+
+        public static void RegisterPersistenceListener(IPersistenceListener listener)
+        {
+            mListeners.Add(listener);
+        }
+    }
+
+    public interface IPersistenceListener
+    {
+        object GetObjectToPersist();
+        void RestorePersistedObject(object obj);
     }
 }

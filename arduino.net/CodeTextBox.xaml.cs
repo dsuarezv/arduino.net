@@ -56,6 +56,7 @@ namespace arduino.net
                 Font = new Font(Configuration.EditorFontName, Configuration.EditorFontSize),
                 AutoIndent = Configuration.EditorAutoIndent,
                 ReservedCountOfLineNumberChars = 5,
+                BackColor = Color.FromArgb(0xf0, 0xf0, 0xf0)
             };
 
             mMainTextBox.PaintLine += mMainTextBox_PaintLine;
