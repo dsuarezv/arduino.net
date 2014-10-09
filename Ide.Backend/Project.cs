@@ -51,6 +51,11 @@ namespace arduino.net
             return result;            
         }
 
+        public string GetSketchFileName()
+        {
+            return Path.Combine(mProjectPath, mSketchFile);
+        }
+        
         public string GetSettingsFileName()
         {
             var fileName = Path.GetFileNameWithoutExtension(mSketchFile) + IdeSettingsExtension;

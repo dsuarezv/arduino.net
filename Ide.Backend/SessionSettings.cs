@@ -39,6 +39,8 @@ namespace arduino.net
         {
             if (mFileName == null) throw new Exception("Persistence manager not initialized.");
 
+            if (!File.Exists(mFileName)) return;
+
             try
             { 
                 using (var reader = new FileStream(mFileName, FileMode.Open, FileAccess.Read, FileShare.Read))

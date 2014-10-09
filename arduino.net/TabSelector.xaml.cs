@@ -36,5 +36,13 @@ namespace arduino.net
         {
             InitializeComponent();
         }
+
+        private void TabItemsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var tabItem = TabItemsListBox.SelectedItem as TabItem;
+            if (tabItem == null) return;
+
+            tabItem.IsSelected = true;
+        }
     }
 }

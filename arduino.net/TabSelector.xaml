@@ -6,22 +6,19 @@
              xmlns:local="clr-namespace:arduino.net" x:Class="arduino.net.TabSelector" 
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="250">
+    
+	
 	<UserControl.Resources>
 		<DataTemplate x:Key="TabsItemTemplate">
-			<Grid x:Name="grid" HorizontalAlignment="Stretch" Height="31">
-				<TextBlock Text="{Binding Header}" VerticalAlignment="Center" Foreground="{DynamicResource C0}"/>
-			</Grid>
-			<DataTemplate.Triggers>
-				<Trigger Property="IsMouseOver" Value="True">
-					<Setter Property="Background" TargetName="grid" Value="{DynamicResource C2}"/>
-				</Trigger>
-			</DataTemplate.Triggers>
-		</DataTemplate>
-		
-		
-	</UserControl.Resources>
-	
+			<Grid x:Name="grid" HorizontalAlignment="Stretch" Height="28">
+				<TextBlock Margin="10, 0, 0, 0" Text="{Binding Header}" VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
     <Grid>
-        <ListBox x:Name="TabItemsListBox" VerticalAlignment="Top" ItemTemplate="{DynamicResource TabsItemTemplate}" BorderThickness="0" Background="{x:Null}" />
+        <ListBox x:Name="TabItemsListBox" VerticalAlignment="Top" ItemTemplate="{DynamicResource TabsItemTemplate}" BorderThickness="0" Background="{x:Null}" Style="{DynamicResource TabSelectorListbox}" ItemContainerStyle="{DynamicResource TabSelectorListBoxItemStyle}" FontSize="14" SelectionChanged="TabItemsListBox_SelectionChanged"/>
     </Grid>
+
+
 </UserControl>

@@ -33,8 +33,9 @@ namespace arduino.net
             {
                 Configuration.Initialize(@"..\");
 
-                var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
-                //var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
+                //var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
+                var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
+                
 
                 IdeManager.CurrentProject = new Project(sketch);
                 IdeManager.Debugger = new Debugger("COM3");
@@ -46,19 +47,25 @@ namespace arduino.net
                 
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
 
-                foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
-
                 SessionSettings.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
 
                 StatusControl.SetState(0, "");
 
                 ProjectPad1.TargetTabControl = OpenFilesTab;
 
+                OpenAllProjectFiles();
             }
             catch (Exception ex)
             {
                 DisplayException(ex);
             }
+        }
+
+        private async void OpenAllProjectFiles()
+        {
+            foreach (var f in IdeManager.CurrentProject.GetFileList()) await OpenFile(f);
+            
+            OpenFile(IdeManager.CurrentProject.GetSketchFileName());
         }
 
         protected async override void OnPreviewKeyDown(KeyEventArgs e)
@@ -327,7 +334,7 @@ namespace arduino.net
         // __ Document management _____________________________________________
 
 
-        private void OpenFile(string fileName)
+        private async Task OpenFile(string fileName)
         {
             var ti = GetTabForFileName(fileName);
 
@@ -343,7 +350,7 @@ namespace arduino.net
                 editor = CreateEditorTabItem(fileName);
             }
 
-            editor.OpenFile(fileName);
+            await editor.OpenFile(fileName);
         }
 
         private void OpenContent(string title, string content)

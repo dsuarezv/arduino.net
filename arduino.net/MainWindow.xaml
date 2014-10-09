@@ -37,8 +37,9 @@
             <GridSplitter Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Stretch" Background="{DynamicResource C0}" ShowsPreview="True" Width="2"/>
 
             <StackPanel Grid.Column="0" Orientation="Vertical" Background="{DynamicResource B1}" Margin="0,0,2,0">
-                <local:ProjectPad x:Name="ProjectPad1" />
+                <local:ProjectPad x:Name="ProjectPad1"/>
             </StackPanel>
+            
 
             <Grid Grid.Column="1" Background="{DynamicResource B0}">
                 <Grid.RowDefinitions>
@@ -46,12 +47,11 @@
                     <RowDefinition Height="150px"/>
                 </Grid.RowDefinitions>
 
-                <TabControl Name="OpenFilesTab" BorderThickness="0,1,0,0" Grid.Row="0" Margin="0,5" Grid.ColumnSpan="3" Background="{DynamicResource B0}" BorderBrush="{x:Null}" />
+                <TabControl Name="OpenFilesTab" Grid.Row="0" Margin="0" Background="{StaticResource B0}" BorderBrush="{x:Null}" Padding="0"/>
 
+                <GridSplitter Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Background="{StaticResource C0}" ShowsPreview="True" Height="2"/>
 
-                <GridSplitter Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Background="{DynamicResource C0}" ShowsPreview="True" Height="2"/>
-
-                <local:OutputTextBox x:Name="OutputTextBox1" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch" Padding="5" Grid.ColumnSpan="3" Background="{DynamicResource B0}"/>
+                <local:OutputTextBox x:Name="OutputTextBox1" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch" Padding="5, 5, 0, 0" Grid.ColumnSpan="3" Background="{StaticResource B0}"/>
 
             </Grid>
 

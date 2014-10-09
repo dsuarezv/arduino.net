@@ -8,7 +8,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
 
-        <local:BasePad Title="Project"/>
+        <!--local:BasePad Title="Project"/-->
 
         <local:TabSelector x:Name="MainTabSelector"/>
 
