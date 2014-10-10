@@ -39,13 +39,7 @@
   <ItemGroup>
     <Reference Include="FastColoredTextBox, Version=2.15.11.0, Culture=neutral, PublicKeyToken=fb8aa12b994ef61b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\FastColoredTextBox\lib\FastColoredTextBox.dll</HintPath>
-    </Reference>
-    <Reference Include="Selen.Wpf.Core">
-      <HintPath>..\libs\Selen.Wpf\lib\Debug\Selen.Wpf.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Selen.Wpf.SystemStyles">
-      <HintPath>..\libs\Selen.Wpf\lib\Debug\Selen.Wpf.SystemStyles.dll</HintPath>
+      <HintPath>..\libs\FastColoredTextBox\src\bin\Debug\FastColoredTextBox.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -70,6 +64,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FontManager.cs" />
     <Compile Include="MemoryDumpPad.xaml.cs">
       <DependentUpon>MemoryDumpPad.xaml</DependentUpon>
     </Compile>
@@ -187,9 +182,9 @@
     <None Include="fonts\SourceCodePro-Medium.otf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Resource Include="fonts\SourceCodePro-Regular.otf">
+    <None Include="fonts\SourceCodePro-Regular.otf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    </None>
     <None Include="fonts\SourceCodePro-Semibold.otf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

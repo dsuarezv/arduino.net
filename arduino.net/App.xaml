@@ -178,8 +178,6 @@
 
 
 
-        <SolidColorBrush x:Key="Expander.MouseOver.Arrow.Stroke" Color="#FF000000"/>
-        <SolidColorBrush x:Key="Expander.Pressed.Arrow.Stroke" Color="#FF000000"/>
         <SolidColorBrush x:Key="Expander.Disabled.Arrow.Stroke" Color="#FF707070"/>
         <SolidColorBrush x:Key="Expander.Static.Arrow.Stroke" Color="#FF333333"/>
         
@@ -209,7 +207,7 @@
                                     <ColumnDefinition Width="30"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Border Grid.Column="0" HorizontalAlignment="Stretch" Height="Auto" Margin="10,6" SnapsToDevicePixels="True">
+                                <Border Grid.Column="0" HorizontalAlignment="Stretch" Height="Auto" Margin="10,5" SnapsToDevicePixels="True">
                                     <ContentPresenter Grid.Column="0"  RecognizesAccessKey="True" VerticalAlignment="Center"/>
                                 </Border>
                                 <Path x:Name="arrow" Grid.Column="1" Data="M 1,1.5 L 4.5,5 L 8,1.5" HorizontalAlignment="Center" SnapsToDevicePixels="false" Stroke="{StaticResource Expander.Static.Arrow.Stroke}" StrokeThickness="2" VerticalAlignment="Center"/>
@@ -222,10 +220,10 @@
                                 <Setter Property="Data" TargetName="arrow" Value="M 1,4.5  L 4.5,1  L 8,4.5"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="true">
-                                <Setter Property="Stroke" TargetName="arrow" Value="{StaticResource Expander.MouseOver.Arrow.Stroke}"/>
+                                <Setter Property="Stroke" TargetName="arrow" Value="{StaticResource C0}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="true">
-                                <Setter Property="Stroke" TargetName="arrow" Value="{StaticResource Expander.Pressed.Arrow.Stroke}"/>
+                                <Setter Property="Stroke" TargetName="arrow" Value="{StaticResource C0}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="false">
                                 <Setter Property="Stroke" TargetName="arrow" Value="{StaticResource Expander.Disabled.Arrow.Stroke}"/>
@@ -250,7 +248,7 @@
                         <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" CornerRadius="3" SnapsToDevicePixels="true">
                             <DockPanel>
                                 <ToggleButton x:Name="HeaderSite" ContentTemplate="{TemplateBinding HeaderTemplate}" ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}" Content="{TemplateBinding Header}" DockPanel.Dock="Top"  
-                                              Foreground="{StaticResource C0}" FontSize="24" FontFamily="Segoe UI" FontWeight="Bold" FontStyle="Normal" FontStretch="Normal"
+                                              Foreground="{StaticResource C0}" FontSize="22" FontFamily="Segoe UI" FontWeight="Bold" FontStyle="Normal" FontStretch="Normal"
                                               FocusVisualStyle="{StaticResource ExpanderHeaderFocusVisual}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" Margin="1" MinWidth="0" MinHeight="0" Padding="{TemplateBinding Padding}" Style="{StaticResource ExpanderDownHeaderStyle}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
                                 <ContentPresenter x:Name="ExpandSite" DockPanel.Dock="Bottom" Focusable="false" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" Visibility="Collapsed" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                             </DockPanel>

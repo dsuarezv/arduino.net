@@ -33,8 +33,8 @@ namespace arduino.net
             {
                 Configuration.Initialize(@"..\");
 
-                //var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
-                var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
+                var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
+                //var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
                 
 
                 IdeManager.CurrentProject = new Project(sketch);
@@ -63,7 +63,7 @@ namespace arduino.net
 
         private async void OpenAllProjectFiles()
         {
-            foreach (var f in IdeManager.CurrentProject.GetFileList()) await OpenFile(f);
+            foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
             
             await OpenFile(IdeManager.CurrentProject.GetSketchFileName());
         }

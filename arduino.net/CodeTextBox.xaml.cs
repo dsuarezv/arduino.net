@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Drawing;
 
 using FastColoredTextBoxNS;
+using System.Drawing.Text;
 
 namespace arduino.net
 {
@@ -50,13 +51,16 @@ namespace arduino.net
 
         private void InitializeTextBox()
         {
+
             mMainTextBox = new FastColoredTextBox()
             {
                 Dock = System.Windows.Forms.DockStyle.Fill,
-                Font = new Font(Configuration.EditorFontName, Configuration.EditorFontSize),
+                Font = FontManager.GetSourceCodeFont(),
                 AutoIndent = Configuration.EditorAutoIndent,
                 ReservedCountOfLineNumberChars = 5,
-                BackColor = Color.FromArgb(240, 240, 240)
+                BackColor = Color.FromArgb(240, 240, 240),
+                IndentBackColor = Color.FromArgb(240, 240, 240),
+                LineNumberColor = Color.FromArgb(180, 180, 180)
             };
 
             mMainTextBox.PaintLine += mMainTextBox_PaintLine;
