@@ -84,12 +84,10 @@
       <DependentUpon>StatusHeaderControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="SyntaxHighlightApplier.cs" />
-    <Compile Include="SystemButtons.xaml.cs">
-      <DependentUpon>SystemButtons.xaml</DependentUpon>
-    </Compile>
     <Compile Include="TabSelector.xaml.cs">
       <DependentUpon>TabSelector.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UiConfig.cs" />
     <Compile Include="WatchesPad.xaml.cs">
       <DependentUpon>WatchesPad.xaml</DependentUpon>
     </Compile>
@@ -133,10 +131,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="StatusHeaderControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SystemButtons.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

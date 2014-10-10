@@ -38,6 +38,7 @@
 
             <StackPanel Grid.Column="0" Orientation="Vertical" Background="{DynamicResource B1}" Margin="0,0,2,0">
                 <local:ProjectPad x:Name="ProjectPad1"/>
+                <local:WatchesPad x:Name="WatchesPad1"/>
             </StackPanel>
             
 

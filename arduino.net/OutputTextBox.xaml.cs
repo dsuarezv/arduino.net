@@ -59,7 +59,8 @@ namespace arduino.net
                 Dock = System.Windows.Forms.DockStyle.Fill,
                 ShowLineNumbers = false,
                 ReadOnly = true,
-                BackColor = Color.FromArgb(240, 240, 240)
+                BackColor = UiConfig.GetWinformsColor(UiConfig.Background0),
+                Font = FontManager.GetSourceCodeFont(),
             };
 
             mContentTextBox.MouseDown += mContentTextBox_MouseDown;

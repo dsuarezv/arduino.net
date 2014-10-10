@@ -37,16 +37,16 @@ namespace arduino.net
 
         private Brush GetBrushForState()
         {
-            var key = "C0-Text";
+            var key = UiConfig.TextOnColor0;
 
             switch (mState)
             {
 
-                case ActionStatus.InProgress: key = "C6"; break;
-                case ActionStatus.Fail: key = "C5"; break;
+                case ActionStatus.InProgress: key = UiConfig.Color6; break;
+                case ActionStatus.Fail: key = UiConfig.Color5; break;
             }
 
-            return Application.Current.TryFindResource(key) as Brush;
+            return UiConfig.GetBrush(key);
         }
     }
 

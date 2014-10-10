@@ -30,7 +30,7 @@ namespace arduino.net
         {
             if (!DesignerProperties.GetIsInDesignMode(this))
             { 
-                WatchesGrid.ItemsSource = IdeManager.Debugger.Watches;
+                //WatchesGrid.ItemsSource = IdeManager.Debugger.Watches;
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
             }
         }

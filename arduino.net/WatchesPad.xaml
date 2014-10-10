@@ -6,12 +6,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300" Loaded="UserControl_Loaded">
 
-    <Grid>
-        <DataGrid Name="WatchesGrid" AutoGenerateColumns="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Width="150"/>
-                <DataGridTextColumn Header="Value" Width="100"/>
-            </DataGrid.Columns>
-        </DataGrid>
+    <Grid Margin="0, 0, 0, 20">
+        <Expander Header="Watches" IsExpanded="True" Style="{DynamicResource PadExpanderStyle}"  >
+            
+        </Expander>
     </Grid>
 </UserControl>

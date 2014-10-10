@@ -18,7 +18,7 @@
 		<SolidColorBrush x:Key="B1" Color="#FFE5E5E5"/>
         <SolidColorBrush x:Key="B1-MouseOver" Color="#FFDCDCDC"/>
 
-		<SolidColorBrush x:Key="B0-Text" Color="#FF2c333d"/>
+		<SolidColorBrush x:Key="B0-Text" Color="#FF3d444e"/>
 		<SolidColorBrush x:Key="C0-Text" Color="#FFF0F0F0"/>
 
 
@@ -253,7 +253,7 @@
                         <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" CornerRadius="3" SnapsToDevicePixels="true">
                             <DockPanel>
                                 <ToggleButton x:Name="HeaderSite" ContentTemplate="{TemplateBinding HeaderTemplate}" ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}" Content="{TemplateBinding Header}" DockPanel.Dock="Top"  
-                                              Foreground="{StaticResource C0}" FontSize="22" FontFamily="Segoe UI" FontWeight="Bold" FontStyle="Normal" FontStretch="Normal"
+                                              Foreground="{StaticResource B0-Text}" FontSize="22" FontFamily="Segoe UI" FontWeight="Bold" FontStyle="Normal" FontStretch="Normal"
                                               FocusVisualStyle="{StaticResource ExpanderHeaderFocusVisual}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" Margin="1" MinWidth="0" MinHeight="0" Padding="{TemplateBinding Padding}" Style="{StaticResource ExpanderDownHeaderStyle}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
                                 <ContentPresenter x:Name="ExpandSite" DockPanel.Dock="Bottom" Focusable="false" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" Visibility="Collapsed" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                             </DockPanel>

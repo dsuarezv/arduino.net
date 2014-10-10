@@ -51,6 +51,7 @@ namespace arduino.net
 
         private void InitializeTextBox()
         {
+            var backColor = UiConfig.GetWinformsColor(UiConfig.Background0);
 
             mMainTextBox = new FastColoredTextBox()
             {
@@ -58,8 +59,8 @@ namespace arduino.net
                 Font = FontManager.GetSourceCodeFont(),
                 AutoIndent = Configuration.EditorAutoIndent,
                 ReservedCountOfLineNumberChars = 5,
-                BackColor = Color.FromArgb(240, 240, 240),
-                IndentBackColor = Color.FromArgb(240, 240, 240),
+                BackColor = backColor,
+                IndentBackColor = backColor,
                 LineNumberColor = Color.FromArgb(180, 180, 180)
             };
 
