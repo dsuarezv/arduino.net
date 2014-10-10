@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         mc:Ignorable="d" x:Class="arduino.net.MainWindow"
         Title="MainWindow" Height="900" Width="1000"
-        WindowStyle="SingleBorderWindow" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded" Icon="arduino-icon2.ico">
+        WindowStyle="SingleBorderWindow" ResizeMode="CanResizeWithGrip" Icon="arduino-icon2.ico"
+        Loaded="Window_Loaded" 
+        Closing="Window_Closing">
     <Grid Width="auto">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -22,11 +24,11 @@
                 <Button x:Name="RunButton" Content="Run" Click="RunButton_Click" Template="{DynamicResource HeaderRoundButton}" Height="47" Margin="165.404,0,0,0" VerticalAlignment="Top" Width="47" FontSize="13" HorizontalAlignment="Left" IsEnabled="False"/>
                 <Button x:Name="StopButton" Content="Stop" Click="StopButton_Click" IsEnabled="False" Template="{DynamicResource HeaderRoundButton}" Height="47" Margin="219.831,0,0,0" FontSize="13" VerticalAlignment="Top" Width="47" HorizontalAlignment="Left"/>
                 <local:StatusHeaderControl x:Name="StatusControl" Width="auto" HorizontalAlignment="Left" Margin="271.831,1.272,0,-1.272"/>
-                <CheckBox x:Name="DebuggerCheckbox" Content="Debugger" HorizontalAlignment="Left" Margin="156.499,59.5,0,-0.127" VerticalAlignment="Top" Template="{DynamicResource HeaderCheckbox}" Width="78.333" Height="16.627" Checked="DebuggerCheckbox_Checked" Unchecked="DebuggerCheckbox_Unchecked"/>
+                <CheckBox x:Name="DebuggerCheckbox" Content="Debugger" HorizontalAlignment="Left" Margin="156,60,0,0" Template="{DynamicResource HeaderCheckbox}" Width="79" Checked="DebuggerCheckbox_Checked" Unchecked="DebuggerCheckbox_Unchecked" Height="16" VerticalAlignment="Top"/>
             </Grid>
         </Border>
 
-        
+
 
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
@@ -40,7 +42,7 @@
                 <local:ProjectPad x:Name="ProjectPad1"/>
                 <local:WatchesPad x:Name="WatchesPad1"/>
             </StackPanel>
-            
+
 
             <Grid Grid.Column="1" Background="{DynamicResource B0}">
                 <Grid.RowDefinitions>

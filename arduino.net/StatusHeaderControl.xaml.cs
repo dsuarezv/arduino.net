@@ -44,11 +44,12 @@ namespace arduino.net
 
                 case ActionStatus.InProgress: key = UiConfig.Color6; break;
                 case ActionStatus.Fail: key = UiConfig.Color5; break;
+                case ActionStatus.Info: key = UiConfig.TextOnColor0; break;
             }
 
             return UiConfig.GetBrush(key);
         }
     }
 
-    public enum ActionStatus { OK, InProgress, Fail };
+    public enum ActionStatus { OK, InProgress, Fail, Info };
 }

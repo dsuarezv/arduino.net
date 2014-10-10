@@ -103,6 +103,8 @@ namespace arduino.net
             if (breakpoints == null) return;
 
             foreach (var bi in breakpoints) Add(bi);
+
+            mNewBreakPointIndex += (byte)breakpoints.Count;
         }
     }
 }

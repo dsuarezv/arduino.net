@@ -47,18 +47,23 @@ namespace arduino.net
                 
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
 
-                SessionSettings.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
-
                 StatusControl.SetState(0, "Project", "Project loaded successfully");
 
                 ProjectPad1.TargetTabControl = OpenFilesTab;
 
                 OpenAllProjectFiles();
+
+                SessionSettings.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
             }
             catch (Exception ex)
             {
                 DisplayException(ex);
             }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            SessionSettings.Save();
         }
 
         private async void OpenAllProjectFiles()
@@ -132,7 +137,7 @@ namespace arduino.net
         {
             IdeManager.Debugger.Detach();
             ClearEditorActiveLine();
-            StatusControl.SetState(0, "Debugger", "Debugger dettached from arduino.");
+            StatusControl.SetState(0, "Debugger", "Debugger dettached from Arduino.");
         }
 
         private void ClearEditorActiveLine()
@@ -228,11 +233,14 @@ namespace arduino.net
         private void DebuggerCheckbox_Checked(object sender, RoutedEventArgs e)
         {
             RunButton.IsEnabled = true;
+
+            StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger enabled. Set breakpoints in the code with F9 and hit 'Run' when ready.");
         }
 
         private void DebuggerCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
             RunButton.IsEnabled = false;
+            StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger Disabled. Deploy to Arduino to update to the non-debug program.");
         }
 
         private void Debugger_StatusChanged(object sender, DebuggerStatus newState)
@@ -278,22 +286,22 @@ namespace arduino.net
 
         private void Debugger_BreakPointHit(object sender, BreakPointInfo bi)
         {
-            //Dispatcher.Invoke(() =>
-            //{
-            //    RegistersPad.UpdateRegisters(IdeManager.Debugger.RegManager);
+            Dispatcher.Invoke(() =>
+            {
+                //RegistersPad.UpdateRegisters(IdeManager.Debugger.RegManager);
 
-            //    if (bi == null)
-            //    {
-            //        StatusControl.SetState(1, "Unknown breakpoint hit. Target is stopped. Hit 'debug' to continue.");
-            //    }
-            //    else
-            //    {
-            //        StatusControl.SetState(0, "Stopped at breakpoint. Hit 'debug' to continue.");
+                if (bi == null)
+                {
+                    StatusControl.SetState(ActionStatus.Fail, "Debugger", "Unknown breakpoint hit. Target is stopped. Hit 'Run' to continue.");
+                }
+                else
+                {
+                    StatusControl.SetState(ActionStatus.Info, "Debugger", "Stopped at breakpoint. Hit 'Run' to continue.");
 
-            //        var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber);
-            //        if (editor != null) editor.SetActiveLine(bi.LineNumber);
-            //    }
-            //});
+                    var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber);
+                    if (editor != null) editor.SetActiveLine(bi.LineNumber);
+                }
+            });
 
             UpdateDwarf();
         }
@@ -444,5 +452,7 @@ namespace arduino.net
 
             return editor;
         }
+
+        
     }
 }
