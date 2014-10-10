@@ -128,6 +128,7 @@ namespace arduino.net
                     {
                         IdeManager.Debugger.Attach();
                         IdeManager.Debugger.TargetContinue();
+                        StatusControl.SetState(ActionStatus.Info, "Debugger", "Arduino running...");
                     }
                     break;
             }

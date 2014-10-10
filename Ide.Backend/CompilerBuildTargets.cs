@@ -395,6 +395,13 @@ namespace arduino.net
                         line
                     };
                 }
+                else
+                {
+                    return new string[] {
+                        string.Format("#line {0} \"{1}\"", lineNumber, EscapePath(SourceFile)),
+                        line 
+                    };
+                }
             }
             else if (lineNumber == mParser.LastIncludeLineNumber + 2)
             {
