@@ -68,6 +68,11 @@
         			<Setter Property="Foreground" TargetName="textBlock" Value="{DynamicResource C1-Highlight}"/>
         			<Setter Property="Stroke" TargetName="ellipse" Value="{DynamicResource C1-Highlight}"/>
         		</Trigger>
+				<Trigger Property="IsEnabled" Value="False">
+        			<Setter Property="Foreground" TargetName="textBlock" Value="{DynamicResource C1-Disabled}"/>
+        			<Setter Property="Stroke" TargetName="ellipse" Value="{DynamicResource C1-Disabled}"/>
+					<Setter Property="Fill" TargetName="ellipse" Value="{DynamicResource C1-Disabled}"/>
+        		</Trigger>
         	</ControlTemplate.Triggers>
         </ControlTemplate>
 
