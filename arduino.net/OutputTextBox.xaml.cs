@@ -81,7 +81,7 @@ namespace arduino.net
 
                 if (IsErrorLocation(line, out fileName, out lineNumber))
                 {
-                    IdeManager.GoToFileAndLine(fileName, lineNumber);
+                    IdeManager.GoToFileAndLine(fileName, lineNumber + 1);
                 }
             }
         }

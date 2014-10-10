@@ -234,7 +234,7 @@ namespace arduino.net
             switch (ext.Trim('.').ToLower())
             {
                 case "s": mSyntaxHighlighter = SyntaxHighlightApplier.Cpp;  break;
-                    
+                case "disassembly": mSyntaxHighlighter = SyntaxHighlightApplier.Disassembly; break;
                 case "c":
                 case "cpp":
                 case "h":
@@ -296,27 +296,26 @@ namespace arduino.net
         void mMainTextBox_PaintLine(object sender, PaintLineEventArgs e)
         {
             var re = e.LineRect;
+            var l = e.LineIndex + 1;
 
             foreach (var i in mBreakpoints)
             {
-                var l = e.LineIndex + 1;
-
                 if (i.Key == l)
                 {
                     bool isUpToDate = i.Value.IsDeployedOnDevice(IdeManager.Compiler);
 
                     var brush = isUpToDate ? C5Brush : C6Brush;
                     
-                    e.Graphics.FillEllipse(brush, new Rectangle(0, re.Top, 15, 15));
+                    e.Graphics.FillEllipse(brush, new Rectangle(2, re.Top, 15, 15));
 
-                    if (mActiveLine == l)
-                    {
-                        const int xStart = 50;
-                        e.Graphics.FillRectangle(C7Brush, new Rectangle(xStart, re.Top, re.Width - xStart, re.Height));
-                    }
-
-                    return;
+                    break;
                 }
+            }
+
+            if (mActiveLine == l)
+            {
+                const int xStart = 50;
+                e.Graphics.FillRectangle(C7Brush, new Rectangle(xStart, re.Top, re.Width - xStart, re.Height));
             }
         }
 

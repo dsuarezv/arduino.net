@@ -165,6 +165,8 @@ namespace arduino.net
 
         private async Task<bool> LaunchBuild()
         {
+            ClearAllActiveLines();
+
             bool debug = IsDebugBuild();
 
             OutputTextBox1.ClearText();
@@ -182,7 +184,7 @@ namespace arduino.net
                 { 
                     OpenContent("Sketch dissasembly",
                         ObjectDumper.GetSingleString(
-                            ObjectDumper.GetDisassemblyWithSource(elfFile)));
+                            ObjectDumper.GetDisassemblyWithSource(elfFile)), ".disassembly");
 
                     OpenContent("Symbol table",
                         ObjectDumper.GetSingleString(
@@ -300,8 +302,7 @@ namespace arduino.net
                 {
                     StatusControl.SetState(ActionStatus.Info, "Debugger", "Stopped at breakpoint. Hit 'Run' to continue.");
 
-                    var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber - 1);
-                    if (editor != null) editor.SetActiveLine(bi.LineNumber);
+                    var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber);
                 }
             });
 
@@ -363,7 +364,7 @@ namespace arduino.net
             await editor.OpenFile(fileName);
         }
 
-        private void OpenContent(string title, string content)
+        private void OpenContent(string title, string content, string ext = null)
         {
             var ti = GetTabForFileName(title);
 
@@ -379,7 +380,7 @@ namespace arduino.net
                 editor = CreateEditorTabItem(title);
             }
 
-            editor.OpenContent(content, null);
+            editor.OpenContent(content, ext);
         }
 
         private CodeTextBox CreateEditorTabItem(string fileName)
@@ -416,6 +417,11 @@ namespace arduino.net
             }
         }
 
+        private void ClearAllActiveLines()
+        {
+            RunOnAllEditors((e) => e.ClearActiveLine());
+        }
+
         private void SaveAllDocuments()
         {
             RunOnAllEditors((e) => e.SaveFile());
@@ -449,12 +455,11 @@ namespace arduino.net
             var editor = GetEditor(fileName);
             if (editor == null) return null;
 
-            editor.SetCursorAt(lineNumber, 0);
+            editor.SetCursorAt(lineNumber - 1, 0);
             editor.FocusEditor();
+            editor.SetActiveLine(lineNumber);
 
             return editor;
         }
-
-        
     }
 }

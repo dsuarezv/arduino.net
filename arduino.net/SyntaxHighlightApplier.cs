@@ -12,7 +12,8 @@ namespace arduino.net
     public class SyntaxHighlightApplier
     {
         static TextStyle BlueStyle = new TextStyle(new SolidBrush(Color.FromArgb(86, 156, 214)), null, FontStyle.Regular);
-        static TextStyle BoldStyle = new TextStyle(null, null, FontStyle.Bold | FontStyle.Underline);
+        static TextStyle BoldStyle = new TextStyle(null, null, FontStyle.Bold);
+        static TextStyle BlackStyle = new TextStyle(Brushes.Black, null, FontStyle.Regular);
         static TextStyle GrayStyle = new TextStyle(Brushes.Gray, null, FontStyle.Regular);
         static TextStyle MagentaStyle = new TextStyle(new SolidBrush(Color.FromArgb(189, 99, 197)), null, FontStyle.Regular);
         static TextStyle GreenStyle = new TextStyle(new SolidBrush(Color.FromArgb(87, 166, 74)), null, FontStyle.Regular);
@@ -33,7 +34,7 @@ namespace arduino.net
             fctb.CommentPrefix = "//";
 
             //clear style of changed range
-            e.ChangedRange.ClearStyle(BlueStyle, BoldStyle, GrayStyle, MagentaStyle, GreenStyle, BrownStyle);
+            e.ChangedRange.ClearStyle(BlueStyle, GrayStyle, MagentaStyle, GreenStyle);
 
             //string highlighting
             e.ChangedRange.SetStyle(MagentaStyle, @"""""|@""""|''|@"".*?""|(?<!@)(?<range>"".*?[^\\]"")|'.*?[^\\]'");
@@ -76,7 +77,7 @@ namespace arduino.net
         public static void Compiler(FastColoredTextBox fctb, TextChangedEventArgs e)
         {
             //clear style of changed range
-            e.ChangedRange.ClearStyle(BlueStyle, BoldStyle, GrayStyle, MagentaStyle, GreenStyle, BrownStyle);
+            e.ChangedRange.ClearStyle(MaroonStyle, RedStyle, OrangeStyle);
 
 
             // Error highlight
@@ -88,6 +89,20 @@ namespace arduino.net
             // Warning highlight
             // Debugger\Debugger.ino:24: warning: unused variable 'test'
             e.ChangedRange.SetStyle(OrangeStyle, WarningRegex);
+
+        }
+
+
+        public static void Disassembly(FastColoredTextBox fctb, TextChangedEventArgs e)
+        {
+            //clear style of changed range
+            e.ChangedRange.ClearStyle(GrayStyle, BlackStyle);
+
+            //e.ChangedRange.SetStyle(BoldStyle, @"^\s*(?<addr>[0-9a-f]+)(?<label>\s<[a-zA-Z_]+>)*:\s+(?<bytecode>([a-f0-9][a-f0-9] )+)\s+(?<range>[a-zA-Z0-9,\+\-\. ]*)(?<comment>;.+$)*", RegexOptions.Multiline);
+            //e.ChangedRange.SetStyle(GreenStyle, @"^\s*(?<addr>[0-9a-f]+)(?<label>\s<[a-zA-Z_]+>)*:\s+(?<bytecode>([a-f0-9][a-f0-9] )+)\s+(?<insto>[a-zA-Z0-9,\+\-\. ]*)(?<range>;.+$)*", RegexOptions.Multiline);
+            e.ChangedRange.SetStyle(BlackStyle, @"^\s*(?<addr>[0-9a-f]+)(?<label>\s<[\.\-a-zA-Z_]+>)*:\s+(?<bytecode>[a-f0-9 ]+)(?<insto>.*)", RegexOptions.Multiline);
+
+            e.ChangedRange.SetStyle(GrayStyle);
 
         }
     }
