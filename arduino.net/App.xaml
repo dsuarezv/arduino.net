@@ -11,10 +11,15 @@
 		<SolidColorBrush x:Key="C1-Pressed" Color="#FFCDE4F0"/>
 		<SolidColorBrush x:Key="C1-Disabled" Color="#FF3D444E"/>
     	<SolidColorBrush x:Key="C2" Color="#FFB7D1DE"/>
+		<SolidColorBrush x:Key="C5" Color="#FFD34245"/>
+		<SolidColorBrush x:Key="C6" Color="#FFEE861F"/>
 
         <SolidColorBrush x:Key="B0" Color="#FFF0F0F0"/>
 		<SolidColorBrush x:Key="B1" Color="#FFE5E5E5"/>
         <SolidColorBrush x:Key="B1-MouseOver" Color="#FFDCDCDC"/>
+
+		<SolidColorBrush x:Key="B0-Text" Color="#FF2c333d"/>
+		<SolidColorBrush x:Key="C0-Text" Color="#FFF0F0F0"/>
 
 
         <ControlTemplate TargetType="{x:Type Button}" x:Key="HeaderRoundButton">

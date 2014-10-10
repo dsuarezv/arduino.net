@@ -49,7 +49,7 @@ namespace arduino.net
 
                 SessionSettings.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
 
-                StatusControl.SetState(0, "");
+                StatusControl.SetState(0, "Project", "Project loaded successfully");
 
                 ProjectPad1.TargetTabControl = OpenFilesTab;
 
@@ -132,7 +132,7 @@ namespace arduino.net
         {
             IdeManager.Debugger.Detach();
             ClearEditorActiveLine();
-            StatusControl.SetState(0, "Debugger dettached.");
+            StatusControl.SetState(0, "Debugger", "Debugger dettached from arduino.");
         }
 
         private void ClearEditorActiveLine()
@@ -161,7 +161,7 @@ namespace arduino.net
             bool debug = IsDebugBuild();
 
             OutputTextBox1.ClearText();
-            StatusControl.SetState(1, "Compiling...");
+            StatusControl.SetState(ActionStatus.InProgress, "Compiler", "Compiling...");
 
             SaveAllDocuments();
 
@@ -182,11 +182,11 @@ namespace arduino.net
                             ObjectDumper.GetNmSymbolTable(elfFile)));
                 }
 
-                StatusControl.SetState(0, "Build succeeded");
+                StatusControl.SetState(ActionStatus.OK, "Compiler", "Build succeeded");
             }
             else
             {
-                StatusControl.SetState(1, "Build failed");
+                StatusControl.SetState(ActionStatus.Fail, "Compiler", "Build failed");
             }
 
             return result;
@@ -199,16 +199,16 @@ namespace arduino.net
             if (!buildSuccess) return false;
 
             OutputTextBox1.ClearText();
-            StatusControl.SetState(1, "Deploying...");
+            StatusControl.SetState(ActionStatus.InProgress, "Deploy", "Deploying...");
             bool success = await IdeManager.Compiler.DeployAsync(Configuration.CurrentBoard, Configuration.CurrentProgrammer, IsDebugBuild());
 
             if (success)
             {
-                StatusControl.SetState(0, "Deploy succeeded");
+                StatusControl.SetState(ActionStatus.OK, "Deploy", "Deploy succeeded");
             }
             else
             {
-                StatusControl.SetState(1, "Deploy failed");
+                StatusControl.SetState(ActionStatus.Fail, "Deploy", "Deploy failed");
             }
 
             return success;

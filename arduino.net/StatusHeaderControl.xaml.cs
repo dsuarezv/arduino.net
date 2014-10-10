@@ -18,7 +18,7 @@ namespace arduino.net
 {
     public partial class StatusHeaderControl : UserControl
     {
-        private int mState = 0;
+        private ActionStatus mState = 0;
 
         public StatusHeaderControl()
         {
@@ -26,20 +26,29 @@ namespace arduino.net
         }
 
 
-        public void SetState(int state, string msg, params object[] args)
+        public void SetState(ActionStatus status, string title, string msg, params object[] args)
         {
-            mState = state;
-            MessageLabel.Text = string.Format(msg, args);
-            MessageLabel.Foreground = GetBrushForState();
+            mState = status;
+
+            FirstLine.Text = title;
+            SecondLine.Text = string.Format(msg, args);
+            SecondLine.Foreground = GetBrushForState();
         }
 
         private Brush GetBrushForState()
-        { 
+        {
+            var key = "C0-Text";
+
             switch (mState)
             {
-                case 0: return Brushes.Black;
-                default: return Brushes.Red;
+
+                case ActionStatus.InProgress: key = "C6"; break;
+                case ActionStatus.Fail: key = "C5"; break;
             }
+
+            return Application.Current.TryFindResource(key) as Brush;
         }
     }
+
+    public enum ActionStatus { OK, InProgress, Fail };
 }
