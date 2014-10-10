@@ -13,6 +13,7 @@ namespace arduino.net
         public const string Color1 = "C1";
         public const string Color5 = "C5";
         public const string Color6 = "C6";
+        public const string Color7 = "C7";
         public const string TextOnColor0 = "C0-Text";
         public const string TextOnBackground0 = "B0-Text";
 

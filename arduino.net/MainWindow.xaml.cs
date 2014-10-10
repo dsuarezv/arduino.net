@@ -113,6 +113,7 @@ namespace arduino.net
                 case DebuggerStatus.Break:
                     ClearEditorActiveLine();
                     IdeManager.Debugger.TargetContinue();
+                    StatusControl.SetState(ActionStatus.Info, "Debugger", "Arduino running...");
                     break;
 
                 case DebuggerStatus.Running:
@@ -137,7 +138,7 @@ namespace arduino.net
         {
             IdeManager.Debugger.Detach();
             ClearEditorActiveLine();
-            StatusControl.SetState(0, "Debugger", "Debugger dettached from Arduino.");
+            StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger dettached from Arduino.");
         }
 
         private void ClearEditorActiveLine()
@@ -298,7 +299,7 @@ namespace arduino.net
                 {
                     StatusControl.SetState(ActionStatus.Info, "Debugger", "Stopped at breakpoint. Hit 'Run' to continue.");
 
-                    var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber);
+                    var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber - 1);
                     if (editor != null) editor.SetActiveLine(bi.LineNumber);
                 }
             });

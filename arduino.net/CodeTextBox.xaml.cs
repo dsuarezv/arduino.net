@@ -19,6 +19,9 @@ namespace arduino.net
 {
     public partial class CodeTextBox : UserControl
     {
+        private Brush C5Brush;
+        private Brush C6Brush;
+        private Brush C7Brush;
         private bool mReadOnly = false;
         private string mFileName;
         private int mActiveLine = -1;
@@ -70,6 +73,10 @@ namespace arduino.net
             mMainTextBox.TextChanged += mMainTextBox_TextChanged;
             mMainTextBox.ToolTipNeeded += mMainTextBox_ToolTipNeeded;
             
+            C5Brush = new SolidBrush(UiConfig.GetWinformsColor(UiConfig.Color5));
+            C6Brush = new SolidBrush(UiConfig.GetWinformsColor(UiConfig.Color6));
+            C7Brush = new SolidBrush(UiConfig.GetWinformsColor(UiConfig.Color7));
+
             WFHost.Child = mMainTextBox;
 
             if (IdeManager.Debugger == null) return;
@@ -284,6 +291,8 @@ namespace arduino.net
         // __ Breakpoint handling _____________________________________________
 
 
+        
+
         void mMainTextBox_PaintLine(object sender, PaintLineEventArgs e)
         {
             var re = e.LineRect;
@@ -296,14 +305,14 @@ namespace arduino.net
                 {
                     bool isUpToDate = i.Value.IsDeployedOnDevice(IdeManager.Compiler);
 
-                    var brush = isUpToDate ? Brushes.Red : Brushes.Orange;
-
+                    var brush = isUpToDate ? C5Brush : C6Brush;
+                    
                     e.Graphics.FillEllipse(brush, new Rectangle(0, re.Top, 15, 15));
 
                     if (mActiveLine == l)
                     {
                         const int xStart = 50;
-                        e.Graphics.FillRectangle(Brushes.Yellow, new Rectangle(xStart, re.Top, re.Width - xStart, re.Height));
+                        e.Graphics.FillRectangle(C7Brush, new Rectangle(xStart, re.Top, re.Width - xStart, re.Height));
                     }
 
                     return;
