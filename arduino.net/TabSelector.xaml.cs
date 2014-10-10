@@ -21,14 +21,19 @@ namespace arduino.net
     public partial class TabSelector : UserControl
     {
         private TabControl mTarget;
+        private bool mIsSignalling = false;
 
         public TabControl TargetTabControl
         {
             get { return mTarget; }
             set 
-            { 
+            {
+                UnregisterEvents(mTarget);
                 mTarget = value;
+                RegisterEvents(mTarget);
+
                 TabItemsListBox.ItemsSource = mTarget.Items;
+                
             }
         }
 
@@ -39,10 +44,44 @@ namespace arduino.net
 
         private void TabItemsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (mIsSignalling) return;
+
             var tabItem = TabItemsListBox.SelectedItem as TabItem;
             if (tabItem == null) return;
 
+            mIsSignalling = true;
             tabItem.IsSelected = true;
+            mIsSignalling = false;
         }
+
+        private void RegisterEvents(TabControl target)
+        {
+            if (target == null) return;
+
+            target.SelectionChanged += target_SelectionChanged;
+        }
+
+        private void UnregisterEvents(TabControl target)
+        {
+            if (target == null) return;
+
+            target.SelectionChanged -= target_SelectionChanged;
+        }
+
+        private void target_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (mIsSignalling) return;
+
+            var tabControl = sender as TabControl;
+            if (tabControl == null) return;
+            
+            var tabItem = tabControl.SelectedItem as TabItem;
+            if (tabItem == null) return;
+
+            mIsSignalling = true;
+            TabItemsListBox.SelectedItem = tabItem;
+            mIsSignalling = false;
+        }
+
     }
 }
