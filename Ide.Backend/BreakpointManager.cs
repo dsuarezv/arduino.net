@@ -108,7 +108,18 @@ namespace arduino.net
 
             foreach (var bi in breakpoints) Add(bi);
 
-            mNewBreakPointIndex += (byte)breakpoints.Count;
+            mNewBreakPointIndex = (byte)(GetMaxId(breakpoints) + 1);
+        }
+
+        private int GetMaxId(List<BreakPointInfo> brs)
+        {
+            int max = -1;
+
+            foreach (var br in brs) 
+                if (br.Id > max) 
+                    max = br.Id;
+
+            return max;
         }
     }
 }

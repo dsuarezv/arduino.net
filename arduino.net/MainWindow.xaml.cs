@@ -291,7 +291,7 @@ namespace arduino.net
             {
                 if (bi == null)
                 {
-                    StatusControl.SetState(ActionStatus.Fail, "Debugger", "Unknown breakpoint hit. Target is stopped. You may need to Deploy so your breakpoints are in sync with the Arduino code.");
+                    StatusControl.SetState(ActionStatus.Fail, "Debugger", "Unknown breakpoint hit (any orange breakpoints?). Target is stopped.\nStop the debugger and hit 'Deploy' to get your breakpoints in sync.");
                 }
                 else
                 {
