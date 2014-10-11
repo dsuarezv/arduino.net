@@ -12,6 +12,7 @@ namespace arduino.net
 
         public event BreakPointDelegate BreakPointAdded;
         public event BreakPointDelegate BreakPointRemoved;
+        public event BreakpointMovedDelegate BreakPointMoved;
 
 
         internal List<BreakPointInfo> BreakPoints
@@ -87,7 +88,10 @@ namespace arduino.net
             { 
                 if (br.LineNumber >= fromLine)
                 {
+                    int oldLine = br.LineNumber;
                     br.LineNumber += shift;
+
+                    if (BreakPointMoved != null) BreakPointMoved(this, br, oldLine);
                 }
             }
         }

@@ -23,6 +23,7 @@ namespace arduino.net
         private Brush C6Brush;
         private Brush C7Brush;
         private bool mReadOnly = false;
+        private bool mIsLoading = false;
         private string mFileName;
         private int mActiveLine = -1;
         private Dictionary<int, BreakPointInfo> mBreakpoints = new Dictionary<int, BreakPointInfo>();
@@ -71,7 +72,11 @@ namespace arduino.net
             mMainTextBox.KeyDown += mMainTextBox_KeyDown;
             mMainTextBox.KeyPress += mMainTextBox_KeyPress;
             mMainTextBox.TextChanged += mMainTextBox_TextChanged;
+            mMainTextBox.TextSource.LineInserted += TextSource_LineInserted;
+            mMainTextBox.TextSource.LineRemoved += TextSource_LineRemoved;
+
             mMainTextBox.ToolTipNeeded += mMainTextBox_ToolTipNeeded;
+
             
             C5Brush = new SolidBrush(UiConfig.GetWinformsColor(UiConfig.Color5));
             C6Brush = new SolidBrush(UiConfig.GetWinformsColor(UiConfig.Color6));
@@ -83,9 +88,10 @@ namespace arduino.net
 
             IdeManager.Debugger.BreakPoints.BreakPointAdded += Debugger_BreakPointAdded;
             IdeManager.Debugger.BreakPoints.BreakPointRemoved += Debugger_BreakPointRemoved;
+            IdeManager.Debugger.BreakPoints.BreakPointMoved += Debugger_BreakPointMoved;
         }
 
-        
+
         public async Task OpenFile(string fileName)
         {
             if (!CheckChanges()) return;
@@ -96,7 +102,9 @@ namespace arduino.net
 
             using (var f = new StreamReader(fileName))
             {
+                mIsLoading = true;
                 mMainTextBox.Text = await f.ReadToEndAsync();
+                mIsLoading = false;
             }
 
         }
@@ -105,11 +113,11 @@ namespace arduino.net
         {
             ApplySyntaxHighlight(highlightExt);
 
+            mIsLoading = true;
             mMainTextBox.Text = content;
+            mIsLoading = false;
 
             if (highlightExt == null) return;
-
-            
         }
 
         public void SaveFile()
@@ -211,20 +219,27 @@ namespace arduino.net
             }
         }
 
+        void TextSource_LineRemoved(object sender, LineRemovedEventArgs e)
+        {
+            if (mIsLoading) return;
+
+            IdeManager.Debugger.BreakPoints.ShiftBreakpointsForFile(mFileName, e.Index, -e.Count);
+            //mMainTextBox.Invalidate();
+        }
+
+        void TextSource_LineInserted(object sender, LineInsertedEventArgs e)
+        {
+            if (mIsLoading) return;
+            // Prevent it from happening during load.
+            IdeManager.Debugger.BreakPoints.ShiftBreakpointsForFile(mFileName, e.Index, e.Count);
+            //mMainTextBox.Invalidate();
+        }
+
         private void mMainTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
         {
             if (mSyntaxHighlighter == null) return;
 
             mSyntaxHighlighter(mMainTextBox, e);
-
-            var shift = e.ChangedRange.ToLine - e.ChangedRange.FromLine;
-            var fromLine = shift > 0 ? e.ChangedRange.FromLine : e.ChangedRange.ToLine;
-            //IdeManager.Debugger.BreakPoints.ShiftBreakpointsForFile(mFileName, fromLine, shift);
-            
-            // DAVE: the textbox only gives insertions. Doesn't provide correct info on deletions.
-
-            return;            
-
         }
 
         private void ApplySyntaxHighlight(string ext)
@@ -335,6 +350,16 @@ namespace arduino.net
 
             mBreakpoints[breakpoint.LineNumber] = breakpoint;
             
+            mMainTextBox.Invalidate();
+        }
+
+        void Debugger_BreakPointMoved(object sender, BreakPointInfo breakpoint, int oldLineNumber)
+        {
+            if (breakpoint.SourceFileName != mFileName) return;
+
+            mBreakpoints.Remove(oldLineNumber);
+            mBreakpoints[breakpoint.LineNumber] = breakpoint;
+
             mMainTextBox.Invalidate();
         }
     }

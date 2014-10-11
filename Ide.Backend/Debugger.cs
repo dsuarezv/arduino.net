@@ -291,6 +291,8 @@ namespace arduino.net
 
     public delegate void BreakPointDelegate(object sender, BreakPointInfo breakpoint);
 
+    public delegate void BreakpointMovedDelegate(object sender, BreakPointInfo breakpoint, int oldBreakpointLine);
+
     public delegate void ByteDelegate(object sender, byte b);
 
     public delegate void StatusChangedDelegate(object sender, DebuggerStatus newState);

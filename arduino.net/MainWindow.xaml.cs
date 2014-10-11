@@ -36,7 +36,6 @@ namespace arduino.net
                 var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
                 //var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
                 
-
                 IdeManager.CurrentProject = new Project(sketch);
                 IdeManager.Debugger = new Debugger("COM3");
                 IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
@@ -133,7 +132,6 @@ namespace arduino.net
                     break;
             }
         }
-
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
@@ -278,7 +276,6 @@ namespace arduino.net
                         DeployButton.IsEnabled = false;
                         DebuggerCheckbox.IsEnabled = false;
                         break;
-
                 }
             });
         }
@@ -292,8 +289,6 @@ namespace arduino.net
         {
             Dispatcher.Invoke(() =>
             {
-                //RegistersPad.UpdateRegisters(IdeManager.Debugger.RegManager);
-
                 if (bi == null)
                 {
                     StatusControl.SetState(ActionStatus.Fail, "Debugger", "Unknown breakpoint hit. Target is stopped. Hit 'Run' to continue.");
