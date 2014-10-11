@@ -12,7 +12,7 @@
             HorizontalAlignment="Left" 
             FontSize="14"
 			LineHeight="22"
-            Margin="20,0,0,0" Foreground="{DynamicResource C0-Text}" >
+            Margin="20,0,0,0" Foreground="{DynamicResource C0-Text}" TextWrapping="Wrap">
                 <Run x:Name="FirstLine" Text="First line" FontWeight="Bold"/>
                 <LineBreak/>
                 <Run x:Name="SecondLine"  Text="Second line" FontWeight="Light"/>

@@ -207,7 +207,7 @@ namespace arduino.net
             return true;
         }
 
-        void mMainTextBox_ToolTipNeeded(object sender, ToolTipNeededEventArgs e)
+        private void mMainTextBox_ToolTipNeeded(object sender, ToolTipNeededEventArgs e)
         {
             if (string.IsNullOrEmpty(e.HoveredWord)) return;
 
@@ -219,20 +219,20 @@ namespace arduino.net
             }
         }
 
-        void TextSource_LineRemoved(object sender, LineRemovedEventArgs e)
+        private void TextSource_LineRemoved(object sender, LineRemovedEventArgs e)
         {
             if (mIsLoading) return;
+
+            DeleteBreakpointsInRange(e.Index, e.Count);
 
             IdeManager.Debugger.BreakPoints.ShiftBreakpointsForFile(mFileName, e.Index, -e.Count);
-            //mMainTextBox.Invalidate();
         }
 
-        void TextSource_LineInserted(object sender, LineInsertedEventArgs e)
+        private void TextSource_LineInserted(object sender, LineInsertedEventArgs e)
         {
             if (mIsLoading) return;
-            // Prevent it from happening during load.
+
             IdeManager.Debugger.BreakPoints.ShiftBreakpointsForFile(mFileName, e.Index, e.Count);
-            //mMainTextBox.Invalidate();
         }
 
         private void mMainTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
@@ -240,6 +240,12 @@ namespace arduino.net
             if (mSyntaxHighlighter == null) return;
 
             mSyntaxHighlighter(mMainTextBox, e);
+        }
+
+        private void DeleteBreakpointsInRange(int start, int numLines)
+        {
+            // Check if there is any breakpoint in the deleted range. Delete that breakpoint.
+
         }
 
         private void ApplySyntaxHighlight(string ext)
@@ -264,51 +270,60 @@ namespace arduino.net
 
 
 
-        void mMainTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        private void mMainTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            if (mReadOnly) return;
-
             if (e.Control)
             { 
                 switch (e.KeyCode)
                 {
-                    case System.Windows.Forms.Keys.S: SaveFile(); break;
+                    case System.Windows.Forms.Keys.S: 
+                        if (CanEdit()) SaveFile(); 
+                        break;
                 }
             }
 
             switch (e.KeyCode)
             {
                 case System.Windows.Forms.Keys.F9: // Toggle breakpoint
-                    var lineNumber = mMainTextBox.Selection.End.iLine + 1;
 
-                    if (mBreakpoints.ContainsKey(lineNumber))
-                    {
-                        IdeManager.Debugger.BreakPoints.Remove(mBreakpoints[lineNumber]);
+                    if (CanEdit())
+                    { 
+                        var lineNumber = mMainTextBox.Selection.End.iLine + 1;
+
+                        if (mBreakpoints.ContainsKey(lineNumber))
+                        {
+                            IdeManager.Debugger.BreakPoints.Remove(mBreakpoints[lineNumber]);
+                        }
+                        else
+                        {
+                            IdeManager.Debugger.BreakPoints.Add(mFileName, lineNumber);
+                        }
                     }
-                    else
-                    {
-                        IdeManager.Debugger.BreakPoints.Add(mFileName, lineNumber);
-                    }
+                    
                     break;
             }
         }
 
-        void mMainTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
+        private void mMainTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
         {
-            if (mReadOnly)
-            {
-                MessageBox.Show("No changes are allowed while the debugger is running. You can stop the debugger to edit the code or modify breakpoints.", "Hey...", MessageBoxButton.OK, MessageBoxImage.Asterisk);
-                e.Handled = true;
-            }
+            if (!CanEdit()) e.Handled = true;
+        }
+
+        private bool CanEdit()
+        {
+            if (!mReadOnly) return true;
+            
+            MessageBox.Show("You can't change things while the debugger is running. If you stop the debugger, then you can edit the code and modify breakpoints.", 
+                "Hey...", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+            return false;
+            
         }
 
         
         // __ Breakpoint handling _____________________________________________
 
 
-        
-
-        void mMainTextBox_PaintLine(object sender, PaintLineEventArgs e)
+        private void mMainTextBox_PaintLine(object sender, PaintLineEventArgs e)
         {
             var re = e.LineRect;
             var l = e.LineIndex + 1;
@@ -333,9 +348,8 @@ namespace arduino.net
                 e.Graphics.FillRectangle(C7Brush, new Rectangle(xStart, re.Top, re.Width - xStart, re.Height));
             }
         }
-
         
-        void Debugger_BreakPointRemoved(object sender, BreakPointInfo breakpoint)
+        private void Debugger_BreakPointRemoved(object sender, BreakPointInfo breakpoint)
         {
             if (breakpoint.SourceFileName != mFileName) return;
 
@@ -344,7 +358,7 @@ namespace arduino.net
             mMainTextBox.Invalidate();
         }
 
-        void Debugger_BreakPointAdded(object sender, BreakPointInfo breakpoint)
+        private void Debugger_BreakPointAdded(object sender, BreakPointInfo breakpoint)
         {
             if (breakpoint.SourceFileName != mFileName) return;
 
@@ -353,7 +367,7 @@ namespace arduino.net
             mMainTextBox.Invalidate();
         }
 
-        void Debugger_BreakPointMoved(object sender, BreakPointInfo breakpoint, int oldLineNumber)
+        private void Debugger_BreakPointMoved(object sender, BreakPointInfo breakpoint, int oldLineNumber)
         {
             if (breakpoint.SourceFileName != mFileName) return;
 
