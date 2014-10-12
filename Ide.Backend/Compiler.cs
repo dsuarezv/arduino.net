@@ -61,6 +61,8 @@ namespace arduino.net
 
             mLastSuccessfulCompilationDate = DateTime.Now;
 
+            VerifySize(tempDir, true);
+
             return true;
         }
 
@@ -76,6 +78,8 @@ namespace arduino.net
 
         public bool Deploy(string boardName, string programmerName, bool debug)
         {
+            if (!VerifySize(null, false)) throw new Exception("Sketch size is larger than supported Arduino memory. Remove some code to get it below the maximum and try again.");
+
             var tempDir = CreateTempDirectory();
             var hexFile = GetHexFile(tempDir);
 
@@ -111,6 +115,33 @@ namespace arduino.net
             if (mBoardName != boardName) Clean();
             mBoardName = boardName;
         }
+
+
+        // __ Size verification _______________________________________________
+
+
+        private bool VerifySize(string tempDir, bool printOutput)
+        {
+            int maxSize = Int32.Parse(Configuration.Boards[mBoardName]["upload"].Get("maximum_size"));
+            int elfSize = ObjectDumper.GetSize(GetElfFile(tempDir));
+            bool result = maxSize > elfSize;
+            
+            if (printOutput)
+            { 
+                if (result)
+                {
+                    Logger.LogCompiler("Binary sketch size: {0} bytes (of a {1} byte maximum)", elfSize, maxSize);
+                }
+                else
+                {
+                    Logger.LogCompiler("WARNING: Binary sketch size of {0} bytes IS LARGER THAN the {1} byte maximum.", elfSize, maxSize);
+                }
+
+            }                
+                
+            return result;
+        }
+
 
         // __ Command generation ______________________________________________
 
