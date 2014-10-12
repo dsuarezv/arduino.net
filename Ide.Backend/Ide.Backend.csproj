@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="BreakPointManager.cs" />
     <Compile Include="CompilerBuildTargets.cs" />
+    <Compile Include="CompilerError.cs" />
     <Compile Include="ConfigurationFile.cs" />
     <Compile Include="ControlPoints.cs" />
     <Compile Include="CmdRunner.cs" />

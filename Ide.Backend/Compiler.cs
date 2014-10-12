@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace arduino.net
@@ -33,6 +34,8 @@ namespace arduino.net
             mProject = p;
             mDebugger = d;
         }
+
+
 
         public Task<bool> BuildAsync(string boardName, bool debug)
         {
@@ -106,11 +109,13 @@ namespace arduino.net
             IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(GetElfFile()));
         }
 
+
         private void SetupBoardName(string boardName)
         {
             if (mBoardName != boardName) Clean();
             mBoardName = boardName;
         }
+
 
         // __ Command generation ______________________________________________
 

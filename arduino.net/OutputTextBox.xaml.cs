@@ -77,9 +77,10 @@ namespace arduino.net
                 var line = mContentTextBox.GetLineText(lineNo);
 
                 string fileName;
+                string errMsg;
                 int lineNumber;
 
-                if (IsErrorLocation(line, out fileName, out lineNumber))
+                if (CompilerMsg.IsErrorLocation(line, out fileName, out lineNumber, out errMsg))
                 {
                     IdeManager.GoToFileAndLine(fileName, lineNumber + 1);
                 }
@@ -88,37 +89,7 @@ namespace arduino.net
 
         private void mContentTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
         {
-            SyntaxHighlightApplier.Compiler(mContentTextBox, e);
-        }
-
-
-        // TODO: move this to the compiler or idemanager class
-
-
-        private bool IsErrorLocation(string line, out string fileName, out int lineNumber)
-        {
-            lineNumber = 0;
-            fileName = null;
-
-            if (IsLineMatch(SyntaxHighlightApplier.ErrorRegex, line, out fileName, out lineNumber)) return true;
-            if (IsLineMatch(SyntaxHighlightApplier.WarningRegex, line, out fileName, out lineNumber)) return true;
-
-            return false;
-        }
-
-        private bool IsLineMatch(Regex regex, string line, out string fileName, out int lineNumber)
-        {
-            var m = regex.Match(line);
-            if (m.Success)
-            {
-                lineNumber = m.Groups["line"].GetIntValue() - 1;
-                fileName = m.Groups["file"].Value;
-                return true;
-            }
-
-            lineNumber = 0;
-            fileName = null;
-            return false;
+            SyntaxHighlightApplier.CppCompiler(mContentTextBox, e);
         }
     }
 }
