@@ -90,6 +90,7 @@ namespace arduino.net
                 {
                     int oldLine = br.LineNumber;
                     br.LineNumber += shift;
+                    br.LastEditDate = DateTime.Now;
 
                     if (BreakPointMoved != null) BreakPointMoved(this, br, oldLine);
                 }

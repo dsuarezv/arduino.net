@@ -328,15 +328,15 @@ namespace arduino.net
             var re = e.LineRect;
             var l = e.LineIndex + 1;
 
-            foreach (var i in mBreakpoints)
+            foreach (var br in mBreakpoints)
             {
-                if (i.Key == l)
+                if (br.Key == l)
                 {
-                    bool isUpToDate = i.Value.IsDeployedOnDevice(IdeManager.Compiler);
+                    bool isUpToDate = br.Value.IsDeployedOnDevice(IdeManager.Compiler);
 
                     var brush = isUpToDate ? C5Brush : C6Brush;
                     
-                    e.Graphics.FillEllipse(brush, new Rectangle(2, re.Top, 15, 15));
+                    e.Graphics.FillEllipse(brush, new Rectangle(2, re.Top + re.Height / 2 - 8, 15, 15));
 
                     break;
                 }
