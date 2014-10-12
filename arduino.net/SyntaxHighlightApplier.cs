@@ -85,6 +85,12 @@ namespace arduino.net
             // Debugger\Debugger.ino:24: error: 'myfunfc' was not declared in this scope
             e.ChangedRange.SetStyle(MaroonStyle, @"(.*: In .*$)", RegexOptions.Singleline);     // error context
             e.ChangedRange.SetStyle(RedStyle, ErrorRegex);
+            
+            // Sketch size OK
+            e.ChangedRange.SetStyle(GreenStyle, "^Binary sketch size: .*", RegexOptions.Multiline);
+
+            // Sketch size off-limits
+            e.ChangedRange.SetStyle(RedStyle, "^WARNING: Binary sketch size of .*", RegexOptions.Multiline);
 
             // Warning highlight
             // Debugger\Debugger.ino:24: warning: unused variable 'test'

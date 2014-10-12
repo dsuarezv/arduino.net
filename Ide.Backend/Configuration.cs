@@ -22,6 +22,12 @@ namespace arduino.net
         public static float EditorFontSize = 11f;
         public static bool EditorAutoIndent = true;
 
+        public static IList<string> LibraryPaths = new string[] 
+        {
+            "",
+            ""
+        };
+
 
         public static string ToolkitPath
         {
