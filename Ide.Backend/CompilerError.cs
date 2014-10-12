@@ -48,6 +48,7 @@ namespace arduino.net
             msg = null;
             return false;
         }
-
     }
+
+    // Add a couple of classes for CompilerError and CompilerWarning, and some code to take all the compiler output and generate an observable collection of errors/warnings
 }
