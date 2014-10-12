@@ -58,10 +58,9 @@ namespace arduino.net
             if (!RunCommands(coreLibCmds, tempDir)) return false;
             if (!RunCommands(linkCmds, tempDir)) return false;
             if (!RunCommands(elfCmds, tempDir)) return false;
+            if (!VerifySize(tempDir, true)) return false;
 
             mLastSuccessfulCompilationDate = DateTime.Now;
-
-            VerifySize(tempDir, true);
 
             return true;
         }
