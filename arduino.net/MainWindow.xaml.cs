@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Shell;
-using AurelienRibon.Ui.SyntaxHighlightBox;
+
 
 namespace arduino.net
 {
@@ -25,34 +25,34 @@ namespace arduino.net
         public MainWindow()
         {
             InitializeComponent();
-
-            // Remove the window border.
-            //WindowChrome.SetWindowChrome(this, new WindowChrome());
-
-            // Register syntax highlight XMLs in this assembly
-            HighlighterManager.Instance.RegisterDefinitions(this.GetType().Assembly);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             try
             {
-                Configuration.Initialize(@"C:\Users\dave\Documents\develop\Arduino\ArduinoIDE.net\deploy");
+                Configuration.Initialize(@"..\");
 
                 var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
-
+                //var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
+                
                 IdeManager.CurrentProject = new Project(sketch);
                 IdeManager.Debugger = new Debugger("COM3");
                 IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
-                //IdeManager.Debugger.SerialCharReceived += Debugger_SerialCharReceived;
+                IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
+                IdeManager.GoToLineRequested += IdeManager_GoToLineRequested;
+                
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
 
+                StatusControl.SetState(0, "Project", "Project loaded successfully");
 
-                foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
+                ProjectPad1.TargetTabControl = OpenFilesTab;
 
-                StatusControl.SetState(0, "");
+                OpenAllProjectFiles();
+
+                SessionSettings.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
             }
             catch (Exception ex)
             {
@@ -60,7 +60,17 @@ namespace arduino.net
             }
         }
 
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            SessionSettings.Save();
+        }
 
+        private async void OpenAllProjectFiles()
+        {
+            foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
+            
+            await OpenFile(IdeManager.CurrentProject.GetSketchFileName());
+        }
 
         protected async override void OnPreviewKeyDown(KeyEventArgs e)
         {
@@ -81,9 +91,13 @@ namespace arduino.net
             MessageBox.Show(ex.Message, "Error");
         }
 
+
+        // __ Action buttons __________________________________________________
+
+
         private async void BuildButton_Click(object sender, RoutedEventArgs e)
         {
-            await LaunchBuild();            
+            var success = await LaunchBuild();            
         }
 
         private async void DeployButton_Click(object sender, RoutedEventArgs e)
@@ -91,84 +105,56 @@ namespace arduino.net
             var success = await LaunchDeploy();
         }
 
-        private void DebugButton_Click(object sender, RoutedEventArgs e)
+        private void RunButton_Click(object sender, RoutedEventArgs e)
         {
-            IdeManager.Debugger.TargetContinue();
-            StatusControl.SetState(0, "Running...");
+            switch (IdeManager.Debugger.Status)
+            {
+                case DebuggerStatus.Break:
+                    ClearEditorActiveLine();
+                    IdeManager.Debugger.TargetContinue();
+                    StatusControl.SetState(ActionStatus.Info, "Debugger", "Arduino running...");
+                    break;
+
+                case DebuggerStatus.Running:
+                    break;
+
+                case DebuggerStatus.Stopped:
+                    // Check for changes and build/deploy/run
+
+                    //var success = await LaunchDeploy();
+
+                    if (IsDebugBuild())
+                    {
+                        IdeManager.Debugger.Attach();
+                        IdeManager.Debugger.TargetContinue();
+                        StatusControl.SetState(ActionStatus.Info, "Debugger", "Arduino running...");
+                    }
+                    break;
+            }
         }
 
-
-        private void OpenFile(string fileName)
+        private void StopButton_Click(object sender, RoutedEventArgs e)
         {
-            var ti = GetTabForFileName(fileName);
-
-            CodeTextBox editor = null;
-
-            if (ti != null)
-            {
-                ti.IsSelected = true;
-                editor = ti.Content as CodeTextBox;
-            }
-            else
-            {
-                editor = CreateEditorTabItem(fileName);
-            }
-
-            editor.OpenFile(fileName);
+            IdeManager.Debugger.Detach();
+            ClearEditorActiveLine();
+            StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger dettached from Arduino.");
         }
 
-        private void OpenContent(string title, string content)
+        private void ClearEditorActiveLine()
         {
-            var ti = GetTabForFileName(title);
+            var dbg = IdeManager.Debugger;
 
-            CodeTextBox editor = null;
-
-            if (ti != null)
+            if (dbg.LastBreakpoint != null)
             {
-                ti.IsSelected = true;
-                editor = ti.Content as CodeTextBox;
+                var editor = GetEditor(dbg.LastBreakpoint.SourceFileName);
+                if (editor != null) editor.ClearActiveLine();
             }
-            else
-            {
-                editor = CreateEditorTabItem(title);
-            }
-            
-            editor.OpenContent(content, null);
         }
 
-        private CodeTextBox CreateEditorTabItem(string fileName)
+        private bool IsDebugBuild()
         {
-            var codeEditor = new CodeTextBox() { Padding = new Thickness(0, 5, 0, 5) };
-
-            TabItem t = new TabItem() { Header = System.IO.Path.GetFileName(fileName), Tag = fileName, Content = codeEditor };
-
-            OpenFilesTab.Items.Add(t);
-
-            t.IsSelected = true;
-
-            return codeEditor;
-        }
-
-
-        private TabItem GetTabForFileName(string fileName)
-        { 
-            foreach (TabItem ti in OpenFilesTab.Items)
-            {
-                if (ti.Tag as string == fileName) return ti;
-            }
-
-            return null;
-        }
-
-        private void SaveAll()
-        { 
-            foreach (TabItem ti in OpenFilesTab.Items)
-            {
-                var editor = ti.Content as CodeTextBox;
-                if (editor == null) continue;
-
-                editor.SaveFile();
-            }
+            var c = DebuggerCheckbox.IsChecked;
+            return (c.HasValue ? c.Value : false);
         }
 
 
@@ -177,44 +163,40 @@ namespace arduino.net
 
         private async Task<bool> LaunchBuild()
         {
+            ClearAllActiveLines();
+
+            bool debug = IsDebugBuild();
+
             OutputTextBox1.ClearText();
-            StatusControl.SetState(1, "Compiling...");
+            StatusControl.SetState(ActionStatus.InProgress, "Compiler", "Compiling...");
 
-            SaveAll();
+            SaveAllDocuments();
 
-            bool result = await IdeManager.Compiler.BuildAsync("atmega328", true);
-            
             var compiler = IdeManager.Compiler;
-            var elfFile = compiler.GetElfFile(compiler.GetTempDirectory());
-            
-            OpenContent("Sketch dissasembly",
-                ObjectDumper.GetSingleString(
-                    ObjectDumper.GetDisassemblyWithSource(elfFile)));
-
-            OpenContent("Symbol table",
-                ObjectDumper.GetSingleString(
-                    ObjectDumper.GetNmSymbolTable(elfFile)));
-
-            InitDwarf();
+            bool result = await compiler.BuildAsync(Configuration.CurrentBoard, debug);
+            var elfFile = compiler.GetElfFile();
 
             if (result)
             {
-                StatusControl.SetState(0, "Build succeeded");
+                if (debug)
+                { 
+                    OpenContent("Sketch dissasembly",
+                        ObjectDumper.GetSingleString(
+                            ObjectDumper.GetDisassemblyWithSource(elfFile)), ".disassembly");
+
+                    OpenContent("Symbol table",
+                        ObjectDumper.GetSingleString(
+                            ObjectDumper.GetNmSymbolTable(elfFile)));
+                }
+
+                StatusControl.SetState(ActionStatus.OK, "Compiler", "Build succeeded");
             }
             else
             {
-                StatusControl.SetState(1, "Build failed");
+                StatusControl.SetState(ActionStatus.Fail, "Compiler", "Build failed");
             }
 
             return result;
-        }
-
-        private void InitDwarf()
-        {
-            if (IdeManager.Dwarf != null) return;
-            var compiler = IdeManager.Compiler;
-            var elfFile = compiler.GetElfFile(compiler.GetTempDirectory());
-            IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(elfFile));
         }
 
         private async Task<bool> LaunchDeploy()
@@ -224,96 +206,104 @@ namespace arduino.net
             if (!buildSuccess) return false;
 
             OutputTextBox1.ClearText();
-            StatusControl.SetState(1, "Deploying...");
-            bool success = await IdeManager.Compiler.DeployAsync("atmega328", "usbasp", true);
+            StatusControl.SetState(ActionStatus.InProgress, "Deploy", "Deploying...");
+            bool success = await IdeManager.Compiler.DeployAsync(Configuration.CurrentBoard, Configuration.CurrentProgrammer, IsDebugBuild());
 
             if (success)
             {
-                //    StatusControl.SetState(0, "Deploy succeeded");
-                
+                StatusControl.SetState(ActionStatus.OK, "Deploy", "Deploy succeeded");
             }
-            //else
-            //{
-            //    StatusControl.SetState(1, "Deploy failed");
-            //}
-
-            InitDwarf();
+            else
+            {
+                StatusControl.SetState(ActionStatus.Fail, "Deploy", "Deploy failed");
+            }
 
             return success;
+        }
+
+        private void UpdateDwarf()
+        {
+            if (IdeManager.Dwarf != null) return;
+
+            IdeManager.Compiler.BuildDwarf();
         }
 
 
         // __ Debugger events _________________________________________________
 
 
-        private void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
+        private void DebuggerCheckbox_Checked(object sender, RoutedEventArgs e)
         {
-            Dispatcher.Invoke(() =>
-            {
-                RegistersPad.UpdateRegisters(IdeManager.Debugger.Registers);
+            RunButton.IsEnabled = true;
 
-                if (breakpoint == null)
-                {
-                    StatusControl.SetState(1, "Unknown breakpoint hit. Target is stopped. Hit 'debug' to continue.");
-                }
-                else
+            StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger enabled. Set breakpoints in the code with F9 and hit 'Run' when ready.");
+        }
+
+        private void DebuggerCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            RunButton.IsEnabled = false;
+            StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger Disabled. Deploy to Arduino to update to the non-debug program.");
+        }
+
+        private void Debugger_StatusChanged(object sender, DebuggerStatus newState)
+        {
+            Dispatcher.Invoke( () =>
+            {
+                // Update UI, what buttons are enabled and disabled.
+                switch (newState)
                 { 
-                    StatusControl.SetState(1, "Breakpoint hit on line {0} ({1}). Hit 'debug' to continue.", 
-                        breakpoint.LineNumber, System.IO.Path.GetFileName(breakpoint.SourceFileName));
+                    case DebuggerStatus.Stopped:
+                        SetAllDocumentsReadOnly(false);
+                        BuildButton.IsEnabled = true;
+                        StopButton.IsEnabled = false;
+                        RunButton.IsEnabled = true;
+                        DeployButton.IsEnabled = true;
+                        DebuggerCheckbox.IsEnabled = true;
+                        break;
+                    case DebuggerStatus.Running:
+                        SetAllDocumentsReadOnly(true);
+                        BuildButton.IsEnabled = false;
+                        StopButton.IsEnabled = true;
+                        RunButton.IsEnabled = false;
+                        DeployButton.IsEnabled = false;
+                        DebuggerCheckbox.IsEnabled = false;
+                        break;
+                    case DebuggerStatus.Break:
+                        SetAllDocumentsReadOnly(true);
+                        BuildButton.IsEnabled = false;
+                        RunButton.IsEnabled = true;
+                        StopButton.IsEnabled = true;
+                        DeployButton.IsEnabled = false;
+                        DebuggerCheckbox.IsEnabled = false;
+                        break;
                 }
             });
-
-            InitDwarf();
-
-            UpdateWatches();
         }
-
-        private void UpdateWatches()
-        {
-            Dispatcher.Invoke(() =>
-            {
-                var t = MemDumpPad1.ResultTextBlock;
-                t.Text = "";
-                t.Text += GetWatchValue("myGlobalVariable");
-                t.Text += GetWatchValue("mylocal");
-                t.Text += GetWatchValue("result");
-            });
-        }
-
-        private string GetWatchValue(string symbolName)
-        {
-            var pc = IdeManager.Debugger.Registers.Registers["PC"];
-            var function = IdeManager.Dwarf.GetFunctionAt(pc);
-            if (function == null) return symbolName + ": <context not found>\n";
-
-            return GetWatchValue(function, symbolName);
-        }
-
-        private string GetWatchValue(string functionName, string symbolName)
-        {
-            var function = IdeManager.Dwarf.GetFunctionByName(functionName);
-            if (function == null) return symbolName + ": <context not found>\n";
-
-            return GetWatchValue(function, symbolName);
-        }
-
-        private string GetWatchValue(DwarfSubprogram function, string symbolName)
-        {
-            var symbol = IdeManager.Dwarf.GetSymbol(symbolName, function);
-            if (symbol == null) return symbolName + ": <not found>\n";
-
-            var val = symbol.GetValue(IdeManager.Debugger);
-            if (val == null) return symbolName + ": <symbol has no location>\n";
-
-            return string.Format("{0}: {1}\n", symbolName, symbol.GetValueRepresentation(IdeManager.Debugger, val));
-        }
-
 
         private void Debugger_TargetConnected(object sender)
         {
-            
+
         }
 
+        private void Debugger_BreakPointHit(object sender, BreakPointInfo bi)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (bi == null)
+                {
+                    StatusControl.SetState(ActionStatus.Fail, "Debugger", "Unknown breakpoint hit (any orange breakpoints?). Target is stopped.\nStop the debugger and hit 'Deploy' to get your breakpoints in sync.");
+                }
+                else
+                {
+                    StatusControl.SetState(ActionStatus.Info, "Debugger", "Stopped at breakpoint. Hit 'Run' to continue.");
+
+                    var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber);
+                }
+            });
+
+            UpdateDwarf();
+        }
+        
         private void Debugger_SerialCharWorker(object state)
         {
             const int BufLen = 100;
@@ -338,15 +328,133 @@ namespace arduino.net
 
                     Dispatcher.Invoke(() =>
                     {
-                        OutputTextBox1.ContentTextBox.AppendText(s);
-                        //OutputTextBox1.ContentTextBox.ScrollToEnd();
+                        OutputTextBox1.AppendText(s, true);
                     });
                 }
 
                 Thread.Sleep(50);
             }
+        }
 
-            
+
+        // __ Document management _____________________________________________
+
+
+        private async Task OpenFile(string fileName)
+        {
+            var ti = GetTabForFileName(fileName);
+
+            CodeTextBox editor = null;
+
+            if (ti != null)
+            {
+                ti.IsSelected = true;
+                editor = ti.Content as CodeTextBox;
+            }
+            else
+            {
+                editor = CreateEditorTabItem(fileName);
+            }
+
+            await editor.OpenFile(fileName);
+        }
+
+        private void OpenContent(string title, string content, string ext = null)
+        {
+            var ti = GetTabForFileName(title);
+
+            CodeTextBox editor = null;
+
+            if (ti != null)
+            {
+                ti.IsSelected = true;
+                editor = ti.Content as CodeTextBox;
+            }
+            else
+            {
+                editor = CreateEditorTabItem(title);
+            }
+
+            editor.OpenContent(content, ext);
+        }
+
+        private CodeTextBox CreateEditorTabItem(string fileName)
+        {
+            var codeEditor = new CodeTextBox() { Padding = new Thickness(0, 5, 0, 5) };
+
+            TabItem t = new TabItem() { Header = System.IO.Path.GetFileName(fileName), Tag = fileName, Content = codeEditor, Visibility = Visibility.Collapsed };
+
+            OpenFilesTab.Items.Add(t);
+
+            t.IsSelected = true;
+
+            return codeEditor;
+        }
+
+        private TabItem GetTabForFileName(string fileName)
+        {
+            foreach (TabItem ti in OpenFilesTab.Items)
+            {
+                if (ti.Tag as string == fileName) return ti;
+            }
+
+            return null;
+        }
+
+        private void RunOnAllEditors(Action<CodeTextBox> editorAction)
+        {
+            foreach (TabItem ti in OpenFilesTab.Items)
+            {
+                var editor = ti.Content as CodeTextBox;
+                if (editor == null) continue;
+
+                editorAction(editor);
+            }
+        }
+
+        private void ClearAllActiveLines()
+        {
+            RunOnAllEditors((e) => e.ClearActiveLine());
+        }
+
+        private void SaveAllDocuments()
+        {
+            RunOnAllEditors((e) => e.SaveFile());
+        }
+
+        private void SetAllDocumentsReadOnly(bool readOnly)
+        {
+            RunOnAllEditors((e) => e.SetReadOnly(readOnly));
+        }
+
+        private void IdeManager_GoToLineRequested(string fileName, int lineNumber)
+        {
+            OpenFileAtLine(fileName, lineNumber);
+        }
+
+        private CodeTextBox GetEditor(string fileName)
+        {
+            var tab = GetTabForFileName(fileName);
+            if (tab == null) return null;
+
+            tab.IsSelected = true;
+
+            var editor = tab.Content as CodeTextBox;
+            if (editor == null) return null;
+
+            return editor;
+        }
+
+        private CodeTextBox OpenFileAtLine(string fileName, int lineNumber)
+        {
+            var editor = GetEditor(fileName);
+            if (editor == null) return null;
+
+            editor.SetCursorAt(lineNumber - 1, 0);
+            editor.FocusEditor();
+            editor.SetActiveLine(lineNumber);
+
+            return editor;
         }
     }
 }

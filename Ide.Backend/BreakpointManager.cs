@@ -1,17 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 
 namespace arduino.net
 {
-    public class BreakPointManager
+    public class BreakPointManager: IPersistenceListener
     {
         private List<BreakPointInfo> mBreakPoints = new List<BreakPointInfo>();
         private byte mNewBreakPointIndex = 10;
 
         public event BreakPointDelegate BreakPointAdded;
         public event BreakPointDelegate BreakPointRemoved;
+        public event BreakpointMovedDelegate BreakPointMoved;
 
+
+        internal List<BreakPointInfo> BreakPoints
+        {
+            get { return mBreakPoints; }
+        }
 
         public int Count
         {
@@ -31,15 +38,25 @@ namespace arduino.net
             }
         }
 
+        public BreakPointManager()
+        {
+            SessionSettings.RegisterPersistenceListener(this);
+        }
 
+        internal void Add(BreakPointInfo bi)
+        {
+            mBreakPoints.Add(bi);
+
+            if (BreakPointAdded != null) BreakPointAdded(this, bi);
+
+            SessionSettings.Save();
+        }
 
         public BreakPointInfo Add(string sourceFile, int lineNumber)
         {
             var result = new BreakPointInfo() { LineNumber = lineNumber, SourceFileName = sourceFile, Id = mNewBreakPointIndex++ };
 
-            mBreakPoints.Add(result);
-
-            if (BreakPointAdded != null) BreakPointAdded(this, result);
+            Add(result);
 
             return result;
         }
@@ -49,6 +66,8 @@ namespace arduino.net
             if (!mBreakPoints.Remove(br)) return;
 
             if (BreakPointRemoved != null) BreakPointRemoved(this, br);
+
+            SessionSettings.Save();
         }
 
         public List<BreakPointInfo> GetBreakpointsForFile(string fileName)
@@ -61,6 +80,47 @@ namespace arduino.net
             }
 
             return result;
+        }
+
+        public void ShiftBreakpointsForFile(string fileName, int fromLine, int shift)
+        {
+            foreach (var br in GetBreakpointsForFile(fileName))
+            { 
+                if (br.LineNumber >= fromLine)
+                {
+                    int oldLine = br.LineNumber;
+                    br.LineNumber += shift;
+                    br.LastEditDate = DateTime.Now;
+
+                    if (BreakPointMoved != null) BreakPointMoved(this, br, oldLine);
+                }
+            }
+        }
+
+        object IPersistenceListener.GetObjectToPersist()
+        {
+            return mBreakPoints;
+        }
+
+        void IPersistenceListener.RestorePersistedObject(object obj)
+        {
+            var breakpoints = obj as List<BreakPointInfo>;
+            if (breakpoints == null) return;
+
+            foreach (var bi in breakpoints) Add(bi);
+
+            mNewBreakPointIndex = (byte)(GetMaxId(breakpoints) + 1);
+        }
+
+        private int GetMaxId(List<BreakPointInfo> brs)
+        {
+            int max = -1;
+
+            foreach (var br in brs) 
+                if (br.Id > max) 
+                    max = br.Id;
+
+            return max;
         }
     }
 }

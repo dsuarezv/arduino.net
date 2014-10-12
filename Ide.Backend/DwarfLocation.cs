@@ -95,7 +95,7 @@ namespace arduino.net
             if (register < 1 || register > 32) return false;
 
             var registerName = string.Format("r{0:00}", register);
-            var val = debugger.Registers.Registers[registerName];
+            var val = debugger.RegManager.Registers[registerName];
 
             result.Add((byte)val);
 
@@ -121,7 +121,7 @@ namespace arduino.net
             }
 
             var offset = m.Groups["offset"].GetIntValue();
-            var stackPointer = debugger.Registers.Registers[addressRegister];
+            var stackPointer = debugger.RegManager.Registers[addressRegister];
             var address = stackPointer + offset;
             var size = (type != null) ? (byte)type.ByteSize : (byte)2;
             var value = debugger.GetTargetMemDump(address, size);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Ports;
 using System.Threading;
@@ -10,17 +11,22 @@ namespace arduino.net
 {
     public class Debugger: IDisposable
     {
+        private string mComPort;
         private SerialPort mSerialPort;
         private BreakPointManager mBreakPoints = new BreakPointManager();
         private RegisterManager mRegisters = new RegisterManager();
-        private List<TracepointInfo> mTracepoints = new List<TracepointInfo>();
+        private ObservableCollection<Watch> mWatches = new ObservableCollection<Watch>();
+        private ObservableCollection<TracepointInfo> mTracePoints = new ObservableCollection<TracepointInfo>();
         private ConcurrentQueue<byte> mReceivedCharsQueue = new ConcurrentQueue<byte>();
         private byte[] mTraceQueryBuffer;
-        private bool mIsTargetRunning = true;
+        private DebuggerStatus mStatus = DebuggerStatus.Stopped;
+        private BreakPointInfo mLastBreakPoint;
+
 
         public event TargetConnectedDelegate TargetConnected;
         public event BreakPointDelegate BreakPointHit;
         public event ByteDelegate SerialCharReceived;
+        public event StatusChangedDelegate StatusChanged;
 
 
         public ConcurrentQueue<byte> ReceivedCharsQueue
@@ -33,39 +39,65 @@ namespace arduino.net
             get { return mBreakPoints; }
         }
 
-        public List<TracepointInfo> TracePoints
+        public ObservableCollection<TracepointInfo> TracePoints
         {
-            get { return mTracepoints; }
+            get { return mTracePoints; }
         }
 
-        public RegisterManager Registers
+        public RegisterManager RegManager
         {
             get { return mRegisters; }
         }
 
-        public bool IsTargetRunning
+        public ObservableCollection<Watch> Watches
         {
-            get { return mIsTargetRunning; }
+            get { return mWatches; }
+        }
+
+        public DebuggerStatus Status
+        {
+            get { return mStatus; }
+        }
+
+        public bool IsAttached
+        {
+            get { return mSerialPort != null; }
+        }
+
+        public BreakPointInfo LastBreakpoint
+        {
+            get { return mLastBreakPoint; }
         }
 
 
         public Debugger(string comPort)
         {
-            mSerialPort = new SerialPort(comPort, 115200);
-
-            Initialize();
+            mComPort = comPort;
         }
 
-        public void Initialize()
+        public void Attach()
         {
+            if (mSerialPort != null) return;
+
+            mSerialPort = new SerialPort(mComPort, 115200);
             mSerialPort.Open();
 
             LaunchReadingThread();
         }
 
+        public void Detach()
+        {
+            SetStatus(DebuggerStatus.Stopped);
+
+            if (mSerialPort == null) return;
+
+            mSerialPort.Close();
+        }
+
         public void Dispose()
         {
             mSerialPort.Dispose();
+            mSerialPort = null;
         }
 
        
@@ -86,14 +118,15 @@ namespace arduino.net
             return mTraceQueryBuffer;
         }
 
-
         public void TargetContinue()
         {
+            if (mSerialPort == null) Attach();
+
             mSerialPort.BaseStream.WriteByte(255);
             mSerialPort.BaseStream.WriteByte((byte)DebuggerPacketType.Continue);
-            mIsTargetRunning = true;
+            SetStatus(DebuggerStatus.Running);
         }
-
+                
 
         // __ Reading impl ____________________________________________________
 
@@ -170,6 +203,7 @@ namespace arduino.net
         }
 
 
+        
         // __ Debugger impl ___________________________________________________
 
 
@@ -195,7 +229,7 @@ namespace arduino.net
 
         private void OnTargetInit()
         {
-            mIsTargetRunning = true;
+            SetStatus(DebuggerStatus.Running);
 
             if (TargetConnected != null)
             {
@@ -207,14 +241,16 @@ namespace arduino.net
         {
             BreakPointInfo br = null;
 
-            mIsTargetRunning = false;
+            SetStatus(DebuggerStatus.Break);
 
             br = mBreakPoints[breakpointId];
             if (br != null) br.HitCount++;
 
+            mLastBreakPoint = br;
+
             if (BreakPointHit != null) 
             {
-                ThreadPool.QueueUserWorkItem((a) => BreakPointHit(this, br));
+                ThreadPool.QueueUserWorkItem( a => BreakPointHit(this, br) );
             }
         }
 
@@ -229,9 +265,22 @@ namespace arduino.net
 
             if (SerialCharReceived != null) 
             {
-                //ThreadPool.QueueUserWorkItem((a) => SerialCharReceived(this, b));
                 SerialCharReceived(this, b);
             }
+        }
+
+
+        // __ Status __________________________________________________________
+
+
+        private void SetStatus(DebuggerStatus status)
+        {
+            if (mStatus != status)
+            { 
+                if (StatusChanged != null) ThreadPool.QueueUserWorkItem( a => StatusChanged(this, status) );
+            }
+
+            mStatus = status;
         }
     }
 
@@ -239,5 +288,68 @@ namespace arduino.net
 
     public delegate void BreakPointDelegate(object sender, BreakPointInfo breakpoint);
 
+    public delegate void BreakpointMovedDelegate(object sender, BreakPointInfo breakpoint, int oldBreakpointLine);
+
     public delegate void ByteDelegate(object sender, byte b);
+
+    public delegate void StatusChangedDelegate(object sender, DebuggerStatus newState);
+    
+    public enum DebuggerStatus
+    { 
+        Stopped, 
+        Running, 
+        Break
+    }
+
+
+    
+    public class Watch
+    {
+        public string Name;
+
+
+        public string GetValue()
+        {
+            return GetWatchValue(Name);
+        }
+
+        public string GetValue(string functionName)
+        {
+            return GetWatchValue(functionName, Name);
+        }
+
+        public string GetValue(DwarfSubprogram function)
+        {
+            return GetWatchValue(function, Name);
+        }
+
+
+        public static string GetWatchValue(string symbolName)
+        {
+            var pc = IdeManager.Debugger.RegManager.Registers["PC"];
+            var function = IdeManager.Dwarf.GetFunctionAt(pc);
+            if (function == null) return symbolName + ": <current context not found>\n";
+
+            return GetWatchValue(function, symbolName);
+        }
+
+        public static string GetWatchValue(string functionName, string symbolName)
+        {
+            var function = IdeManager.Dwarf.GetFunctionByName(functionName);
+            if (function == null) return symbolName + ": <context not found>\n";
+
+            return GetWatchValue(function, symbolName);
+        }
+
+        public static string GetWatchValue(DwarfSubprogram function, string symbolName)
+        {
+            var symbol = IdeManager.Dwarf.GetSymbol(symbolName, function);
+            if (symbol == null) return symbolName + ": <not in current context>\n";
+
+            var val = symbol.GetValue(IdeManager.Debugger);
+            if (val == null) return symbolName + ": <symbol has no location debug information>\n";
+
+            return string.Format("{0}: {1}\n", symbolName, symbol.GetValueRepresentation(IdeManager.Debugger, val));
+        }
+    }
 }

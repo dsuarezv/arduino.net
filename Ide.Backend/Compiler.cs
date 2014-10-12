@@ -86,15 +86,25 @@ namespace arduino.net
                 if (!Build(boardName, debug)) return false;
             }
 
+            IdeManager.Debugger.Detach();
+
             var deployCmds = CreateDeployCommands(tempDir, programmerName);
 
             if (!RunCommands(deployCmds, tempDir)) return false;
 
+            // Successful deploy. Post actions.
+
             mLastSuccessfulDeploymentDate = DateTime.Now;
+            SessionSettings.Save();
+            BuildDwarf();
 
             return true;
         }
         
+        public void BuildDwarf()
+        {
+            IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(GetElfFile()));
+        }
 
         private void SetupBoardName(string boardName)
         {
@@ -265,23 +275,31 @@ namespace arduino.net
             return Path.Combine(tempDir, dirName);
         }
 
-        public string GetElfFile(string tempDir)
+        public string GetElfFile(string tempDir = null)
         {
+            if (tempDir == null) tempDir = GetTempDirectory();
+
             return Path.Combine(tempDir, mProject.SketchFile + ".elf");
         }
 
-        private string GetEepromFile(string tempDir)
+        private string GetEepromFile(string tempDir = null)
         {
+            if (tempDir == null) tempDir = GetTempDirectory();
+
             return Path.Combine(tempDir, mProject.SketchFile + ".eep");
         }
 
-        private string GetHexFile(string tempDir)
+        private string GetHexFile(string tempDir = null)
         {
+            if (tempDir == null) tempDir = GetTempDirectory();
+
             return Path.Combine(tempDir, mProject.SketchFile + ".hex");
         }
 
-        private string GetCoreLibraryFile(string tempDir)
+        private string GetCoreLibraryFile(string tempDir = null)
         {
+            if (tempDir == null) tempDir = GetTempDirectory();
+
             return Path.Combine(tempDir, "core.a");
         }
 
@@ -296,7 +314,7 @@ namespace arduino.net
             var ext = Path.GetExtension(fileName).ToLower();
 
             if (ext.StartsWith(".c")) return FileType.Code;
-            else if (ext == ".ino") return FileType.Sketch;
+            else if (ext == ".ino" || ext == ".pde") return FileType.Sketch;
             else if (ext.StartsWith(".h")) return FileType.Include;
             else if (ext == ".s") return FileType.Assembler;
 

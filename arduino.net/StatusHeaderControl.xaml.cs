@@ -16,87 +16,40 @@ using System.Windows.Shapes;
 
 namespace arduino.net
 {
-    /// <summary>
-    /// Interaction logic for StatusHeaderControl.xaml
-    /// </summary>
     public partial class StatusHeaderControl : UserControl
     {
-        private int mState = 0;
-        private ThicknessAnimation mBarAnimation;
-        private Storyboard mBarStoryboard;
-        
+        private ActionStatus mState = 0;
 
         public StatusHeaderControl()
         {
             InitializeComponent();
-
-            SetupAnimations();
-
-            SizeChanged += StatusHeaderControl_SizeChanged;
         }
 
-        private void StatusHeaderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+
+        public void SetState(ActionStatus status, string title, string msg, params object[] args)
         {
-            InternalBar.Width = this.ActualWidth * 2.1;
-            InternalBar.Margin = GetMarginForState(mState);
-            mBarAnimation.From = GetMarginForState(0);
-            mBarAnimation.To = GetMarginForState(1);
+            mState = status;
+
+            FirstLine.Text = title;
+            SecondLine.Text = string.Format(msg, args);
+            SecondLine.Foreground = GetBrushForState();
         }
 
-        private void SetupAnimations()
+        private Brush GetBrushForState()
         {
-            mBarAnimation = new ThicknessAnimation() 
-            { 
-                From = GetMarginForState(0), 
-                To = GetMarginForState(1),
-                Duration = TimeSpan.FromSeconds(0.15),
-                FillBehavior = FillBehavior.HoldEnd
-            };
+            var key = UiConfig.TextOnColor0;
 
-            Storyboard.SetTarget(mBarAnimation, InternalBar);
-            Storyboard.SetTargetProperty(mBarAnimation, new PropertyPath(Border.MarginProperty));
-            
-            mBarStoryboard = new Storyboard();
-            mBarStoryboard.Children.Add(mBarAnimation);
-        }
-
-        public void SetState(int state, string msg, params object[] args)
-        {
-            MessageLabel.Text = string.Format(msg, args);
-            var key = (state == 0) ? "SuccessColor" : "FailColor";
-            var color = this.FindResource(key);
-            MessageLabel.Foreground = (SolidColorBrush)color;
-
-            if (state == 0)
+            switch (mState)
             {
-                if (mState == 0) return;
 
-                //mBarStoryboard.AutoReverse = true;
-                //mBarStoryboard.Begin();
-                
-                //mBarStoryboard.Seek(mBarAnimation.Duration.TimeSpan);
-                //mBarStoryboard.Resume();
-                
-                mState = 0;
-            }
-            else
-            {
-                if (mState == 1) return;
-
-                //mBarStoryboard.AutoReverse = false;
-                //mBarStoryboard.Begin();
-
-                mState = 1;
+                case ActionStatus.InProgress: key = UiConfig.Color6; break;
+                case ActionStatus.Fail: key = UiConfig.Color5; break;
+                case ActionStatus.Info: key = UiConfig.TextOnColor0; break;
             }
 
-            InternalBar.Margin = GetMarginForState(state);
+            return UiConfig.GetBrush(key);
         }
-
-        private Thickness GetMarginForState(int state)
-        {
-            return new Thickness(-this.ActualWidth * 1.1 * state, 0, 0, 0);
-        }
-
-        
     }
+
+    public enum ActionStatus { OK, InProgress, Fail, Info };
 }

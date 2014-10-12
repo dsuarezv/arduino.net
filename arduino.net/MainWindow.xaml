@@ -1,9 +1,13 @@
 ﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="clr-namespace:arduino.net" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:SyntaxHighlightBox="clr-namespace:AurelienRibon.Ui.SyntaxHighlightBox;assembly=AurelienRibon.Ui.SyntaxHighlightBox" mc:Ignorable="d" x:Class="arduino.net.MainWindow"
-        Title="MainWindow" Height="900" Width="900"
-        WindowStyle="SingleBorderWindow" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded" Icon="arduino-icon2.ico">
+        xmlns:local="clr-namespace:arduino.net" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        mc:Ignorable="d" x:Class="arduino.net.MainWindow"
+        Title="MainWindow" Height="900" Width="1000"
+        WindowStyle="SingleBorderWindow" ResizeMode="CanResizeWithGrip" Icon="arduino-icon2.ico"
+        Loaded="Window_Loaded" 
+        Closing="Window_Closing">
     <Grid Width="auto">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -13,81 +17,47 @@
         </Grid.RowDefinitions>
 
 
-        <TextBlock x:Name="TitleLabel" 
-			Grid.Row="0"
-			Grid.Column="0" 
-
-			Padding="10,5"
-			FontWeight="Light"
-			FontSize="36"
-			Foreground="#FFA1A1A1" ><Run Text="Blink sample - arduino.net"/></TextBlock>
-
-
-        <Border Grid.Row="1" Padding="10,0,10,10">
-            <StackPanel Orientation="Horizontal">
-                <Button x:Name="BuildButton" Template="{StaticResource ActionButton}" Content="build" Click="BuildButton_Click"/>
-                <Button x:Name="DeployButton" Template="{StaticResource ActionButton}" Content="deploy" Click="DeployButton_Click"/>
-                <Button x:Name="DebugButton" Template="{StaticResource ActionButton}" Content="debug" Click="DebugButton_Click"/>
-            </StackPanel>
+        <Border Grid.Row="1" Padding="15" Background="{DynamicResource C0}" Height="106">
+            <Grid Grid.Row="1">
+                <Button x:Name="BuildButton" Content="Verify" Click="BuildButton_Click" Template="{DynamicResource HeaderRoundButton}" Width="76" Height="76" FontSize="16" BorderThickness="1" Margin="0,0,0,0" HorizontalAlignment="Left"/>
+                <Button x:Name="DeployButton" Content="Deploy" Click="DeployButton_Click" Template="{DynamicResource HeaderRoundButton}" Margin="81,0.272,0,-0.272" Width="76" Height="76" FontSize="16" HorizontalAlignment="Left"/>
+                <Button x:Name="RunButton" Content="Run" Click="RunButton_Click" Template="{DynamicResource HeaderRoundButton}" Height="47" Margin="165.404,0,0,0" VerticalAlignment="Top" Width="47" FontSize="13" HorizontalAlignment="Left" IsEnabled="False"/>
+                <Button x:Name="StopButton" Content="Stop" Click="StopButton_Click" IsEnabled="False" Template="{DynamicResource HeaderRoundButton}" Height="47" Margin="219.831,0,0,0" FontSize="13" VerticalAlignment="Top" Width="47" HorizontalAlignment="Left"/>
+                <local:StatusHeaderControl x:Name="StatusControl" Margin="272,1,101,-1"/>
+                <CheckBox x:Name="DebuggerCheckbox" Content="Debugger" HorizontalAlignment="Left" Margin="156,60,0,0" Template="{DynamicResource HeaderCheckbox}" Width="79" Checked="DebuggerCheckbox_Checked" Unchecked="DebuggerCheckbox_Unchecked" Height="16" VerticalAlignment="Top"/>
+            </Grid>
         </Border>
 
-        <local:StatusHeaderControl 
-			x:Name="StatusControl"
-			Width="auto"
-			Grid.Row="2" 
-			HorizontalAlignment="Left"/>
+
 
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200px" />
+                <ColumnDefinition Width="250px" />
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <GridSplitter 
-				Grid.Column="0"
-				HorizontalAlignment="Right"
-				VerticalAlignment="Stretch"
-				Background="#b6b6b6" 
-				ShowsPreview="True"
-				Width="1"/>
-            <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="2*"/>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
-                <local:RegistersPad x:Name="RegistersPad" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-                <GridSplitter
-                    Grid.Row="0"
-                    VerticalAlignment="Bottom"
-                    HorizontalAlignment="Stretch"
-                    Background="#b6b6b6" 
-				    ShowsPreview="True"
-				    Height="1"/>
-                <local:MemoryDumpPad x:Name="MemDumpPad1" Grid.Row="1"/>
-            </Grid>
-            
-            <Grid Grid.Column="1">
+
+            <GridSplitter Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Stretch" Background="{DynamicResource C0}" ShowsPreview="True" Width="2"/>
+
+            <StackPanel Grid.Column="0" Orientation="Vertical" Background="{DynamicResource B1}" Margin="0,0,2,0">
+                <local:ProjectPad x:Name="ProjectPad1"/>
+                <local:WatchesPad x:Name="WatchesPad1"/>
+            </StackPanel>
+
+
+            <Grid Grid.Column="1" Background="{DynamicResource B0}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="150px"/>
                 </Grid.RowDefinitions>
 
-                <GridSplitter
-					Grid.Row="0"
-					HorizontalAlignment="Stretch"
-					VerticalAlignment="Bottom"
-					Background="#b6b6b6" 
-					ShowsPreview="True"
-					Height="1"/>
+                <TabControl Name="OpenFilesTab" Grid.Row="0" Margin="0" Background="{StaticResource B0}" BorderBrush="{x:Null}" Padding="0"/>
 
-                <TabControl Name="OpenFilesTab" BorderThickness="0,1,0,0" Grid.Row="0" Margin="0,5">
-                    
-                </TabControl>
-                <local:OutputTextBox x:Name="OutputTextBox1" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch" Padding="5"/>
+                <GridSplitter Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Background="{StaticResource C0}" ShowsPreview="True" Height="2"/>
 
-
+                <local:OutputTextBox x:Name="OutputTextBox1" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch" Padding="5, 5, 0, 0" Grid.ColumnSpan="3" Background="{StaticResource B0}"/>
 
             </Grid>
-            
+
         </Grid>
     </Grid>
 </Window>

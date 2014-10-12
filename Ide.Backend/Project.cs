@@ -7,6 +7,8 @@ namespace arduino.net
 {
     public class Project
     {
+        private const string IdeSettingsExtension = ".ide_settings.user";
+
         private string mProjectPath;
         private string mSketchFile;
 
@@ -39,7 +41,7 @@ namespace arduino.net
         {
             List<string> result = new List<string>();
 
-            var extensions = new string[] { "h", "hpp", "s", "c", "cpp", "ino" };
+            var extensions = new string[] { "h", "hpp", "s", "c", "cpp", "ino", "pde" };
 
             foreach (var ext in extensions)
             {
@@ -47,6 +49,17 @@ namespace arduino.net
             }
 
             return result;            
+        }
+
+        public string GetSketchFileName()
+        {
+            return Path.Combine(mProjectPath, mSketchFile);
+        }
+        
+        public string GetSettingsFileName()
+        {
+            var fileName = Path.GetFileNameWithoutExtension(mSketchFile) + IdeSettingsExtension;
+            return Path.Combine(mProjectPath, fileName);
         }
 
         public string GetFileContent(string fileName)

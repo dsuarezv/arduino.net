@@ -37,8 +37,14 @@
     <ApplicationIcon>arduino-icon2.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FastColoredTextBox, Version=2.15.11.0, Culture=neutral, PublicKeyToken=fb8aa12b994ef61b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\FastColoredTextBox\src\bin\Debug\FastColoredTextBox.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -47,15 +53,18 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FontManager.cs" />
     <Compile Include="MemoryDumpPad.xaml.cs">
       <DependentUpon>MemoryDumpPad.xaml</DependentUpon>
     </Compile>
@@ -65,14 +74,22 @@
     <Compile Include="ProjectExplorer.xaml.cs">
       <DependentUpon>ProjectExplorer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ProjectPad.xaml.cs">
+      <DependentUpon>ProjectPad.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RegistersPad.xaml.cs">
       <DependentUpon>RegistersPad.xaml</DependentUpon>
     </Compile>
     <Compile Include="StatusHeaderControl.xaml.cs">
       <DependentUpon>StatusHeaderControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SystemButtons.xaml.cs">
-      <DependentUpon>SystemButtons.xaml</DependentUpon>
+    <Compile Include="SyntaxHighlightApplier.cs" />
+    <Compile Include="TabSelector.xaml.cs">
+      <DependentUpon>TabSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UiConfig.cs" />
+    <Compile Include="WatchesPad.xaml.cs">
+      <DependentUpon>WatchesPad.xaml</DependentUpon>
     </Compile>
     <Page Include="CodeTextBox.xaml">
       <SubType>Designer</SubType>
@@ -105,6 +122,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="ProjectPad.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="RegistersPad.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -113,7 +134,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SystemButtons.xaml">
+    <Page Include="TabSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WatchesPad.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -136,6 +161,27 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="fonts\SourceCodePro-Black.otf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="fonts\SourceCodePro-Bold.otf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="fonts\SourceCodePro-ExtraLight.otf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="fonts\SourceCodePro-Light.otf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="fonts\SourceCodePro-Medium.otf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="fonts\SourceCodePro-Regular.otf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="fonts\SourceCodePro-Semibold.otf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -146,28 +192,16 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\assembler.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Ide.Backend\Ide.Backend.csproj">
       <Project>{4cb8f184-05ff-4cc9-9cd6-41f68589a5b3}</Project>
       <Name>Ide.Backend</Name>
     </ProjectReference>
-    <ProjectReference Include="..\libs\SyntaxHighlightTextbox\src\syntaxhighlightbox_18a16149c7b1\AurelienRibon.Ui.SyntaxHighlightBox\AurelienRibon.Ui.SyntaxHighlightBox.csproj">
-      <Project>{10a9ecd3-ae1e-494d-9a27-8a32dd581759}</Project>
-      <Name>AurelienRibon.Ui.SyntaxHighlightBox</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\CloseDisabled.png" />
-    <Resource Include="resources\CloseNormal.png" />
-    <Resource Include="resources\ClosePressed.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\cpp.xml" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="arduino-icon2.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\chevron.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
