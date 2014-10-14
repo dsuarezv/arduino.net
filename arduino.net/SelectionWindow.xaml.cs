@@ -61,5 +61,10 @@ namespace arduino.net
         {
             DialogResult = true;
         }
+
+        private void ItemDoubleClick(object sender, RoutedEventArgs e)
+        {
+            OkButton_Click(null, null);
+        }
     }
 }

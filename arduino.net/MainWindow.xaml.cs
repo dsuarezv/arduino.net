@@ -53,6 +53,8 @@ namespace arduino.net
                 OpenAllProjectFiles();
 
                 SessionSettings.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
+
+                UpdateBoardSerialProgrammer();
             }
             catch (Exception ex)
             {
@@ -146,7 +148,29 @@ namespace arduino.net
             if (selected == null) return;
 
             Configuration.CurrentBoard = selected.Name;
+            UpdateBoardSerialProgrammer();
         }
+        
+        private void SelectSerialButton_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void SelectProgrammerButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = SelectionWindow.Show("Select programmer", Configuration.Programmers.GetAllSections(), Configuration.Programmers.GetSection(Configuration.CurrentProgrammer), "img/programmers");
+            if (selected == null) return;
+
+            Configuration.CurrentProgrammer = selected.Name;
+            UpdateBoardSerialProgrammer();
+        }
+
+        private void UpdateBoardSerialProgrammer()
+        {
+            SelectBoardButton.Content = string.Format("Board: {0}", Configuration.Boards.GetSection(Configuration.CurrentBoard)["name"]);
+            SelectProgrammerButton.Content = string.Format("Programmer: {0}", Configuration.Programmers.GetSection(Configuration.CurrentProgrammer)["name"]);
+        }
+
 
         private void ClearEditorActiveLine()
         {

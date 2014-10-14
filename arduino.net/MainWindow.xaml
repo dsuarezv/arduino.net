@@ -17,15 +17,18 @@
         </Grid.RowDefinitions>
 
 
-        <Border Grid.Row="1" Padding="15" Background="{DynamicResource C0}" Height="106">
+        <Border Grid.Row="1" Padding="15,15,6,15" Background="{DynamicResource C0}" Height="106">
             <Grid Grid.Row="1">
                 <Button x:Name="BuildButton" Content="Verify" Click="BuildButton_Click" Template="{DynamicResource HeaderRoundButton}" Width="76" Height="76" FontSize="16" BorderThickness="1" Margin="0,0,0,0" HorizontalAlignment="Left"/>
                 <Button x:Name="DeployButton" Content="Deploy" Click="DeployButton_Click" Template="{DynamicResource HeaderRoundButton}" Margin="81,0.272,0,-0.272" Width="76" Height="76" FontSize="16" HorizontalAlignment="Left"/>
                 <Button x:Name="RunButton" Content="Run" Click="RunButton_Click" Template="{DynamicResource HeaderRoundButton}" Height="47" Margin="165.404,0,0,0" VerticalAlignment="Top" Width="47" FontSize="13" HorizontalAlignment="Left" IsEnabled="False"/>
                 <Button x:Name="StopButton" Content="Stop" Click="StopButton_Click" IsEnabled="False" Template="{DynamicResource HeaderRoundButton}" Height="47" Margin="219.831,0,0,0" FontSize="13" VerticalAlignment="Top" Width="47" HorizontalAlignment="Left"/>
-                <local:StatusHeaderControl x:Name="StatusControl" Margin="272,1,101,-1"/>
+                <local:StatusHeaderControl x:Name="StatusControl" Margin="272,1,285,-1"/>
                 <CheckBox x:Name="DebuggerCheckbox" Content="Debugger" HorizontalAlignment="Left" Margin="156,60,0,0" Template="{DynamicResource HeaderCheckbox}" Width="79" Checked="DebuggerCheckbox_Checked" Unchecked="DebuggerCheckbox_Unchecked" Height="16" VerticalAlignment="Top"/>
-                <Button x:Name="SelectBoardButton" Content="Board" Template="{DynamicResource HeaderRoundButton}" FontSize="11" BorderThickness="1" HorizontalAlignment="Right" Width="47" Margin="0,1,0,28" Click="SelectBoardButton_Click"/>
+                
+                <Button Name="SelectBoardButton" Content="Board" Click="SelectBoardButton_Click" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="280" Style="{DynamicResource HeaderSelectionButtonStyle}" />
+                <Button Name="SelectSerialButton" Content="Serial" Click="SelectSerialButton_Click" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="280" Style="{DynamicResource HeaderSelectionButtonStyle}" Margin="0,25,0,0" />
+                <Button Name="SelectProgrammerButton" Content="Progr" Click="SelectProgrammerButton_Click" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="280" Style="{DynamicResource HeaderSelectionButtonStyle}" Margin="0,50,0,0" />
             </Grid>
         </Border>
 
