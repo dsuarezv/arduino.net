@@ -129,9 +129,9 @@ namespace arduino.net
         {
             var compiler = "hardware/tools/avr/bin/" + (IsCFile(EffectiveSourceFile) ? "avr-gcc" : "avr-g++");
 
-            var config = Configuration.Boards[boardName]["build"];
-            var usbvid = config.Get("vid");
-            var usbpid = config.Get("pid");
+            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
+            var usbvid = config["vid"];
+            var usbpid = config["pid"];
             var includePaths = GetIncludeArgument(config);
 
             BuildCommand = new Command()
@@ -139,8 +139,8 @@ namespace arduino.net
                 Program = Path.Combine(Configuration.ToolkitPath, compiler),
                 //Arguments = string.Format("-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
                 Arguments = string.Format("-c -g {8} -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
-                    config.Get("mcu"),
-                    config.Get("f_cpu"),
+                    config["mcu"],
+                    config["f_cpu"],
                     (usbvid == null) ? "null" : usbvid,
                     (usbpid == null) ? "null" : usbpid,
                     "105",
@@ -159,9 +159,9 @@ namespace arduino.net
         public static string[] GetIncludePaths(ConfigurationFile config)
         {
             return new string[] {
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config.Get("core")),
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config.Get("variant")),
-                Path.Combine(Configuration.ToolkitPath, "debugger/" + config.Get("core"))
+                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]),
+                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config["variant"]),
+                Path.Combine(Configuration.ToolkitPath, "debugger/" + config["core"])
             };
         }
 
@@ -186,22 +186,22 @@ namespace arduino.net
         {
             var compiler = "hardware/tools/avr/bin/avr-gcc";
 
-            var config = Configuration.Boards[boardName]["build"];
-            var usbvid = config.Get("vid");
-            var usbpid = config.Get("pid");
+            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
+            var usbvid = config["vid"];
+            var usbpid = config["pid"];
             var includePaths = CppBuildTarget.GetIncludeArgument(config);
 
             BuildCommand = new Command()
             {
                 Program = Path.Combine(Configuration.ToolkitPath, compiler),
                 //Arguments = string.Format("-c -g -mmcu={0} {1} \"{2}\" -o \"{3}\"",
-                //config.Get("mcu"),
+                //config["mcu"),
                 //includePaths,
                 //EffectiveSourceFile,
                 //TargetFile)
                 Arguments = string.Format("-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
-                    config.Get("mcu"),
-                    config.Get("f_cpu"),
+                    config["mcu"],
+                    config["f_cpu"],
                     (usbvid == null) ? "null" : usbvid,
                     (usbpid == null) ? "null" : usbpid,
                     "105",
@@ -250,13 +250,13 @@ namespace arduino.net
         {
             DisableTargetDateCheck = true;
 
-            var config = Configuration.Boards[boardName]["build"];
+            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
 
             BuildCommand = new Command()
             {
                 Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-gcc"),
                 Arguments = string.Format("-Os -Wl,--gc-sections -mmcu={0} -o {1} {2} -L{3} -lm",
-                    config.Get("mcu"),
+                    config["mcu"],
                     TargetFile,
                     EffectiveSourceFile,
                     Path.GetDirectoryName(TargetFile))
@@ -482,9 +482,9 @@ namespace arduino.net
 
         public override void SetupCommand(string boardName)
         {
-            var communication = Configuration.Programmers[mProgrammerName].Get("communication");
-            var protocol = Configuration.Programmers[mProgrammerName].Get("protocol");
-            var mcu = Configuration.Boards[boardName]["build"].Get("mcu");
+            var communication = Configuration.Programmers.GetSection(mProgrammerName)["communication"];
+            var protocol = Configuration.Programmers.GetSection(mProgrammerName)["protocol"];
+            var mcu = Configuration.Boards.GetSection(boardName).GetSection("build")["mcu"];
 
             BuildCommand = new Command()
             {

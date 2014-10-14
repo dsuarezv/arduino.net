@@ -9,21 +9,40 @@ namespace arduino.net
 {
     public class ConfigurationFile
     {
+        private static readonly ConfigurationFile Empty = new ConfigurationFile();
+
         private Dictionary<string, string> mEntries = new Dictionary<string, string>();
         private Dictionary<string, ConfigurationFile> mSections = new Dictionary<string, ConfigurationFile>();
 
-        public ConfigurationFile this[string sectionName]
-        {
-            get { return mSections[sectionName]; }
+
+        public string this[string entryName]
+        { 
+            get
+            {
+                if (!mEntries.ContainsKey(entryName)) return null;
+
+                return mEntries[entryName];
+            }
         }
 
-        public string Get(string key)
-        {
-            if (!mEntries.ContainsKey(key)) return null;
 
-            return mEntries[key];
+        public ICollection<string> GetAllSectionNames()
+        {
+            return mSections.Keys;
         }
 
+        public ICollection<ConfigurationFile> GetAllSections()
+        {
+            return mSections.Values;
+        }
+
+        public ConfigurationFile GetSection(string sectionName)
+        {
+            if (!mSections.ContainsKey(sectionName)) return Empty;
+
+            return mSections[sectionName]; 
+        }
+        
         public static ConfigurationFile LoadFromFile(string fileName)
         {
             ConfigurationFile result = new ConfigurationFile();

@@ -132,8 +132,8 @@ namespace arduino.net
         {
             if (!debug) return new List<BuildTarget>();
             
-            var config = Configuration.Boards[mBoardName]["build"];
-            var sourceDir = Path.Combine(Configuration.ToolkitPath, "debugger/" + config.Get("core"));
+            var config = Configuration.Boards.GetSection(mBoardName).GetSection("build");
+            var sourceDir = Path.Combine(Configuration.ToolkitPath, "debugger/" + config["core"]);
 
             var fileList = Project.GetCodeFilesOnPath(sourceDir);
             return GetCommandsForFiles(tempDir, debug, fileList, false);
@@ -328,9 +328,9 @@ namespace arduino.net
 
         private string GetBoardCoreDirectory()
         {
-            var config = Configuration.Boards[mBoardName]["build"];
+            var config = Configuration.Boards.GetSection(mBoardName).GetSection("build");
 
-            return Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config.Get("core"));
+            return Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]);
         }
     }
 }

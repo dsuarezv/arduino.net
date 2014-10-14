@@ -80,6 +80,9 @@
     <Compile Include="RegistersPad.xaml.cs">
       <DependentUpon>RegistersPad.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SelectionWindow.xaml.cs">
+      <DependentUpon>SelectionWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="StatusHeaderControl.xaml.cs">
       <DependentUpon>StatusHeaderControl.xaml</DependentUpon>
     </Compile>
@@ -127,6 +130,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="RegistersPad.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SelectionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
