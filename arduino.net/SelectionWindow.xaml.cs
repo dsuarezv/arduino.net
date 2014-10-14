@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace arduino.net
 {
@@ -24,9 +24,42 @@ namespace arduino.net
             InitializeComponent();
         }
 
-        //public static SelectionWindow Show(string title, )
-        //{ 
-            
-        //}
+        public static ConfigurationFile Show(string title, ICollection<ConfigurationFile> items, ConfigurationFile currentValue, string imgDirectory)
+        {
+            var w = new SelectionWindow();
+            InjectImagePaths(items, imgDirectory);
+            w.MainListView.ItemsSource = items;
+            w.MainListView.SelectedItem = currentValue;
+            w.TitleLabel.Content = title;
+
+            var result = w.ShowDialog();
+
+            if (result.HasValue && result.Value == true)
+            {
+                return w.MainListView.SelectedItem as ConfigurationFile;
+            }
+
+            return null;
+        }
+
+        private static void InjectImagePaths(ICollection<ConfigurationFile> items, string imgDirectory)
+        {
+            var fullPath = Path.GetFullPath(imgDirectory);
+
+            foreach (var i in items)
+            { 
+                if (i["image"] != null) continue;
+
+                var imgFile = Path.Combine(fullPath, i.Name + ".png");
+                if (!File.Exists(imgFile)) imgFile = Path.Combine(fullPath, "unknown.png");
+
+                i["image"] = imgFile;
+            }
+        }
+
+        private void OkButton_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+        }
     }
 }

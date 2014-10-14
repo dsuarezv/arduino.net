@@ -14,6 +14,11 @@ namespace arduino.net
         private Dictionary<string, string> mEntries = new Dictionary<string, string>();
         private Dictionary<string, ConfigurationFile> mSections = new Dictionary<string, ConfigurationFile>();
 
+        public string Name
+        {
+            get;
+            private set;
+        }
 
         public string this[string entryName]
         { 
@@ -23,8 +28,11 @@ namespace arduino.net
 
                 return mEntries[entryName];
             }
+            set
+            {
+                mEntries[entryName] = value;
+            }
         }
-
 
         public ICollection<string> GetAllSectionNames()
         {
@@ -86,7 +94,7 @@ namespace arduino.net
                     }
                     else
                     {
-                        var newFile = new ConfigurationFile();
+                        var newFile = new ConfigurationFile() { Name = val };
                         currentFile.mSections.Add(val, newFile);
                         currentFile = newFile;
                     }

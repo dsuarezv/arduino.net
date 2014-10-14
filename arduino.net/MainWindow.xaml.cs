@@ -140,6 +140,14 @@ namespace arduino.net
             StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger dettached from Arduino.");
         }
 
+        private void SelectBoardButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = SelectionWindow.Show("Select board", Configuration.Boards.GetAllSections(), Configuration.Boards.GetSection(Configuration.CurrentBoard), "img/boards");
+            if (selected == null) return;
+
+            Configuration.CurrentBoard = selected.Name;
+        }
+
         private void ClearEditorActiveLine()
         {
             var dbg = IdeManager.Debugger;

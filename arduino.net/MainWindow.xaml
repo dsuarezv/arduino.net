@@ -25,6 +25,7 @@
                 <Button x:Name="StopButton" Content="Stop" Click="StopButton_Click" IsEnabled="False" Template="{DynamicResource HeaderRoundButton}" Height="47" Margin="219.831,0,0,0" FontSize="13" VerticalAlignment="Top" Width="47" HorizontalAlignment="Left"/>
                 <local:StatusHeaderControl x:Name="StatusControl" Margin="272,1,101,-1"/>
                 <CheckBox x:Name="DebuggerCheckbox" Content="Debugger" HorizontalAlignment="Left" Margin="156,60,0,0" Template="{DynamicResource HeaderCheckbox}" Width="79" Checked="DebuggerCheckbox_Checked" Unchecked="DebuggerCheckbox_Unchecked" Height="16" VerticalAlignment="Top"/>
+                <Button x:Name="SelectBoardButton" Content="Board" Template="{DynamicResource HeaderRoundButton}" FontSize="11" BorderThickness="1" HorizontalAlignment="Right" Width="47" Margin="0,1,0,28" Click="SelectBoardButton_Click"/>
             </Grid>
         </Border>
 
