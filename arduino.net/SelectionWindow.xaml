@@ -9,18 +9,18 @@
         <DataTemplate x:Key="SelectDataViewDataTemplate">
             <Grid Height="180" Width="180">
                 <Image Source="{Binding [image]}" Stretch="Uniform" Width="150" HorizontalAlignment="Center"/>
-                <Label Content="{Binding [name]}" Margin="0" VerticalAlignment="Bottom" Height="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Bottom"/>
+                <TextBlock Text="{Binding [name]}" Margin="0" VerticalAlignment="Bottom" Height="32" TextAlignment="Center" TextWrapping="Wrap"/>
             </Grid>
         </DataTemplate>
     </Window.Resources>
     
     <DockPanel>
         <Border DockPanel.Dock="Top" Background="{DynamicResource C0}">
-            <Label x:Name="TitleLabel" Content="Select" Foreground="{DynamicResource C0-Text}" FontSize="37.333" Margin="14,0,0,0"/>
+            <Label x:Name="TitleLabel" Content="Select" Foreground="{DynamicResource C0-Text}" FontSize="32" Margin="14,3,0,7"/>
         </Border>
         <Grid DockPanel.Dock="Bottom" Height="60">
-            <Button x:Name="OkButton" Content="OK" Grid.Row="2" Margin="0,0,98,24" IsDefault="True" HorizontalAlignment="Right" Width="75" Height="19.96" VerticalAlignment="Bottom" Click="OkButton_Click"/>
-            <Button x:Name="CancelButton" Content="Cancel" Grid.Row="2" Margin="0,0,10,24" IsCancel="True" HorizontalAlignment="Right" Width="75" Height="19.96" VerticalAlignment="Bottom"/>
+            <Button x:Name="OkButton" Content="OK" Margin="0,0,119,13" IsDefault="True" HorizontalAlignment="Right" Width="100" Height="32" VerticalAlignment="Bottom" Click="OkButton_Click" Style="{DynamicResource RegularButtonStyle}"/>
+            <Button x:Name="CancelButton" Content="Cancel" Margin="0,0,10,13" IsCancel="True" HorizontalAlignment="Right" Width="100" Height="32" VerticalAlignment="Bottom" Style="{DynamicResource RegularButtonStyle}"/>
         </Grid>
         <ListView x:Name="MainListView" Grid.Row="1" ItemTemplate="{DynamicResource SelectDataViewDataTemplate}" ItemsPanel="{DynamicResource SelectDataViewItemsTemplate}"/>
     </DockPanel>
