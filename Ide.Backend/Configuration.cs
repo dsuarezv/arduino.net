@@ -8,8 +8,8 @@ namespace arduino.net
 {
     public class Configuration
     {
-        private static ConfigurationFile mBoards;
-        private static ConfigurationFile mProgrammers;
+        private static ConfigSection mBoards;
+        private static ConfigSection mProgrammers;
 
         private static string mToolkitPath;
 
@@ -33,12 +33,12 @@ namespace arduino.net
             get { return Path.Combine(mToolkitPath, "hardware/tools/avr/bin/"); }
         }
 
-        public static ConfigurationFile Boards
+        public static ConfigSection Boards
         {
             get { return mBoards; }
         }
 
-        public static ConfigurationFile Programmers
+        public static ConfigSection Programmers
         {
             get { return mProgrammers; }
         }
@@ -49,8 +49,8 @@ namespace arduino.net
 
             var configPath = Path.Combine(toolkitPath, "hardware/arduino");
 
-            mBoards = ConfigurationFile.LoadFromFile(Path.Combine(configPath, "boards.txt"));
-            mProgrammers = ConfigurationFile.LoadFromFile(Path.Combine(configPath, "programmers.txt"));
+            mBoards = ConfigSection.LoadFromFile(Path.Combine(configPath, "boards.txt"));
+            mProgrammers = ConfigSection.LoadFromFile(Path.Combine(configPath, "programmers.txt"));
         }
     }
 }

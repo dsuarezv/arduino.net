@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace arduino.net
 {
-    public class ConfigurationFile
+    public class ConfigSection
     {
-        private static readonly ConfigurationFile Empty = new ConfigurationFile();
+        private static readonly ConfigSection Empty = new ConfigSection();
 
         private Dictionary<string, string> mEntries = new Dictionary<string, string>();
-        private Dictionary<string, ConfigurationFile> mSections = new Dictionary<string, ConfigurationFile>();
+        private Dictionary<string, ConfigSection> mSections = new Dictionary<string, ConfigSection>();
 
         public string Name
         {
@@ -39,21 +39,21 @@ namespace arduino.net
             return mSections.Keys;
         }
 
-        public ICollection<ConfigurationFile> GetAllSections()
+        public ICollection<ConfigSection> GetAllSections()
         {
             return mSections.Values;
         }
 
-        public ConfigurationFile GetSection(string sectionName)
+        public ConfigSection GetSection(string sectionName)
         {
             if (!mSections.ContainsKey(sectionName)) return Empty;
 
             return mSections[sectionName]; 
         }
         
-        public static ConfigurationFile LoadFromFile(string fileName)
+        public static ConfigSection LoadFromFile(string fileName)
         {
-            ConfigurationFile result = new ConfigurationFile();
+            ConfigSection result = new ConfigSection();
 
             using (var reader = new StreamReader(fileName))
             {
@@ -67,7 +67,7 @@ namespace arduino.net
             return result;
         }
 
-        private static void ProcessLine(ConfigurationFile file, string line)
+        private static void ProcessLine(ConfigSection file, string line)
         {
             if (line == null || line == "" || IsComment(line)) return;
 
@@ -76,7 +76,7 @@ namespace arduino.net
 
             var sections = entry[0].Split('.');
 
-            ConfigurationFile currentFile = file;
+            ConfigSection currentFile = file;
 
             for (int i = 0; i < sections.Length; ++i)
             {
@@ -94,7 +94,7 @@ namespace arduino.net
                     }
                     else
                     {
-                        var newFile = new ConfigurationFile() { Name = val };
+                        var newFile = new ConfigSection() { Name = val };
                         currentFile.mSections.Add(val, newFile);
                         currentFile = newFile;
                     }

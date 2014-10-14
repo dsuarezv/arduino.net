@@ -156,7 +156,7 @@ namespace arduino.net
             return (Path.GetExtension(file).ToLower() == ".c");
         }
 
-        public static string[] GetIncludePaths(ConfigurationFile config)
+        public static string[] GetIncludePaths(ConfigSection config)
         {
             return new string[] {
                 Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]),
@@ -165,7 +165,7 @@ namespace arduino.net
             };
         }
 
-        public static string GetIncludeArgument(ConfigurationFile config)
+        public static string GetIncludeArgument(ConfigSection config)
         {
             var sb = new StringBuilder();
 

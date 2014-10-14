@@ -69,7 +69,14 @@ namespace arduino.net
 
         public void Clean()
         {
-            
+            foreach (var f in Directory.GetFiles(GetTempDirectory()))
+            {
+                try
+                {
+                    File.Delete(f);
+                }
+                catch { }
+            }
         }
 
         public Task<bool> DeployAsync(string boardName, string programmerName, bool debug)

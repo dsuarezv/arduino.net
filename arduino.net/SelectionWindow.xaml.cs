@@ -24,7 +24,7 @@ namespace arduino.net
             InitializeComponent();
         }
 
-        public static ConfigurationFile Show(string title, ICollection<ConfigurationFile> items, ConfigurationFile currentValue, string imgDirectory)
+        public static ConfigSection Show(string title, ICollection<ConfigSection> items, ConfigSection currentValue, string imgDirectory)
         {
             var w = new SelectionWindow();
             InjectImagePaths(items, imgDirectory);
@@ -36,13 +36,13 @@ namespace arduino.net
 
             if (result.HasValue && result.Value == true)
             {
-                return w.MainListView.SelectedItem as ConfigurationFile;
+                return w.MainListView.SelectedItem as ConfigSection;
             }
 
             return null;
         }
 
-        private static void InjectImagePaths(ICollection<ConfigurationFile> items, string imgDirectory)
+        private static void InjectImagePaths(ICollection<ConfigSection> items, string imgDirectory)
         {
             var fullPath = Path.GetFullPath(imgDirectory);
 

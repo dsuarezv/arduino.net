@@ -11,6 +11,7 @@ namespace arduino.net
 {
     public class Debugger: IDisposable
     {
+        private int mDebuggerBytesCount = 0;
         private string mComPort;
         private SerialPort mSerialPort;
         private BreakPointManager mBreakPoints = new BreakPointManager();
@@ -124,6 +125,7 @@ namespace arduino.net
 
             mSerialPort.BaseStream.WriteByte(255);
             mSerialPort.BaseStream.WriteByte((byte)DebuggerPacketType.Continue);
+            mDebuggerBytesCount += 2;
             SetStatus(DebuggerStatus.Running);
         }
                 
@@ -151,7 +153,7 @@ namespace arduino.net
                     }
                 }
             }
-            catch (IOException)
+            catch
             {
                 Dispose();
             }
@@ -169,6 +171,7 @@ namespace arduino.net
         private void ProcessPacket(BinaryReader r)
         {
             byte b = r.ReadByte();
+            mDebuggerBytesCount++;
 
             if (b != 255)
             {
@@ -187,6 +190,7 @@ namespace arduino.net
                 case DebuggerPacketType.Break:
                     int breakpointIndex = r.ReadByte();
                     mRegisters.UpdateRegisters(r.ReadBytes(RegisterManager.PacketSize));
+                    mDebuggerBytesCount += RegisterManager.PacketSize;
                     OnTargetBreak(breakpointIndex); 
                     break;
                 
@@ -194,6 +198,7 @@ namespace arduino.net
                     int size = r.ReadByte();
                     if (size == 0) break;
                     byte[] memdump = r.ReadBytes(size);
+                    mDebuggerBytesCount += size + 1;
                     OnTargetTraceAnswer(memdump);
                     break;
 
@@ -224,6 +229,7 @@ namespace arduino.net
             p[6] = size;
 
             mSerialPort.Write(p, 0, p.Length);
+            mDebuggerBytesCount += p.Length;
         }
 
 
