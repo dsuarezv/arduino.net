@@ -144,7 +144,7 @@ namespace arduino.net
 
         private void SelectBoardButton_Click(object sender, RoutedEventArgs e)
         {
-            var selected = SelectionWindow.Show("Select board", Configuration.Boards.GetAllSections(), Configuration.Boards.GetSection(Configuration.CurrentBoard), "img/boards");
+            var selected = SelectionWindow.Show(this, "Select board", Configuration.Boards.GetAllSections(), Configuration.Boards.GetSection(Configuration.CurrentBoard), "img/boards");
             if (selected == null) return;
 
             Configuration.CurrentBoard = selected.Name;
@@ -158,7 +158,7 @@ namespace arduino.net
 
         private void SelectProgrammerButton_Click(object sender, RoutedEventArgs e)
         {
-            var selected = SelectionWindow.Show("Select programmer", Configuration.Programmers.GetAllSections(), Configuration.Programmers.GetSection(Configuration.CurrentProgrammer), "img/programmers");
+            var selected = SelectionWindow.Show(this, "Select programmer", Configuration.Programmers.GetAllSections(), Configuration.Programmers.GetSection(Configuration.CurrentProgrammer), "img/programmers");
             if (selected == null) return;
 
             Configuration.CurrentProgrammer = selected.Name;

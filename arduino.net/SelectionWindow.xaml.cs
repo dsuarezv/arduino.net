@@ -14,9 +14,6 @@ using System.Windows.Media.Imaging;
 
 namespace arduino.net
 {
-    /// <summary>
-    /// Interaction logic for SelectionWindow.xaml
-    /// </summary>
     public partial class SelectionWindow : Window
     {
         public SelectionWindow()
@@ -24,9 +21,10 @@ namespace arduino.net
             InitializeComponent();
         }
 
-        public static ConfigSection Show(string title, ICollection<ConfigSection> items, ConfigSection currentValue, string imgDirectory)
+        public static ConfigSection Show(Window parent, string title, ICollection<ConfigSection> items, ConfigSection currentValue, string imgDirectory)
         {
             var w = new SelectionWindow();
+            w.Owner = parent;
             InjectImagePaths(items, imgDirectory);
             w.MainListView.ItemsSource = items;
             w.MainListView.SelectedItem = currentValue;
@@ -46,14 +44,14 @@ namespace arduino.net
         {
             var fullPath = Path.GetFullPath(imgDirectory);
 
-            foreach (var i in items)
+            foreach (var item in items)
             { 
-                if (i["image"] != null) continue;
+                if (item["image"] != null) continue;
 
-                var imgFile = Path.Combine(fullPath, i.Name + ".png");
+                var imgFile = Path.Combine(fullPath, item.Name + ".png");
                 if (!File.Exists(imgFile)) imgFile = Path.Combine(fullPath, "unknown.png");
 
-                i["image"] = imgFile;
+                item["image"] = imgFile;
             }
         }
 

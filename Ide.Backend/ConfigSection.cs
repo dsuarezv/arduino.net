@@ -14,11 +14,7 @@ namespace arduino.net
         private Dictionary<string, string> mEntries = new Dictionary<string, string>();
         private Dictionary<string, ConfigSection> mSections = new Dictionary<string, ConfigSection>();
 
-        public string Name
-        {
-            get;
-            private set;
-        }
+        public string Name { get; set; }
 
         public string this[string entryName]
         { 
@@ -51,6 +47,33 @@ namespace arduino.net
             return mSections[sectionName]; 
         }
         
+        public void SaveToFile(string fileName)
+        { 
+            using (var w = new StreamWriter(fileName))
+            {
+                SaveToFile(w, null);
+            }
+        }
+
+        public void SaveToFile(TextWriter writer, string parentName)
+        { 
+            var name = (parentName == null) ? Name : parentName + "." + Name;
+
+            foreach (var e in mEntries)
+            {
+                var entryName = (name == null) ? e.Key : name + "." + e.Key;
+
+                SaveLine(writer, entryName, e.Value);
+            }
+
+            foreach (var s in mSections)
+            {
+                SaveToFile(writer, name);
+            }
+
+            writer.WriteLine();
+        }
+
         public static ConfigSection LoadFromFile(string fileName)
         {
             ConfigSection result = new ConfigSection();
@@ -100,6 +123,11 @@ namespace arduino.net
                     }
                 }
             }
+        }
+
+        private static void SaveLine(TextWriter writer, string key, string val)
+        {
+            writer.WriteLine(string.Format("{0}={1}", key, val));
         }
 
         private static bool IsComment(string line)
