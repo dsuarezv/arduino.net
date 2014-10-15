@@ -64,6 +64,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ComportAdapter.cs" />
     <Compile Include="FontManager.cs" />
     <Compile Include="MemoryDumpPad.xaml.cs">
       <DependentUpon>MemoryDumpPad.xaml</DependentUpon>
@@ -290,6 +291,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="img\programmers\unknown.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\comports\unknown.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

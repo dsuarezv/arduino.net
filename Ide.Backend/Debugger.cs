@@ -91,6 +91,11 @@ namespace arduino.net
             
         }
 
+        public string[] GetAvailableComPorts()
+        {
+            return SerialPort.GetPortNames();
+        }
+
         public void Attach()
         {
             if (mSerialPort != null) return;

@@ -155,7 +155,7 @@ namespace arduino.net
         
         private void SelectSerialButton_Click(object sender, RoutedEventArgs e)
         {
-            
+            SelectSerial();
         }
 
         private void SelectProgrammerButton_Click(object sender, RoutedEventArgs e)
@@ -183,6 +183,20 @@ namespace arduino.net
 
         // __ Board/Serial/Programmer ___________________________________________________
 
+
+        private bool SelectSerial()
+        {
+            var c = Configuration.CurrentComPort;
+            var ports = ComportAdapter.Get(IdeManager.Debugger.GetAvailableComPorts());
+            var selected = SelectConfigSection("Select serial port", ports, ref c, "img/comports");
+            if (selected != null)
+            {
+                Configuration.CurrentComPort = c;
+                UpdateBoardUi();
+            }
+
+            return selected != null;
+        }
 
         private bool SelectProgrammer()
         {
