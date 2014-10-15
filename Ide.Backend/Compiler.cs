@@ -3,18 +3,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace arduino.net
 {
     public class Compiler
     {
+        private bool mIsDirty = true;
         private Project mProject;
         private Debugger mDebugger;
         private string mBoardName;
         private DateTime mLastSuccessfulCompilationDate = DateTime.MinValue;
         private DateTime mLastSuccessfulDeploymentDate = DateTime.MinValue;
 
+        public bool IsDirty
+        {
+            get { return mIsDirty; }
+        }
 
         public DateTime LastSuccessfulCompilationDate
         {
@@ -32,6 +38,11 @@ namespace arduino.net
         {
             mProject = p;
             mDebugger = d;
+        }
+
+        public void MarkAsDirty()
+        {
+            mIsDirty = true;
         }
 
         public Task<bool> BuildAsync(string boardName, bool debug)
@@ -67,7 +78,14 @@ namespace arduino.net
 
         public void Clean()
         {
-            
+            foreach (var f in Directory.GetFiles(GetTempDirectory()))
+            {
+                try
+                {
+                    File.Delete(f);
+        }
+                catch { }
+            }
         }
 
         public Task<bool> DeployAsync(string boardName, string programmerName, bool debug)
@@ -98,6 +116,7 @@ namespace arduino.net
             // Successful deploy. Post actions.
 
             mLastSuccessfulDeploymentDate = DateTime.Now;
+            mIsDirty = false;
             SessionSettings.Save();
             BuildDwarf();
 
@@ -108,6 +127,7 @@ namespace arduino.net
         {
             IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(GetElfFile()));
         }
+
 
         private void SetupBoardName(string boardName)
         {
@@ -157,8 +177,8 @@ namespace arduino.net
         {
             if (!debug) return new List<BuildTarget>();
             
-            var config = Configuration.Boards[mBoardName]["build"];
-            var sourceDir = Path.Combine(Configuration.ToolkitPath, "debugger/" + config.Get("core"));
+            var config = Configuration.Boards.GetSub(mBoardName).GetSub("build");
+            var sourceDir = Path.Combine(Configuration.ToolkitPath, "debugger/" + config["core"]);
 
             var fileList = Project.GetCodeFilesOnPath(sourceDir);
             return GetCommandsForFiles(tempDir, debug, fileList, false);
@@ -353,9 +373,9 @@ namespace arduino.net
 
         private string GetBoardCoreDirectory()
         {
-            var config = Configuration.Boards[mBoardName]["build"];
+            var config = Configuration.Boards.GetSub(mBoardName).GetSub("build");
 
-            return Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config.Get("core"));
+            return Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]);
         }
     }
 }
