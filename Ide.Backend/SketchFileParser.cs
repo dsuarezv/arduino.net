@@ -14,7 +14,7 @@ namespace arduino.net
     {
         
         
-        private static Regex mIncludeRegex = new Regex("^[ \\t]*#include\\s*[<\\\"](\\S+)[\\\">]", RegexOptions.Multiline);
+        private static Regex mIncludeRegex = new Regex("^\\s*#include\\s*[<\\\"](?<file>\\S+)[\\\">]", RegexOptions.Multiline);
         private static Regex mFunctionRegEx = new Regex(@"(?<return_type>[\w\[\]\*]+)\s+(?<name>[&\[\]:\*\w]+)\s*\((?<arguments>[&,\[\]\*\w\s]*)\)(?=\s*\{)", RegexOptions.Multiline);
         private static Regex mPrototypeRegEx = new Regex(@"(?<return_type>[\w\[\]\*]+)\s+(?<name>[&\[\]:\*\w]+)\s*\((?<arguments>[&,\[\]\*\w\s]*)\)(?<attributes>\s__attribute__\s*\(\([\w,\s]+\)\))*(?=\s*\;)", RegexOptions.Multiline);
         private static Regex mCommentsRegEx = new Regex(
@@ -28,11 +28,12 @@ namespace arduino.net
 
         private string mFileName;
         private List<int> mLineEnds = new List<int>();
-        private Dictionary<string, string> mFunctions = new Dictionary<string,string>();
+        private Dictionary<string, string> mFunctions = new Dictionary<string, string>();
         private Dictionary<string, string> mPrototypes = new Dictionary<string, string>();
         private List<string> mFunctionsWithoutPrototype = new List<string>();
         private int mLastIncludeLine = -1;
         private int mSetupFirstLine = -1;
+        private List<string> mIncludeFiles = new List<string>();
 
 
         public int LastIncludeLineNumber
@@ -55,6 +56,10 @@ namespace arduino.net
             get { return mSetupFirstLine; }
         }
 
+        public IList<string> IncludedFiles
+        {
+            get { return mIncludeFiles; }
+        }
 
         public SketchFileParser(string sketchFileName)
         {
@@ -78,11 +83,6 @@ namespace arduino.net
             var normalized = NormalizeLineEndings(noComments);
             
             CalculateLineNumbers(normalized);
-
-            // 1. #include "soft_debugger.h"
-            // 2. function declarations && #include "Arduino.h"
-            // 3. DbgConnect() inside setup()
-
             CalculateLastIncludeLine(normalized);
             BuildFunctionsLists(normalized);
             CalculateSetupFirstLine(normalized);
@@ -140,6 +140,8 @@ namespace arduino.net
                 return;
             }
 
+            BuildLibraryList(matches);
+
             var lastMatch = matches[matches.Count - 1];
 
             mLastIncludeLine = GetLineForCharIndex(lastMatch.Index);
@@ -171,6 +173,16 @@ namespace arduino.net
                 }
 
                 if (!found) mFunctionsWithoutPrototype.Add(func.Value);
+            }
+        }
+
+        private void BuildLibraryList(MatchCollection matches)
+        { 
+            mIncludeFiles.Clear();
+
+            foreach (Match m in matches)
+            {
+                mIncludeFiles.Add(m.Groups["file"].Value);
             }
         }
 

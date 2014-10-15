@@ -58,13 +58,15 @@ namespace arduino.net
 
             var debuggerCmds = CreateDebuggerCompileCommands(tempDir, debug);
             var projectCmds = CreateProjectCompileCommands(tempDir, debug);
+            var librariesCmds = CreateLibraryCompileCommands(tempDir, projectCmds, debug);
             var coreCmds = CreateCoreCompileCommands(tempDir);
-            var coreLibCmds = CreateLibraryCommands(tempDir, coreCmds);
-            var linkCmds = CreateLinkCommand(tempDir, projectCmds, debuggerCmds);
+            var coreLibCmds = CreateCoreLibraryCommands(tempDir, coreCmds);
+            var linkCmds = CreateLinkCommand(tempDir, projectCmds, debuggerCmds, librariesCmds);
             var elfCmds = CreateImageCommands(tempDir);
 
             if (!RunCommands(debuggerCmds, tempDir)) return false;
             if (!RunCommands(projectCmds, tempDir)) return false;
+            if (!RunCommands(librariesCmds, tempDir)) return false;
             if (!RunCommands(coreCmds, tempDir)) return false;
             if (!RunCommands(coreLibCmds, tempDir)) return false;
             if (!RunCommands(linkCmds, tempDir)) return false;
@@ -205,6 +207,21 @@ namespace arduino.net
             return result;
         }
 
+        private List<BuildTarget> CreateLibraryCompileCommands(string tempDir, List<BuildTarget> projectCmds, bool debug)
+        {
+            var result = new List<string>();
+
+            foreach (var libPath in GetLibraryPaths(GetAllLibraryIncludes(projectCmds)))
+            { 
+                foreach (var cppFile in Directory.GetFiles(libPath, "*.c*"))
+                {
+                    result.Add(cppFile);
+                }
+            }
+
+            return GetCommandsForFiles(tempDir, debug, result, false);
+        }
+
         private List<BuildTarget> CreateCoreCompileCommands(string tempDir)
         {
             var result = new List<BuildTarget>();
@@ -218,7 +235,7 @@ namespace arduino.net
             return result;
         }
 
-        private List<BuildTarget> CreateLibraryCommands(string tempDir, List<BuildTarget> coreTargets)
+        private List<BuildTarget> CreateCoreLibraryCommands(string tempDir, List<BuildTarget> coreTargets)
         {
             var result = new List<BuildTarget>();
             var cmd = new ArBuildTarget() { TargetFile = GetCoreLibraryFile(tempDir) };
@@ -233,13 +250,15 @@ namespace arduino.net
             return result;
         }
 
-        private List<BuildTarget> CreateLinkCommand(string tempDir, List<BuildTarget> projectTargets, List<BuildTarget> debuggerTargets)
+        private List<BuildTarget> CreateLinkCommand(string tempDir, params List<BuildTarget>[] targets)
         {
             var result = new List<BuildTarget>();
             var sourceFiles = new StringBuilder();
 
-            foreach (var c in projectTargets) if (c.TargetFile != null) sourceFiles.AppendFormat("{0} ", c.TargetFile);
-            foreach (var c in debuggerTargets) if (c.TargetFile != null) sourceFiles.AppendFormat("{0} ", c.TargetFile);
+            foreach (var subTargets in targets)
+            { 
+                foreach (var c in subTargets) if (c.TargetFile != null) sourceFiles.AppendFormat("{0} ", c.TargetFile);
+            }
 
             sourceFiles.AppendFormat(GetCoreLibraryFile(tempDir));
 
@@ -302,6 +321,44 @@ namespace arduino.net
             foreach (var s in cmd.BuildCommand.Output) Logger.LogCompiler("    " + s);
 
             return cmd.FinishedSuccessfully;
+        }
+
+
+        // __ Library support _________________________________________________
+
+
+        private IList<string> GetAllLibraryIncludes(IList<BuildTarget> targets)
+        {
+            List<string> result = new List<string>();
+
+            foreach (BuildTarget target in targets)
+            {
+                var ino = target as InoBuildTarget;
+                if (ino == null) continue;
+
+                result.AddRange(ino.GetAllIncludes());
+            }
+
+            return result;
+        }
+
+        public static IList<string> GetLibraryPaths(IList<string> includedFiles)
+        {
+            List<string> result = new List<string>();
+
+            foreach (var inc in includedFiles)
+            {
+                var libName = Path.GetFileNameWithoutExtension(inc);
+
+                foreach (var path in Configuration.LibraryPaths)
+                {
+                    var libPath = Path.GetFullPath(Path.Combine(path, libName));
+
+                    if (Directory.Exists(libPath)) result.Add(libPath);
+                }
+            }
+
+            return result;
         }
 
 

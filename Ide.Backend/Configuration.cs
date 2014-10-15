@@ -39,11 +39,7 @@ namespace arduino.net
         public static float EditorFontSize = 11f;
         public static bool EditorAutoIndent = true;
 
-        public static IList<string> LibraryPaths = new string[] 
-        {
-            "",
-            ""
-        };
+        public static IList<string> LibraryPaths = new List<string>();
 
 
         public static string ToolkitPath
@@ -70,6 +66,7 @@ namespace arduino.net
         {
             mToolkitPath = toolkitPath;
 
+            LibraryPaths.Add(Path.Combine(toolkitPath, "libraries"));
             var configPath = Path.Combine(toolkitPath, "hardware/arduino");
 
             mBoards = ConfigSection.LoadFromFile(Path.Combine(configPath, "boards.txt"));
