@@ -37,7 +37,7 @@ namespace arduino.net
                 //var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
                 
                 IdeManager.CurrentProject = new Project(sketch);
-                IdeManager.Debugger = new Debugger("COM3");
+                IdeManager.Debugger = new Debugger();
                 IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
@@ -53,6 +53,8 @@ namespace arduino.net
                 OpenAllProjectFiles();
 
                 SessionSettings.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
+
+                UpdateBoardUi();
             }
             catch (Exception ex)
             {
@@ -62,6 +64,7 @@ namespace arduino.net
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            Configuration.Save();
             SessionSettings.Save();
         }
 
@@ -105,7 +108,7 @@ namespace arduino.net
             var success = await LaunchDeploy();
         }
 
-        private void RunButton_Click(object sender, RoutedEventArgs e)
+        private async void RunButton_Click(object sender, RoutedEventArgs e)
         {
             switch (IdeManager.Debugger.Status)
             {
@@ -119,12 +122,15 @@ namespace arduino.net
                     break;
 
                 case DebuggerStatus.Stopped:
-                    // Check for changes and build/deploy/run
-
-                    //var success = await LaunchDeploy();
+                    if (IdeManager.Compiler.IsDirty)
+                    {
+                        var success = await LaunchDeploy();
+                        if (!success) break;
+                    }
 
                     if (IsDebugBuild())
                     {
+                        IdeManager.Debugger.ComPort = Configuration.CurrentComPort;
                         IdeManager.Debugger.Attach();
                         IdeManager.Debugger.TargetContinue();
                         StatusControl.SetState(ActionStatus.Info, "Debugger", "Arduino running...");
@@ -138,6 +144,23 @@ namespace arduino.net
             IdeManager.Debugger.Detach();
             ClearEditorActiveLine();
             StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger dettached from Arduino.");
+        }
+
+        private void SelectBoardButton_Click(object sender, RoutedEventArgs e)
+        {
+            SelectBoard();
+        }
+
+        
+        
+        private void SelectSerialButton_Click(object sender, RoutedEventArgs e)
+        {
+            SelectSerial();
+        }
+
+        private void SelectProgrammerButton_Click(object sender, RoutedEventArgs e)
+        {
+            SelectProgrammer();
         }
 
         private void ClearEditorActiveLine()
@@ -154,7 +177,100 @@ namespace arduino.net
         private bool IsDebugBuild()
         {
             var c = DebuggerCheckbox.IsChecked;
-            return (c.HasValue ? c.Value : false);
+            return (c ?? false);
+        }
+
+
+        // __ Board/Serial/Programmer ___________________________________________________
+
+
+        private bool SelectSerial()
+        {
+            var c = Configuration.CurrentComPort;
+            var ports = ComportAdapter.Get(IdeManager.Debugger.GetAvailableComPorts());
+            var selected = SelectConfigSection("Select serial port", ports, ref c, "img/comports");
+            if (selected != null)
+            {
+                Configuration.CurrentComPort = c;
+                UpdateBoardUi();
+            }
+
+            return selected != null;
+        }
+
+        private bool SelectProgrammer()
+        {
+            var c = Configuration.CurrentProgrammer;
+            var selected = SelectConfigSection("Select programmer", Configuration.Programmers, ref c, "img/programmers");
+            if (selected != null) 
+            {
+                Configuration.CurrentProgrammer = c;
+                UpdateBoardUi();
+            }
+
+            return selected != null;
+        }
+
+        private bool SelectBoard()
+        {
+            var c = Configuration.CurrentBoard;
+            var selected = SelectConfigSection("Select board", Configuration.Boards, ref c, "img/boards");
+            if (selected != null) 
+            {
+                Configuration.CurrentBoard = c;
+                UpdateBoardUi();
+            }
+
+            return selected != null;
+        }
+
+        private ConfigSection SelectConfigSection(string title, ConfigSection masterSection, ref string current, string imagesDirectory)
+        {
+            var result = SelectionWindow.Show(this, title, masterSection.GetAllSections(), masterSection.GetSub(current), imagesDirectory);
+            if (result == null) return null;
+
+            current = result.Name;
+            IdeManager.Compiler.MarkAsDirty();
+
+            return result;
+        }
+
+        private void UpdateBoardUi()
+        {
+            var board = Configuration.Boards.GetSub(Configuration.CurrentBoard)["name"];
+            var progr = Configuration.Programmers.GetSub(Configuration.CurrentProgrammer)["name"];
+            var comport = Configuration.CurrentComPort;
+
+            SelectBoardButton.Content = string.Format("Board: {0}", board ?? "None. Click to select");
+            SelectProgrammerButton.Content = string.Format("Programmer: {0}", progr ?? "None (bootloader on serial port)");
+            SelectSerialButton.Content = string.Format("Serial: {0}", comport ?? "None. Click to select");
+        }
+
+        private bool IsBoardConfigured()
+        {
+            if (Configuration.CurrentBoard != null) return true;
+
+            MessageBox.Show("You have to configure the type of Arduino board you are using.", "Attention", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+            return false;
+        }
+
+        private bool IsDeploymentConfigured()
+        {
+            if (Configuration.CurrentComPort != null || Configuration.CurrentProgrammer != null) return true;
+
+            MessageBox.Show("You have to configure a deployment option, either bootloader through a serial port, or a programmer.", "Attention", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+            return false;
+        }
+
+        private bool IsSerialConfigured()
+        {
+            if (Configuration.CurrentComPort != null) return true;
+
+            MessageBox.Show("You have to configure the serial port that connects to your Arduino.", "Attention", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+            return false;
         }
 
 
@@ -163,6 +279,8 @@ namespace arduino.net
 
         private async Task<bool> LaunchBuild()
         {
+            if (!IsBoardConfigured()) return false;
+
             ClearAllActiveLines();
 
             bool debug = IsDebugBuild();
@@ -201,6 +319,8 @@ namespace arduino.net
 
         private async Task<bool> LaunchDeploy()
         {
+            if (!IsDeploymentConfigured()) return false;
+
             bool buildSuccess = await LaunchBuild();
 
             if (!buildSuccess) return false;
@@ -234,6 +354,12 @@ namespace arduino.net
 
         private void DebuggerCheckbox_Checked(object sender, RoutedEventArgs e)
         {
+            if (!IsSerialConfigured()) 
+            {
+                DebuggerCheckbox.IsChecked = false;
+                return;
+            }
+
             RunButton.IsEnabled = true;
 
             StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger enabled. Set breakpoints in the code with F9 and hit 'Run' when ready.");
@@ -242,7 +368,7 @@ namespace arduino.net
         private void DebuggerCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
             RunButton.IsEnabled = false;
-            StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger Disabled. Deploy to Arduino to update to the non-debug program.");
+            StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger Disabled.");
         }
 
         private void Debugger_StatusChanged(object sender, DebuggerStatus newState)

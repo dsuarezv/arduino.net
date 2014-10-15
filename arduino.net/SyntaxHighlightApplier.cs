@@ -65,16 +65,12 @@ namespace arduino.net
 
             //set folding markers
             e.ChangedRange.SetFoldingMarkers("{", "}");                         //allow to collapse brackets block
-            //e.ChangedRange.SetFoldingMarkers(@"#region\b", @"#endregion\b");    //allow to collapse #region blocks
             e.ChangedRange.SetFoldingMarkers(@"/\*", @"\*/");                   //allow to collapse comment block
         }
 
         
-        public static Regex ErrorRegex = new Regex(@"\s*(?<file>.*):(?<line>[0-9]+): error: .*$", RegexOptions.Singleline | RegexOptions.Compiled);
-        public static Regex WarningRegex = new Regex(@"\s*(?<file>.*):(?<line>[0-9]+): warning: .*$", RegexOptions.Singleline | RegexOptions.Compiled);
-
-
-        public static void Compiler(FastColoredTextBox fctb, TextChangedEventArgs e)
+       
+        public static void CppCompiler(FastColoredTextBox fctb, TextChangedEventArgs e)
         {
             //clear style of changed range
             e.ChangedRange.ClearStyle(MaroonStyle, RedStyle, OrangeStyle);
@@ -84,11 +80,11 @@ namespace arduino.net
             // Debugger\Debugger.ino: In function 'void loop()':
             // Debugger\Debugger.ino:24: error: 'myfunfc' was not declared in this scope
             e.ChangedRange.SetStyle(MaroonStyle, @"(.*: In .*$)", RegexOptions.Singleline);     // error context
-            e.ChangedRange.SetStyle(RedStyle, ErrorRegex);
+            e.ChangedRange.SetStyle(RedStyle, CompilerMsg.ErrorRegex);
 
             // Warning highlight
             // Debugger\Debugger.ino:24: warning: unused variable 'test'
-            e.ChangedRange.SetStyle(OrangeStyle, WarningRegex);
+            e.ChangedRange.SetStyle(OrangeStyle, CompilerMsg.WarningRegex);
 
         }
 

@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ide.Backend", "Ide.Backend\Ide.Backend.csproj", "{4CB8F184-05FF-4CC9-9CD6-41F68589A5B3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "arduino.net", "arduino.net\arduino.net.csproj", "{0986F160-80EA-4031-9F48-67C65D6CB2D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ide.Backend.Tests", "Ide.Backend.Tests\Ide.Backend.Tests.csproj", "{DE3295F1-D50C-4D3F-92EE-F68EBC754416}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{0986F160-80EA-4031-9F48-67C65D6CB2D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0986F160-80EA-4031-9F48-67C65D6CB2D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0986F160-80EA-4031-9F48-67C65D6CB2D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE3295F1-D50C-4D3F-92EE-F68EBC754416}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE3295F1-D50C-4D3F-92EE-F68EBC754416}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE3295F1-D50C-4D3F-92EE-F68EBC754416}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE3295F1-D50C-4D3F-92EE-F68EBC754416}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

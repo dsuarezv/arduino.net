@@ -47,6 +47,8 @@ namespace arduino.net
         {
             mBreakPoints.Add(bi);
 
+            IdeManager.Compiler.MarkAsDirty();
+
             if (BreakPointAdded != null) BreakPointAdded(this, bi);
 
             SessionSettings.Save();
@@ -64,6 +66,8 @@ namespace arduino.net
         public void Remove(BreakPointInfo br)
         {
             if (!mBreakPoints.Remove(br)) return;
+
+            IdeManager.Compiler.MarkAsDirty();
 
             if (BreakPointRemoved != null) BreakPointRemoved(this, br);
 
@@ -91,6 +95,8 @@ namespace arduino.net
                     int oldLine = br.LineNumber;
                     br.LineNumber += shift;
                     br.LastEditDate = DateTime.Now;
+
+                    IdeManager.Compiler.MarkAsDirty();
 
                     if (BreakPointMoved != null) BreakPointMoved(this, br, oldLine);
                 }
