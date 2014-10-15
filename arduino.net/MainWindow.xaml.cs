@@ -354,7 +354,7 @@ namespace arduino.net
         private void DebuggerCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
             RunButton.IsEnabled = false;
-            StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger Disabled. Deploy to Arduino to update to the non-debug program.");
+            StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger Disabled.");
         }
 
         private void Debugger_StatusChanged(object sender, DebuggerStatus newState)
