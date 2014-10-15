@@ -212,8 +212,8 @@ namespace arduino.net
             var result = new List<string>();
 
             foreach (var libPath in GetLibraryPaths(GetAllLibraryIncludes(projectCmds)))
-            { 
-                foreach (var cppFile in Directory.GetFiles(libPath, "*.c*"))
+            {
+                foreach (var cppFile in Directory.GetFiles(libPath, "*.c*", SearchOption.AllDirectories))
                 {
                     result.Add(cppFile);
                 }
