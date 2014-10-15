@@ -29,6 +29,21 @@ namespace arduino.net
         public event ByteDelegate SerialCharReceived;
         public event StatusChangedDelegate StatusChanged;
 
+        public string ComPort
+        {
+            get 
+            { 
+                return mComPort; 
+            }
+            set
+            {
+                if (mComPort == value) return;
+
+                Detach();
+
+                mComPort = value;
+            }
+        }
 
         public ConcurrentQueue<byte> ReceivedCharsQueue
         {
@@ -71,9 +86,9 @@ namespace arduino.net
         }
 
 
-        public Debugger(string comPort)
+        public Debugger()
         {
-            mComPort = comPort;
+            
         }
 
         public void Attach()

@@ -12,7 +12,7 @@ namespace arduino.net
         private static readonly ConfigSection Empty = new ConfigSection();
 
         private Dictionary<string, string> mEntries = new Dictionary<string, string>();
-        private Dictionary<string, ConfigSection> mSections = new Dictionary<string, ConfigSection>();
+        private Dictionary<string, ConfigSection> mSubSections = new Dictionary<string, ConfigSection>();
 
         public string Name { get; set; }
 
@@ -32,19 +32,22 @@ namespace arduino.net
 
         public ICollection<string> GetAllSectionNames()
         {
-            return mSections.Keys;
+            return mSubSections.Keys;
         }
 
         public ICollection<ConfigSection> GetAllSections()
         {
-            return mSections.Values;
+            return mSubSections.Values;
         }
 
-        public ConfigSection GetSection(string sectionName)
+        public ConfigSection GetSub(string sectionName)
         {
-            if (!mSections.ContainsKey(sectionName)) return Empty;
+            if (sectionName == null) return Empty;
+                
+            if (!mSubSections.ContainsKey(sectionName))
+                mSubSections[sectionName] = new ConfigSection() { Name = sectionName };
 
-            return mSections[sectionName]; 
+            return mSubSections[sectionName]; 
         }
         
         public void SaveToFile(string fileName)
@@ -66,9 +69,9 @@ namespace arduino.net
                 SaveLine(writer, entryName, e.Value);
             }
 
-            foreach (var s in mSections)
+            foreach (var s in mSubSections.Values)
             {
-                SaveToFile(writer, name);
+                s.SaveToFile(writer, name);
             }
 
             writer.WriteLine();
@@ -78,12 +81,15 @@ namespace arduino.net
         {
             ConfigSection result = new ConfigSection();
 
-            using (var reader = new StreamReader(fileName))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
+            if (File.Exists(fileName))
+            { 
+                using (var reader = new StreamReader(fileName))
                 {
-                    ProcessLine(result, line);
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        ProcessLine(result, line);
+                    }
                 }
             }
 
@@ -111,14 +117,14 @@ namespace arduino.net
                 }
                 else
                 {
-                    if (currentFile.mSections.ContainsKey(val))
+                    if (currentFile.mSubSections.ContainsKey(val))
                     {
-                        currentFile = currentFile.mSections[val];
+                        currentFile = currentFile.mSubSections[val];
                     }
                     else
                     {
                         var newFile = new ConfigSection() { Name = val };
-                        currentFile.mSections.Add(val, newFile);
+                        currentFile.mSubSections.Add(val, newFile);
                         currentFile = newFile;
                     }
                 }

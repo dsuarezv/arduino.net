@@ -10,12 +10,17 @@ namespace arduino.net
 {
     public class Compiler
     {
+        private bool mIsDirty = true;
         private Project mProject;
         private Debugger mDebugger;
         private string mBoardName;
         private DateTime mLastSuccessfulCompilationDate = DateTime.MinValue;
         private DateTime mLastSuccessfulDeploymentDate = DateTime.MinValue;
 
+        public bool IsDirty
+        {
+            get { return mIsDirty; }
+        }
 
         public DateTime LastSuccessfulCompilationDate
         {
@@ -35,7 +40,10 @@ namespace arduino.net
             mDebugger = d;
         }
 
-
+        public void MarkAsDirty()
+        {
+            mIsDirty = true;
+        }
 
         public Task<bool> BuildAsync(string boardName, bool debug)
         {
@@ -105,6 +113,7 @@ namespace arduino.net
             // Successful deploy. Post actions.
 
             mLastSuccessfulDeploymentDate = DateTime.Now;
+            mIsDirty = false;
             SessionSettings.Save();
             BuildDwarf();
 
@@ -139,7 +148,7 @@ namespace arduino.net
         {
             if (!debug) return new List<BuildTarget>();
             
-            var config = Configuration.Boards.GetSection(mBoardName).GetSection("build");
+            var config = Configuration.Boards.GetSub(mBoardName).GetSub("build");
             var sourceDir = Path.Combine(Configuration.ToolkitPath, "debugger/" + config["core"]);
 
             var fileList = Project.GetCodeFilesOnPath(sourceDir);
@@ -335,7 +344,7 @@ namespace arduino.net
 
         private string GetBoardCoreDirectory()
         {
-            var config = Configuration.Boards.GetSection(mBoardName).GetSection("build");
+            var config = Configuration.Boards.GetSub(mBoardName).GetSub("build");
 
             return Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]);
         }

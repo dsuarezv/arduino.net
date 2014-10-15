@@ -8,15 +8,32 @@ namespace arduino.net
 {
     public class Configuration
     {
+        public const string AppName = "arduino.net";
+
+
+        private static ConfigSection mBaseConfig;
         private static ConfigSection mBoards;
         private static ConfigSection mProgrammers;
-
         private static string mToolkitPath;
 
 
-        public static string CurrentBoard = "atmega328";
-        public static string CurrentProgrammer = "usbasp";
-        public static string CurrentComPort;
+        public static string CurrentBoard
+        {
+            get { return mBaseConfig.GetSub("target")["board"]; }
+            set { mBaseConfig.GetSub("target")["board"] = value; }
+        }
+
+        public static string CurrentProgrammer
+        {
+            get { return mBaseConfig.GetSub("target")["programmer"]; }
+            set { mBaseConfig.GetSub("target")["programmer"] = value; }
+        }
+
+        public static string CurrentComPort
+        {
+            get { return mBaseConfig.GetSub("target")["serialport"]; }
+            set { mBaseConfig.GetSub("target")["serialport"] = value; }
+        }
 
         public static string EditorFontName = "Consolas";
         public static float EditorFontSize = 11f;
@@ -51,6 +68,26 @@ namespace arduino.net
 
             mBoards = ConfigSection.LoadFromFile(Path.Combine(configPath, "boards.txt"));
             mProgrammers = ConfigSection.LoadFromFile(Path.Combine(configPath, "programmers.txt"));
+            mBaseConfig = ConfigSection.LoadFromFile(GetPreferencesFile());
+        }
+
+        public static void Save()
+        {
+            mBaseConfig.SaveToFile(GetPreferencesFile());
+        }
+
+        private static string GetPreferencesFile()
+        {
+            return Path.Combine(GetPreferencesDirectory(), "preferences.txt");
+        }
+
+        private static string GetPreferencesDirectory()
+        {
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppName);
+
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+            return path;
         }
     }
 }

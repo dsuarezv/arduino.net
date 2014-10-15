@@ -31,8 +31,8 @@ namespace Ide.Backend.Tests
             cs.SaveToFile(testFile);
 
             var cs2 = ConfigSection.LoadFromFile(testFile);
-            Assert.AreEqual(cs2.GetSection("base")["key1"], cs["key1"], false);
-            Assert.AreEqual(cs2.GetSection("base")["key3"], cs["key3"], false);
+            Assert.AreEqual(cs2.GetSub("base")["key1"], cs["key1"], false);
+            Assert.AreEqual(cs2.GetSub("base")["key3"], cs["key3"], false);
         }
     }
 }

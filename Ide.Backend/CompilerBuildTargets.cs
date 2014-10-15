@@ -129,7 +129,7 @@ namespace arduino.net
         {
             var compiler = "hardware/tools/avr/bin/" + (IsCFile(EffectiveSourceFile) ? "avr-gcc" : "avr-g++");
 
-            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
+            var config = Configuration.Boards.GetSub(boardName).GetSub("build");
             var usbvid = config["vid"];
             var usbpid = config["pid"];
             var includePaths = GetIncludeArgument(config);
@@ -186,7 +186,7 @@ namespace arduino.net
         {
             var compiler = "hardware/tools/avr/bin/avr-gcc";
 
-            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
+            var config = Configuration.Boards.GetSub(boardName).GetSub("build");
             var usbvid = config["vid"];
             var usbpid = config["pid"];
             var includePaths = CppBuildTarget.GetIncludeArgument(config);
@@ -250,7 +250,7 @@ namespace arduino.net
         {
             DisableTargetDateCheck = true;
 
-            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
+            var config = Configuration.Boards.GetSub(boardName).GetSub("build");
 
             BuildCommand = new Command()
             {
@@ -482,9 +482,9 @@ namespace arduino.net
 
         public override void SetupCommand(string boardName)
         {
-            var communication = Configuration.Programmers.GetSection(mProgrammerName)["communication"];
-            var protocol = Configuration.Programmers.GetSection(mProgrammerName)["protocol"];
-            var mcu = Configuration.Boards.GetSection(boardName).GetSection("build")["mcu"];
+            var communication = Configuration.Programmers.GetSub(mProgrammerName)["communication"];
+            var protocol = Configuration.Programmers.GetSub(mProgrammerName)["protocol"];
+            var mcu = Configuration.Boards.GetSub(boardName).GetSub("build")["mcu"];
 
             BuildCommand = new Command()
             {
