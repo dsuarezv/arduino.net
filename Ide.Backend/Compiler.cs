@@ -141,7 +141,7 @@ namespace arduino.net
 
         private bool VerifySize(string tempDir, bool printOutput)
         {
-            int maxSize = Int32.Parse(Configuration.Boards[mBoardName]["upload"].Get("maximum_size"));
+            int maxSize = Int32.Parse(Configuration.Boards.GetSub(mBoardName).GetSub("upload")["maximum_size"]);
             int elfSize = ObjectDumper.GetSize(GetElfFile(tempDir));
             bool result = maxSize > elfSize;
             
