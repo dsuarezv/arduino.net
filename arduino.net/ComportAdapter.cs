@@ -14,7 +14,7 @@ namespace arduino.net
 
             foreach (string port in listOfPorts)
             {
-                result.GetSub(port)["name"] = port;
+                result.GetSection(port)["name"] = port;
             }
 
             return result;

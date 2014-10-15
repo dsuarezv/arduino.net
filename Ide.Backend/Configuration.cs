@@ -19,20 +19,20 @@ namespace arduino.net
 
         public static string CurrentBoard
         {
-            get { return mBaseConfig.GetSub("target")["board"]; }
-            set { mBaseConfig.GetSub("target")["board"] = value; }
+            get { return mBaseConfig.GetSection("target")["board"]; }
+            set { mBaseConfig.GetSection("target")["board"] = value; }
         }
 
         public static string CurrentProgrammer
         {
-            get { return mBaseConfig.GetSub("target")["programmer"]; }
-            set { mBaseConfig.GetSub("target")["programmer"] = value; }
+            get { return mBaseConfig.GetSection("target")["programmer"]; }
+            set { mBaseConfig.GetSection("target")["programmer"] = value; }
         }
 
         public static string CurrentComPort
         {
-            get { return mBaseConfig.GetSub("target")["serialport"]; }
-            set { mBaseConfig.GetSub("target")["serialport"] = value; }
+            get { return mBaseConfig.GetSection("target")["serialport"]; }
+            set { mBaseConfig.GetSection("target")["serialport"] = value; }
         }
 
         public static string EditorFontName = "Consolas";

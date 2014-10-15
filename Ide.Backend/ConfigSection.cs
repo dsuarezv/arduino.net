@@ -40,7 +40,7 @@ namespace arduino.net
             return mSubSections.Values;
         }
 
-        public ConfigSection GetSub(string sectionName)
+        public ConfigSection GetSection(string sectionName)
         {
             if (sectionName == null) return Empty;
                 

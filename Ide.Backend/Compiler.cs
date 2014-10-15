@@ -141,7 +141,7 @@ namespace arduino.net
 
         private bool VerifySize(string tempDir, bool printOutput)
         {
-            int maxSize = Int32.Parse(Configuration.Boards.GetSub(mBoardName).GetSub("upload")["maximum_size"]);
+            int maxSize = Int32.Parse(Configuration.Boards.GetSection(mBoardName).GetSection("upload")["maximum_size"]);
             int elfSize = ObjectDumper.GetSize(GetElfFile(tempDir));
             bool result = maxSize > elfSize;
             
@@ -177,7 +177,7 @@ namespace arduino.net
         {
             if (!debug) return new List<BuildTarget>();
             
-            var config = Configuration.Boards.GetSub(mBoardName).GetSub("build");
+            var config = Configuration.Boards.GetSection(mBoardName).GetSection("build");
             var sourceDir = Path.Combine(Configuration.ToolkitPath, "debugger/" + config["core"]);
 
             var fileList = Project.GetCodeFilesOnPath(sourceDir);
@@ -373,7 +373,7 @@ namespace arduino.net
 
         private string GetBoardCoreDirectory()
         {
-            var config = Configuration.Boards.GetSub(mBoardName).GetSub("build");
+            var config = Configuration.Boards.GetSection(mBoardName).GetSection("build");
 
             return Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]);
         }
