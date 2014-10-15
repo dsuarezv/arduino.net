@@ -129,7 +129,7 @@ namespace arduino.net
         {
             var compiler = "hardware/tools/avr/bin/" + (IsCFile(EffectiveSourceFile) ? "avr-gcc" : "avr-g++");
 
-            var config = Configuration.Boards.GetSub(boardName).GetSub("build");
+            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
             var usbvid = config["vid"];
             var usbpid = config["pid"];
             var includePaths = GetIncludeArgument(config);
@@ -156,16 +156,17 @@ namespace arduino.net
             return (Path.GetExtension(file).ToLower() == ".c");
         }
 
-        public static string[] GetIncludePaths(ConfigSection config)
+        protected virtual IList<string> GetIncludePaths(ConfigSection config)
         {
-            return new string[] {
+            return new List<string>() 
+            {
                 Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]),
                 Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config["variant"]),
-                Path.Combine(Configuration.ToolkitPath, "debugger/" + config["core"])
+                Path.GetDirectoryName(EffectiveSourceFile)
             };
         }
 
-        public static string GetIncludeArgument(ConfigSection config)
+        protected virtual string GetIncludeArgument(ConfigSection config)
         {
             var sb = new StringBuilder();
 
@@ -180,25 +181,21 @@ namespace arduino.net
         }
     }
 
-    public class AssemblerBuildTarget : BuildTarget
+    public class AssemblerBuildTarget : CppBuildTarget
     {
         public override void SetupCommand(string boardName)
         {
             var compiler = "hardware/tools/avr/bin/avr-gcc";
 
-            var config = Configuration.Boards.GetSub(boardName).GetSub("build");
+            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
             var usbvid = config["vid"];
             var usbpid = config["pid"];
-            var includePaths = CppBuildTarget.GetIncludeArgument(config);
+            var includePaths = GetIncludeArgument(config);
 
             BuildCommand = new Command()
             {
                 Program = Path.Combine(Configuration.ToolkitPath, compiler),
-                //Arguments = string.Format("-c -g -mmcu={0} {1} \"{2}\" -o \"{3}\"",
-                //config["mcu"),
-                //includePaths,
-                //EffectiveSourceFile,
-                //TargetFile)
+
                 Arguments = string.Format("-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
                     config["mcu"],
                     config["f_cpu"],
@@ -250,7 +247,7 @@ namespace arduino.net
         {
             DisableTargetDateCheck = true;
 
-            var config = Configuration.Boards.GetSub(boardName).GetSub("build");
+            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
 
             BuildCommand = new Command()
             {
@@ -362,6 +359,15 @@ namespace arduino.net
             return new string[] { line };
         }
 
+        protected override IList<string> GetIncludePaths(ConfigSection config)
+        {
+            var includePaths = base.GetIncludePaths(config);
+
+            if (Debugger != null) includePaths.Add(Path.Combine(Configuration.ToolkitPath, "debugger/" + config["core"]));
+
+            return includePaths;
+        }
+
         protected override string GetOptimizationSetting()
         {
             return "-O0";  // In debug, disable optimization. Most debug info is lost if enabled.
@@ -372,12 +378,26 @@ namespace arduino.net
     {
         private SketchFileParser mParser;
 
+        public IList<string> GetAllIncludes()
+        {
+            ParseIno();
+
+            return mParser.IncludedFiles;
+        }
+
+        private void ParseIno()
+        {
+            if (mParser != null) return;
+
+            mParser = new SketchFileParser(SourceFile);
+            mParser.Parse();
+        }
+
         protected override void ProcessFile(List<BreakPointInfo> breakpoints)
         {
             // First pass: analyze
 
-            mParser = new SketchFileParser(SourceFile);
-            mParser.Parse();
+            ParseIno();
 
             // Second pass: edit through ProcessLine
             base.ProcessFile(breakpoints);
@@ -443,6 +463,18 @@ namespace arduino.net
             return ProcessLineForBreakpoints(lineNumber, line, breakpoints);
         }
 
+        protected override IList<string> GetIncludePaths(ConfigSection config)
+        {
+            var includes = base.GetIncludePaths(config);
+
+            foreach (var libPath in Compiler.GetLibraryPaths(GetAllIncludes()))
+            {
+                includes.Add(libPath);
+            }
+
+            return includes;
+        }
+
         private static string EscapePath(string path)
         {
             return path.Replace("\\", "\\\\");
@@ -482,9 +514,9 @@ namespace arduino.net
 
         public override void SetupCommand(string boardName)
         {
-            var communication = Configuration.Programmers.GetSub(mProgrammerName)["communication"];
-            var protocol = Configuration.Programmers.GetSub(mProgrammerName)["protocol"];
-            var mcu = Configuration.Boards.GetSub(boardName).GetSub("build")["mcu"];
+            var communication = Configuration.Programmers.GetSection(mProgrammerName)["communication"];
+            var protocol = Configuration.Programmers.GetSection(mProgrammerName)["protocol"];
+            var mcu = Configuration.Boards.GetSection(boardName).GetSection("build")["mcu"];
 
             BuildCommand = new Command()
             {

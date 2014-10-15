@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 
 namespace arduino.net
@@ -11,6 +12,9 @@ namespace arduino.net
     {
         public const string ObjDumpCommand = "avr-objdump.exe";
         public const string NmCommand = "avr-nm.exe";
+        public const string SizeCommand = "avr-size";
+
+        private static Regex SizeRegEx = new Regex(@"\s+(?<text>[0-9]+)\s+(?<data>[0-9]+)\s+(?<bss>[0-9]+)\s+(?<dec>[0-9]+)\s+(?<hex>[0-9a-f]+)\s+(?<elf>.*\.elf)", RegexOptions.Compiled | RegexOptions.Multiline);
 
 
         public static List<string> GetHelp()
@@ -43,6 +47,18 @@ namespace arduino.net
             return RunObjectDump("-w -W " + elfFile);
         }
 
+        public static int GetSize(string elfFile)
+        { 
+            var s = RunAvrSize(elfFile);
+            var m = SizeRegEx.Match(GetSingleString(s));
+            if (!m.Success) return 0;
+
+            var textSize = m.Groups["text"].GetIntValue();
+            var dataSize = m.Groups["data"].GetIntValue();
+
+            return textSize + dataSize;
+        }
+
         public static string GetSingleString(List<string> listOfStrings)
         {
             var sb = new StringBuilder();
@@ -50,6 +66,15 @@ namespace arduino.net
             foreach (var s in listOfStrings) sb.AppendLine(s);
 
             return sb.ToString();
+        }
+
+        private static List<string> RunAvrSize(string arguments)
+        {
+            string sizeCommand = Path.Combine(Configuration.ToolsPath, SizeCommand);
+
+            var cmd = new Command() { Program = sizeCommand, Arguments = arguments };
+            CmdRunner.Run(cmd);
+            return cmd.Output;
         }
 
         private static List<string> RunNm(string arguments)
@@ -69,7 +94,5 @@ namespace arduino.net
             CmdRunner.Run(cmd);
             return cmd.Output;
         }
-
-
     }
 }

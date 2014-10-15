@@ -58,17 +58,20 @@ namespace arduino.net
 
             var debuggerCmds = CreateDebuggerCompileCommands(tempDir, debug);
             var projectCmds = CreateProjectCompileCommands(tempDir, debug);
+            var librariesCmds = CreateLibraryCompileCommands(tempDir, projectCmds, debug);
             var coreCmds = CreateCoreCompileCommands(tempDir);
-            var coreLibCmds = CreateLibraryCommands(tempDir, coreCmds);
-            var linkCmds = CreateLinkCommand(tempDir, projectCmds, debuggerCmds);
+            var coreLibCmds = CreateCoreLibraryCommands(tempDir, coreCmds);
+            var linkCmds = CreateLinkCommand(tempDir, projectCmds, debuggerCmds, librariesCmds);
             var elfCmds = CreateImageCommands(tempDir);
 
             if (!RunCommands(debuggerCmds, tempDir)) return false;
             if (!RunCommands(projectCmds, tempDir)) return false;
+            if (!RunCommands(librariesCmds, tempDir)) return false;
             if (!RunCommands(coreCmds, tempDir)) return false;
             if (!RunCommands(coreLibCmds, tempDir)) return false;
             if (!RunCommands(linkCmds, tempDir)) return false;
             if (!RunCommands(elfCmds, tempDir)) return false;
+            if (!VerifySize(tempDir, true)) return false;
 
             mLastSuccessfulCompilationDate = DateTime.Now;
 
@@ -82,7 +85,7 @@ namespace arduino.net
                 try
                 {
                     File.Delete(f);
-                }
+        }
                 catch { }
             }
         }
@@ -94,6 +97,8 @@ namespace arduino.net
 
         public bool Deploy(string boardName, string programmerName, bool debug)
         {
+            if (!VerifySize(null, false)) throw new Exception("Sketch size is larger than supported Arduino memory. Remove some code to get it below the maximum and try again.");
+
             var tempDir = CreateTempDirectory();
             var hexFile = GetHexFile(tempDir);
 
@@ -133,6 +138,32 @@ namespace arduino.net
         }
 
 
+        // __ Size verification _______________________________________________
+
+
+        private bool VerifySize(string tempDir, bool printOutput)
+        {
+            int maxSize = Int32.Parse(Configuration.Boards.GetSection(mBoardName).GetSection("upload")["maximum_size"]);
+            int elfSize = ObjectDumper.GetSize(GetElfFile(tempDir));
+            bool result = maxSize > elfSize;
+            
+            if (printOutput)
+            { 
+                if (result)
+                {
+                    Logger.LogCompiler("Binary sketch size: {0} bytes (of a {1} byte maximum)", elfSize, maxSize);
+                }
+                else
+                {
+                    Logger.LogCompiler("WARNING: Binary sketch size of {0} bytes IS LARGER THAN the {1} byte maximum.", elfSize, maxSize);
+                }
+
+            }                
+                
+            return result;
+        }
+
+
         // __ Command generation ______________________________________________
 
         
@@ -148,7 +179,7 @@ namespace arduino.net
         {
             if (!debug) return new List<BuildTarget>();
             
-            var config = Configuration.Boards.GetSub(mBoardName).GetSub("build");
+            var config = Configuration.Boards.GetSection(mBoardName).GetSection("build");
             var sourceDir = Path.Combine(Configuration.ToolkitPath, "debugger/" + config["core"]);
 
             var fileList = Project.GetCodeFilesOnPath(sourceDir);
@@ -176,6 +207,21 @@ namespace arduino.net
             return result;
         }
 
+        private List<BuildTarget> CreateLibraryCompileCommands(string tempDir, List<BuildTarget> projectCmds, bool debug)
+        {
+            var result = new List<string>();
+
+            foreach (var libPath in GetLibraryPaths(GetAllLibraryIncludes(projectCmds)))
+            {
+                foreach (var cppFile in Directory.GetFiles(libPath, "*.c*", SearchOption.AllDirectories))
+                {
+                    result.Add(cppFile);
+                }
+            }
+
+            return GetCommandsForFiles(tempDir, debug, result, false);
+        }
+
         private List<BuildTarget> CreateCoreCompileCommands(string tempDir)
         {
             var result = new List<BuildTarget>();
@@ -189,7 +235,7 @@ namespace arduino.net
             return result;
         }
 
-        private List<BuildTarget> CreateLibraryCommands(string tempDir, List<BuildTarget> coreTargets)
+        private List<BuildTarget> CreateCoreLibraryCommands(string tempDir, List<BuildTarget> coreTargets)
         {
             var result = new List<BuildTarget>();
             var cmd = new ArBuildTarget() { TargetFile = GetCoreLibraryFile(tempDir) };
@@ -204,13 +250,15 @@ namespace arduino.net
             return result;
         }
 
-        private List<BuildTarget> CreateLinkCommand(string tempDir, List<BuildTarget> projectTargets, List<BuildTarget> debuggerTargets)
+        private List<BuildTarget> CreateLinkCommand(string tempDir, params List<BuildTarget>[] targets)
         {
             var result = new List<BuildTarget>();
             var sourceFiles = new StringBuilder();
 
-            foreach (var c in projectTargets) if (c.TargetFile != null) sourceFiles.AppendFormat("{0} ", c.TargetFile);
-            foreach (var c in debuggerTargets) if (c.TargetFile != null) sourceFiles.AppendFormat("{0} ", c.TargetFile);
+            foreach (var subTargets in targets)
+            { 
+                foreach (var c in subTargets) if (c.TargetFile != null) sourceFiles.AppendFormat("{0} ", c.TargetFile);
+            }
 
             sourceFiles.AppendFormat(GetCoreLibraryFile(tempDir));
 
@@ -273,6 +321,44 @@ namespace arduino.net
             foreach (var s in cmd.BuildCommand.Output) Logger.LogCompiler("    " + s);
 
             return cmd.FinishedSuccessfully;
+        }
+
+
+        // __ Library support _________________________________________________
+
+
+        private IList<string> GetAllLibraryIncludes(IList<BuildTarget> targets)
+        {
+            List<string> result = new List<string>();
+
+            foreach (BuildTarget target in targets)
+            {
+                var ino = target as InoBuildTarget;
+                if (ino == null) continue;
+
+                result.AddRange(ino.GetAllIncludes());
+            }
+
+            return result;
+        }
+
+        public static IList<string> GetLibraryPaths(IList<string> includedFiles)
+        {
+            List<string> result = new List<string>();
+
+            foreach (var inc in includedFiles)
+            {
+                var libName = Path.GetFileNameWithoutExtension(inc);
+
+                foreach (var path in Configuration.LibraryPaths)
+                {
+                    var libPath = Path.GetFullPath(Path.Combine(path, libName));
+
+                    if (Directory.Exists(libPath)) result.Add(libPath);
+                }
+            }
+
+            return result;
         }
 
 
@@ -344,7 +430,7 @@ namespace arduino.net
 
         private string GetBoardCoreDirectory()
         {
-            var config = Configuration.Boards.GetSub(mBoardName).GetSub("build");
+            var config = Configuration.Boards.GetSection(mBoardName).GetSection("build");
 
             return Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]);
         }

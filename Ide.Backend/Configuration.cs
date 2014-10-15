@@ -19,25 +19,27 @@ namespace arduino.net
 
         public static string CurrentBoard
         {
-            get { return mBaseConfig.GetSub("target")["board"]; }
-            set { mBaseConfig.GetSub("target")["board"] = value; }
+            get { return mBaseConfig.GetSection("target")["board"]; }
+            set { mBaseConfig.GetSection("target")["board"] = value; }
         }
 
         public static string CurrentProgrammer
         {
-            get { return mBaseConfig.GetSub("target")["programmer"]; }
-            set { mBaseConfig.GetSub("target")["programmer"] = value; }
+            get { return mBaseConfig.GetSection("target")["programmer"]; }
+            set { mBaseConfig.GetSection("target")["programmer"] = value; }
         }
 
         public static string CurrentComPort
         {
-            get { return mBaseConfig.GetSub("target")["serialport"]; }
-            set { mBaseConfig.GetSub("target")["serialport"] = value; }
+            get { return mBaseConfig.GetSection("target")["serialport"]; }
+            set { mBaseConfig.GetSection("target")["serialport"] = value; }
         }
 
         public static string EditorFontName = "Consolas";
         public static float EditorFontSize = 11f;
         public static bool EditorAutoIndent = true;
+
+        public static IList<string> LibraryPaths = new List<string>();
 
 
         public static string ToolkitPath
@@ -64,6 +66,7 @@ namespace arduino.net
         {
             mToolkitPath = toolkitPath;
 
+            LibraryPaths.Add(Path.Combine(toolkitPath, "libraries"));
             var configPath = Path.Combine(toolkitPath, "hardware/arduino");
 
             mBoards = ConfigSection.LoadFromFile(Path.Combine(configPath, "boards.txt"));
@@ -74,12 +77,12 @@ namespace arduino.net
         public static void Save()
         {
             mBaseConfig.SaveToFile(GetPreferencesFile());
-        }
+    }
 
         private static string GetPreferencesFile()
         {
             return Path.Combine(GetPreferencesDirectory(), "preferences.txt");
-        }
+}
 
         private static string GetPreferencesDirectory()
         {

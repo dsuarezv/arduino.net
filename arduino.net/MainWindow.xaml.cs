@@ -226,7 +226,7 @@ namespace arduino.net
 
         private ConfigSection SelectConfigSection(string title, ConfigSection masterSection, ref string current, string imagesDirectory)
         {
-            var result = SelectionWindow.Show(this, title, masterSection.GetAllSections(), masterSection.GetSub(current), imagesDirectory);
+            var result = SelectionWindow.Show(this, title, masterSection.GetAllSections(), masterSection.GetSection(current), imagesDirectory);
             if (result == null) return null;
 
             current = result.Name;
@@ -237,8 +237,8 @@ namespace arduino.net
 
         private void UpdateBoardUi()
         {
-            var board = Configuration.Boards.GetSub(Configuration.CurrentBoard)["name"];
-            var progr = Configuration.Programmers.GetSub(Configuration.CurrentProgrammer)["name"];
+            var board = Configuration.Boards.GetSection(Configuration.CurrentBoard)["name"];
+            var progr = Configuration.Programmers.GetSection(Configuration.CurrentProgrammer)["name"];
             var comport = Configuration.CurrentComPort;
 
             SelectBoardButton.Content = string.Format("Board: {0}", board ?? "None. Click to select");
