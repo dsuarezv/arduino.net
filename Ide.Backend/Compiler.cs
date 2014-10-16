@@ -10,7 +10,7 @@ namespace arduino.net
 {
     public class Compiler
     {
-        private bool mIsDirty = true;
+        private BuildStage mDirtyStage = BuildStage.NeedsBuild;
         private Project mProject;
         private Debugger mDebugger;
         private string mBoardName;
@@ -19,7 +19,7 @@ namespace arduino.net
 
         public bool IsDirty
         {
-            get { return mIsDirty; }
+            get { return mDirtyStage != BuildStage.ReadyToRun; }
         }
 
         public DateTime LastSuccessfulCompilationDate
@@ -35,7 +35,7 @@ namespace arduino.net
         public Project Project
         {
             get { return mProject; }
-            set { mProject = value; MarkAsDirty(); }
+            set { mProject = value; MarkAsDirty(BuildStage.NeedsBuild); }
         }
 
         public Compiler(Project p, Debugger d)
@@ -44,9 +44,9 @@ namespace arduino.net
             mDebugger = d;
         }
 
-        public void MarkAsDirty()
+        public void MarkAsDirty(BuildStage stage)
         {
-            mIsDirty = true;
+            mDirtyStage = stage;
         }
 
         public Task<bool> BuildAsync(string boardName, bool debug)
@@ -56,6 +56,8 @@ namespace arduino.net
 
         public bool Build(string boardName, bool debug)
         {
+            if (mDirtyStage != BuildStage.NeedsBuild) return true;
+
             var tempDir = CreateTempDirectory();
 
             SetupBoardName(boardName);
@@ -79,6 +81,8 @@ namespace arduino.net
 
             mLastSuccessfulCompilationDate = DateTime.Now;
 
+            BuildDwarf();
+
             return true;
         }
 
@@ -101,6 +105,8 @@ namespace arduino.net
 
         public bool Deploy(string boardName, string programmerName, bool debug)
         {
+            if (mDirtyStage == BuildStage.ReadyToRun) return true;
+
             if (!VerifySize(null, false)) throw new Exception("Sketch size is larger than supported Arduino memory. Remove some code to get it below the maximum and try again.");
 
             var tempDir = CreateTempDirectory();
@@ -122,7 +128,7 @@ namespace arduino.net
             // Successful deploy. Post actions.
 
             mLastSuccessfulDeploymentDate = DateTime.Now;
-            mIsDirty = false;
+            mDirtyStage = BuildStage.ReadyToRun;
             SessionSettings.Save();
             BuildDwarf();
 
@@ -439,4 +445,6 @@ namespace arduino.net
             return Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]);
         }
     }
+
+    public enum BuildStage { NeedsBuild, NeedsDeploy, ReadyToRun }
 }

@@ -33,8 +33,9 @@ namespace arduino.net
             {
                 Configuration.Initialize(@"..\");
 
-                var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
+                //var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
                 //var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
+                var sketch = @"C:\Users\dave\Documents\develop\Arduino\ArduinoMotionSensorExample\ArduinoMotionSensorExample.ino";
 
                 IdeManager.Debugger = new Debugger();
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
@@ -186,6 +187,7 @@ namespace arduino.net
             if (selected != null)
             {
                 Configuration.CurrentComPort = c;
+                IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsDeploy);
                 UpdateBoardUi();
             }
 
@@ -199,6 +201,7 @@ namespace arduino.net
             if (selected != null) 
             {
                 Configuration.CurrentProgrammer = c;
+                IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsDeploy);
                 UpdateBoardUi();
             }
 
@@ -212,6 +215,7 @@ namespace arduino.net
             if (selected != null) 
             {
                 Configuration.CurrentBoard = c;
+                IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsBuild);
                 UpdateBoardUi();
             }
 
@@ -224,8 +228,6 @@ namespace arduino.net
             if (result == null) return null;
 
             current = result.Name;
-            IdeManager.Compiler.MarkAsDirty();
-
             return result;
         }
 
