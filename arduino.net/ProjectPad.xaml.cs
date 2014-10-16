@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
 
 namespace arduino.net
 {
@@ -51,7 +52,15 @@ namespace arduino.net
 
         private void OpenButton_Click(object sender, RoutedEventArgs e)
         {
+            var dialog = new OpenFileDialog()
+            {
+                Multiselect = false,
+                Filter = "Arduino sketches (*.ino, *.pde)|*.ino;*.pde"
+            };
 
+            if (!(bool)dialog.ShowDialog()) return;
+
+            OpenProject(dialog.FileName);
         }
 
         private void AddFileButton_Click(object sender, RoutedEventArgs e)

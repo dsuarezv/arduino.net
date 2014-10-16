@@ -298,7 +298,7 @@ namespace arduino.net
 
                     ProjectPad1.OpenContent("Symbol table",
                         ObjectDumper.GetSingleString(
-                            ObjectDumper.GetNmSymbolTable(elfFile)));
+                            ObjectDumper.GetNmSymbolTable(elfFile)), ".symboltable");
                 }
 
                 StatusControl.SetState(ActionStatus.OK, "Compiler", "Build succeeded");
