@@ -30,6 +30,8 @@ namespace arduino.net
         {
             base.FillAttributes(node);
             Name = node.GetAttr("name").GetStringValue();
+
+            //if (Name == "ret") System.Diagnostics.Debugger.Break();
         }
     }
 
@@ -117,13 +119,15 @@ namespace arduino.net
         {
  	        base.FillAttributes(node);
 
+            //if (Name == "ret") System.Diagnostics.Debugger.Break();
+
             mLocationString = node.GetAttr("location").RawValue;
             mTypeId = node.GetAttr("type").GetReferenceValue();
         }
 
         public override void SetupReferences(DwarfTextParser parser, Dictionary<int, DwarfObject> index)
         {
-            //if (Name == "arg3") System.Diagnostics.Debugger.Break();
+            //if (Name == "ret") System.Diagnostics.Debugger.Break();
 
             if (mTypeId > -1) Type = DwarfBaseType.GetTypeFromIndex(index, mTypeId);
             if (mLocationString != null) Location = DwarfLocation.Get(parser, mLocationString);

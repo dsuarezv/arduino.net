@@ -104,6 +104,8 @@ namespace arduino.net
 
         private DwarfObject ParseNode(DwarfParserNode node)
         {
+            //if (node.Id == 0x2f97) System.Diagnostics.Debugger.Break();
+
             DwarfObject result = null;
 
             switch (node.TagType)
@@ -144,6 +146,8 @@ namespace arduino.net
 
         private DwarfObject SetupNewObject(DwarfParserNode node, DwarfObject obj)
         {
+            //if (node.Id == 0x2f97) System.Diagnostics.Debugger.Break();
+
             obj.FillAttributes(node);
 
             if (node.Children != null)
