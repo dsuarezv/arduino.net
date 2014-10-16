@@ -35,25 +35,16 @@ namespace arduino.net
 
                 var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
                 //var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
-                
-                IdeManager.CurrentProject = new Project(sketch);
+
                 IdeManager.Debugger = new Debugger();
-                IdeManager.Compiler = new Compiler(IdeManager.CurrentProject, IdeManager.Debugger);
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
-                IdeManager.GoToLineRequested += IdeManager_GoToLineRequested;
+
+                SetupProject(sketch);                
                 
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
-
-                StatusControl.SetState(0, "Project", "Project loaded successfully");
-
-                ProjectPad1.TargetTabControl = OpenFilesTab;
-
-                OpenAllProjectFiles();
-
-                SessionSettings.Initialize(IdeManager.CurrentProject.GetSettingsFileName());
-
+                
                 UpdateBoardUi();
             }
             catch (Exception ex)
@@ -62,18 +53,19 @@ namespace arduino.net
             }
         }
 
+        private void SetupProject(string sketch)
+        {
+            ProjectPad1.TargetTabControl = OpenFilesTab;
+            ProjectPad1.OpenProject(sketch);
+
+            StatusControl.SetState(ActionStatus.Info, "Project", "Project loaded successfully");
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Configuration.Save();
             SessionSettings.Save();
-        }
-
-        private async void OpenAllProjectFiles()
-        {
-            foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
-            
-            await OpenFile(IdeManager.CurrentProject.GetSketchFileName());
-        }
+        }        
 
         protected async override void OnPreviewKeyDown(KeyEventArgs e)
         {
@@ -82,7 +74,7 @@ namespace arduino.net
 
             switch (e.Key)
             {
-                case Key.F5: break;
+                case Key.F5: RunButton_Click(null, null); break;
                 case Key.B: if (ctrl && shift) await LaunchBuild(); break;
             }
 
@@ -110,6 +102,8 @@ namespace arduino.net
 
         private async void RunButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!RunButton.IsEnabled) return;
+
             switch (IdeManager.Debugger.Status)
             {
                 case DebuggerStatus.Break:
@@ -169,7 +163,7 @@ namespace arduino.net
 
             if (dbg.LastBreakpoint != null)
             {
-                var editor = GetEditor(dbg.LastBreakpoint.SourceFileName);
+                var editor = ProjectPad1.GetEditor(dbg.LastBreakpoint.SourceFileName);
                 if (editor != null) editor.ClearActiveLine();
             }
         }
@@ -281,14 +275,14 @@ namespace arduino.net
         {
             if (!IsBoardConfigured()) return false;
 
-            ClearAllActiveLines();
+            ProjectPad1.ClearAllActiveLines();
 
             bool debug = IsDebugBuild();
 
             OutputTextBox1.ClearText();
             StatusControl.SetState(ActionStatus.InProgress, "Compiler", "Compiling...");
 
-            SaveAllDocuments();
+            ProjectPad1.SaveAllDocuments();
 
             var compiler = IdeManager.Compiler;
             bool result = await compiler.BuildAsync(Configuration.CurrentBoard, debug);
@@ -297,12 +291,12 @@ namespace arduino.net
             if (result)
             {
                 if (debug)
-                { 
-                    OpenContent("Sketch dissasembly",
+                {
+                    ProjectPad1.OpenContent("Sketch dissasembly",
                         ObjectDumper.GetSingleString(
                             ObjectDumper.GetDisassemblyWithSource(elfFile)), ".disassembly");
 
-                    OpenContent("Symbol table",
+                    ProjectPad1.OpenContent("Symbol table",
                         ObjectDumper.GetSingleString(
                             ObjectDumper.GetNmSymbolTable(elfFile)));
                 }
@@ -325,7 +319,6 @@ namespace arduino.net
 
             if (!buildSuccess) return false;
 
-            OutputTextBox1.ClearText();
             StatusControl.SetState(ActionStatus.InProgress, "Deploy", "Deploying...");
             bool success = await IdeManager.Compiler.DeployAsync(Configuration.CurrentBoard, Configuration.CurrentProgrammer, IsDebugBuild());
 
@@ -379,7 +372,7 @@ namespace arduino.net
                 switch (newState)
                 { 
                     case DebuggerStatus.Stopped:
-                        SetAllDocumentsReadOnly(false);
+                        ProjectPad1.SetAllDocumentsReadOnly(false);
                         BuildButton.IsEnabled = true;
                         StopButton.IsEnabled = false;
                         RunButton.IsEnabled = true;
@@ -387,7 +380,7 @@ namespace arduino.net
                         DebuggerCheckbox.IsEnabled = true;
                         break;
                     case DebuggerStatus.Running:
-                        SetAllDocumentsReadOnly(true);
+                        ProjectPad1.SetAllDocumentsReadOnly(true);
                         BuildButton.IsEnabled = false;
                         StopButton.IsEnabled = true;
                         RunButton.IsEnabled = false;
@@ -395,7 +388,7 @@ namespace arduino.net
                         DebuggerCheckbox.IsEnabled = false;
                         break;
                     case DebuggerStatus.Break:
-                        SetAllDocumentsReadOnly(true);
+                        ProjectPad1.SetAllDocumentsReadOnly(true);
                         BuildButton.IsEnabled = false;
                         RunButton.IsEnabled = true;
                         StopButton.IsEnabled = true;
@@ -423,7 +416,7 @@ namespace arduino.net
                 {
                     StatusControl.SetState(ActionStatus.Info, "Debugger", "Stopped at breakpoint. Hit 'Run' to continue.");
 
-                    var editor = OpenFileAtLine(bi.SourceFileName, bi.LineNumber);
+                    var editor = ProjectPad1.OpenFileAtLine(bi.SourceFileName, bi.LineNumber);
                 }
             });
 
@@ -460,127 +453,6 @@ namespace arduino.net
 
                 Thread.Sleep(50);
             }
-        }
-
-
-        // __ Document management _____________________________________________
-
-
-        private async Task OpenFile(string fileName)
-        {
-            var ti = GetTabForFileName(fileName);
-
-            CodeTextBox editor = null;
-
-            if (ti != null)
-            {
-                ti.IsSelected = true;
-                editor = ti.Content as CodeTextBox;
-            }
-            else
-            {
-                editor = CreateEditorTabItem(fileName);
-            }
-
-            await editor.OpenFile(fileName);
-        }
-
-        private void OpenContent(string title, string content, string ext = null)
-        {
-            var ti = GetTabForFileName(title);
-
-            CodeTextBox editor = null;
-
-            if (ti != null)
-            {
-                ti.IsSelected = true;
-                editor = ti.Content as CodeTextBox;
-            }
-            else
-            {
-                editor = CreateEditorTabItem(title);
-            }
-
-            editor.OpenContent(content, ext);
-        }
-
-        private CodeTextBox CreateEditorTabItem(string fileName)
-        {
-            var codeEditor = new CodeTextBox() { Padding = new Thickness(0, 5, 0, 5) };
-
-            TabItem t = new TabItem() { Header = System.IO.Path.GetFileName(fileName), Tag = fileName, Content = codeEditor, Visibility = Visibility.Collapsed };
-
-            OpenFilesTab.Items.Add(t);
-
-            t.IsSelected = true;
-
-            return codeEditor;
-        }
-
-        private TabItem GetTabForFileName(string fileName)
-        {
-            foreach (TabItem ti in OpenFilesTab.Items)
-            {
-                if (ti.Tag as string == fileName) return ti;
-            }
-
-            return null;
-        }
-
-        private void RunOnAllEditors(Action<CodeTextBox> editorAction)
-        {
-            foreach (TabItem ti in OpenFilesTab.Items)
-            {
-                var editor = ti.Content as CodeTextBox;
-                if (editor == null) continue;
-
-                editorAction(editor);
-            }
-        }
-
-        private void ClearAllActiveLines()
-        {
-            RunOnAllEditors((e) => e.ClearActiveLine());
-        }
-
-        private void SaveAllDocuments()
-        {
-            RunOnAllEditors((e) => e.SaveFile());
-        }
-
-        private void SetAllDocumentsReadOnly(bool readOnly)
-        {
-            RunOnAllEditors((e) => e.SetReadOnly(readOnly));
-        }
-
-        private void IdeManager_GoToLineRequested(string fileName, int lineNumber)
-        {
-            OpenFileAtLine(fileName, lineNumber);
-        }
-
-        private CodeTextBox GetEditor(string fileName)
-        {
-            var tab = GetTabForFileName(fileName);
-            if (tab == null) return null;
-
-            tab.IsSelected = true;
-
-            var editor = tab.Content as CodeTextBox;
-            if (editor == null) return null;
-
-            return editor;
-        }
-
-        private CodeTextBox OpenFileAtLine(string fileName, int lineNumber)
-        {
-            var editor = GetEditor(fileName);
-            if (editor == null) return null;
-
-            editor.SetCursorAt(lineNumber - 1, 0);
-            editor.FocusEditor();
-            editor.SetActiveLine(lineNumber);
-
-            return editor;
         }
     }
 }

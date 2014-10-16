@@ -9,7 +9,20 @@
     <Grid Margin="0, 0, 0, 20">
 
         <Expander Header="Project" IsExpanded="True" Style="{DynamicResource PadExpanderStyle}"  >
-            <local:TabSelector x:Name="MainTabSelector"/>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="11, 0, 10, 0" VerticalAlignment="Top"> 
+                    <Button Name="NewButton" Content="New" Click="NewButton_Click" Style="{DynamicResource PadMenuButtonStyle}" FontSize="14" />
+                    <Button Name="OpenButton" Content="Open" Click="OpenButton_Click" Style="{DynamicResource PadMenuButtonStyle}" FontSize="14" />
+                    <Button Name="AddFileButton" Content="Add file" Click="AddFileButton_Click" Style="{DynamicResource PadMenuButtonStyle}" FontSize="14" />
+                    <Button Name="AddLibrarybutton" Content="Add lib" Click="AddLibrarybutton_Click" Style="{DynamicResource PadMenuButtonStyle}" FontSize="14" IsEnabled="False" />
+                </StackPanel>
+                
+                <local:TabSelector Grid.Row="1" x:Name="MainTabSelector" />
+            </Grid>
         </Expander>
 
     </Grid>

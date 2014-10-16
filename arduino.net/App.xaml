@@ -6,6 +6,9 @@
 
         
 		<SolidColorBrush x:Key="C0" Color="#FF2c333d"/>
+        <SolidColorBrush x:Key="C0-Highlight" Color="#FF48576C"/>
+        <SolidColorBrush x:Key="C0-Pressed" Color="#FF617693"/>
+        <SolidColorBrush x:Key="C0-Disabled" Color="#FFC3C3C3"/>
     	<SolidColorBrush x:Key="C1" Color="#FF6A869B"/>
 		<SolidColorBrush x:Key="C1-Highlight" Color="#FFA0B6C7"/>
 		<SolidColorBrush x:Key="C1-Pressed" Color="#FFCDE4F0"/>
@@ -363,9 +366,39 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-
         
         
+        <Style x:Key="PadMenuButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
+            <Setter Property="Foreground" Value="{StaticResource B0-Text}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border" SnapsToDevicePixels="true" Margin="0, 2, 10, 2">
+                            <ContentPresenter x:Name="contentPresenter" TextElement.FontWeight="Bold" TextElement.Foreground="{TemplateBinding Foreground}" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource C0-Highlight}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource C0-Pressed}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource C0-Disabled}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+
+
     </Application.Resources>
 </Application>

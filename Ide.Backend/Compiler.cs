@@ -32,7 +32,11 @@ namespace arduino.net
             get { return mLastSuccessfulDeploymentDate; }
         }
 
-
+        public Project Project
+        {
+            get { return mProject; }
+            set { mProject = value; MarkAsDirty(); }
+        }
 
         public Compiler(Project p, Debugger d)
         {
