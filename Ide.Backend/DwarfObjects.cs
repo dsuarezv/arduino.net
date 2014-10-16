@@ -108,6 +108,8 @@ namespace arduino.net
 
         public virtual string GetValueRepresentation(Debugger debugger, byte[] value)
         {
+            if (Type == null) return "<type not available>";
+
             return Type.GetValueRepresentation(debugger, value);
         }
 
