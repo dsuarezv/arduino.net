@@ -105,6 +105,9 @@ namespace arduino.net
         {
             if (!RunButton.IsEnabled) return;
 
+            // This should be moved to the debugger: Run();
+            // Only problem is the clearEditorActiveLine and SetStatus calls that belong here.
+
             switch (IdeManager.Debugger.Status)
             {
                 case DebuggerStatus.Break:

@@ -171,7 +171,19 @@ namespace arduino.net
         {
             long intValue = GetIntFromBytes(value);
 
-            return string.Format("{0} ({1})", intValue, Name);
+            return string.Format("{0} ({1})", GetValueRepresentation(intValue), Name);
+        }
+
+        private string GetValueRepresentation(long intValue)
+        {
+            switch (ByteSize)
+            {
+                case 1: return ((byte)intValue).ToString();
+                case 2: return ((Int16)intValue).ToString();
+                case 4: return ((Int32)intValue).ToString();
+            }
+
+            return intValue.ToString();
         }
 
         public static DwarfBaseType GetTypeFromIndex(Dictionary<int, DwarfObject> index, int key)
