@@ -8,6 +8,7 @@ namespace arduino.net
     public class Project
     {
         private const string IdeSettingsExtension = ".ide_settings.user";
+        private const string DefaultSketchTemplateFile = "templates/default.ino";
 
         private string mProjectPath;
         private string mSketchFile;
@@ -30,6 +31,9 @@ namespace arduino.net
             mSketchFile = Path.GetFileName(sketchFile);
 
             if (sdkPath == null) mSdkPath = Configuration.ToolkitPath;
+
+            if (!Directory.Exists(mProjectPath)) Directory.CreateDirectory(mProjectPath);
+            if (!File.Exists(sketchFile)) CreateDefaultSketch(sketchFile);
         }
 
         public List<string> GetFileList()
@@ -92,6 +96,24 @@ namespace arduino.net
         public void RenameFile(string fileName, string newFileName)
         {
             File.Move(Path.Combine(mProjectPath, fileName), Path.Combine(mProjectPath, newFileName));
+        }
+
+
+        public static string GetNewProjectFile(string sketchFolder)
+        {
+            return Path.Combine(sketchFolder, Path.GetFileNameWithoutExtension(sketchFolder) + ".ino");
+        }
+
+        public static string GetDefaultNewProjectName()
+        {
+            var d = DateTime.Now;
+
+            return string.Format("sketch_{0}{1}", d.ToString("MMM").ToLower(), d.Day);
+        }
+
+        private static void CreateDefaultSketch(string sketchFile)
+        {
+            File.Copy(DefaultSketchTemplateFile, sketchFile, false);
         }
     }
 }

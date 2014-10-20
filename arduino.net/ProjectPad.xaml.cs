@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Microsoft.Win32;
 
 namespace arduino.net
@@ -47,13 +47,29 @@ namespace arduino.net
 
         private void NewButton_Click(object sender, RoutedEventArgs e)
         {
+            var dialog = new SaveFileDialog()
+            {
+                Title = "Choose new sketch folder...",
+                Filter = "All files (*.*)|*.*",
+                FileName = System.IO.Path.Combine(Configuration.SketchBookPath, Project.GetDefaultNewProjectName())
+            };
 
+            if (!(bool)dialog.ShowDialog()) return;
+
+            if (!CloseAllProjectFiles()) return;
+
+            // Create project
+
+            var projectFile = Project.GetNewProjectFile(dialog.FileName);
+
+            OpenProject(projectFile);
         }
 
         private void OpenButton_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new OpenFileDialog()
             {
+                Title = "Open Arduino sketch...",
                 Multiselect = false,
                 Filter = "Arduino sketches (*.ino, *.pde)|*.ino;*.pde"
             };
@@ -61,6 +77,11 @@ namespace arduino.net
             if (!(bool)dialog.ShowDialog()) return;
 
             OpenProject(dialog.FileName);
+        }
+
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private void AddFileButton_Click(object sender, RoutedEventArgs e)
@@ -81,7 +102,7 @@ namespace arduino.net
         {
             if (IdeManager.CurrentProject != null)
             {
-                CloseAllProjectFiles();
+                if (!CloseAllProjectFiles()) return;
             }
 
             Project p = new Project(sketchFile);
@@ -94,9 +115,9 @@ namespace arduino.net
             SessionSettings.Initialize(p.GetSettingsFileName());
         }
 
-        public void CloseProject()
+        public bool CloseProject()
         {
-            CloseAllProjectFiles();
+            return CloseAllProjectFiles();
         }
 
 
@@ -107,27 +128,24 @@ namespace arduino.net
             await OpenFile(IdeManager.CurrentProject.GetSketchFileName());
         }
 
-        private void CloseAllProjectFiles()
+        private bool CloseAllProjectFiles()
         {
-            foreach (var f in IdeManager.CurrentProject.GetFileList()) CloseFile(f);
+            bool result = true;
+
+            foreach (var f in IdeManager.CurrentProject.GetFileList()) 
+            {
+                if (!CloseFile(f))
+                {
+                    result = false;
+                    break;
+                }
+            }
+
+            return result;
         }
 
 
         // __ Document management _____________________________________________
-
-
-        private void CloseFile(string fileName)
-        {
-            var ti = GetTabForFileName(fileName);
-            if (ti == null) return;
-
-            var editor = ti.Content as CodeTextBox;
-            if (editor == null) return;
-
-            editor.CloseFile();
-
-            mTabControl.Items.Remove(ti);
-        }
 
 
         private async Task OpenFile(string fileName)
@@ -166,6 +184,23 @@ namespace arduino.net
             }
 
             editor.OpenContent(content, ext);
+        }
+
+        private bool CloseFile(string fileName)
+        {
+            var ti = GetTabForFileName(fileName);
+            if (ti == null) return true;
+
+            var editor = ti.Content as CodeTextBox;
+            if (editor == null) return true;
+
+            var result = editor.CloseFile();
+            if (result)
+            {
+                mTabControl.Items.Remove(ti);
+            }
+
+            return result;
         }
 
         private CodeTextBox CreateEditorTabItem(string fileName)

@@ -139,12 +139,14 @@ namespace arduino.net
             }
         }
 
-        public void CloseFile()
+        public bool CloseFile()
         {
-            if (!CheckChanges()) return;
+            if (!CheckChanges()) return false;
 
             mMainTextBox.Text = "";
             mFileName = null;
+
+            return true;
         }
 
         public void Find(string text)

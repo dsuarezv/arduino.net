@@ -239,8 +239,6 @@ namespace arduino.net
 
             // Create a new expression to get the pointer value
 
-            //pointerValue += 0x800000;    // TODO: get this from the config
-
             var program = new List<string>();
             program.Add(string.Format("DW_OP_addr: {0:X}", pointerValue));
             var pointerTargetLocation = new DwarfLocation() { RawLocationProgram = program };
