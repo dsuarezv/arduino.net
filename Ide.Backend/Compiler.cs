@@ -11,7 +11,7 @@ namespace arduino.net
 {
     public class Compiler
     {
-        private BuildStage mDirtyStage = BuildStage.NeedsBuild;
+        private BuildStage mBuildStage = BuildStage.NeedsBuild;
         private ObservableCollection<CompilerMsg> mCompilerErrors = new ObservableCollection<CompilerMsg>();
         private Project mProject;
         private Debugger mDebugger;
@@ -21,7 +21,7 @@ namespace arduino.net
 
         public bool IsDirty
         {
-            get { return mDirtyStage != BuildStage.ReadyToRun; }
+            get { return mBuildStage != BuildStage.ReadyToRun; }
         }
 
         public DateTime LastSuccessfulCompilationDate
@@ -54,7 +54,7 @@ namespace arduino.net
 
         public void MarkAsDirty(BuildStage stage)
         {
-            mDirtyStage = stage;
+            mBuildStage = stage;
         }
 
         public Task<bool> BuildAsync(string boardName, bool debug)
@@ -64,7 +64,11 @@ namespace arduino.net
 
         public bool Build(string boardName, bool debug)
         {
-            if (mDirtyStage != BuildStage.NeedsBuild) return true;
+            if (mBuildStage != BuildStage.NeedsBuild)
+            {
+                Logger.LogCompiler("Build is up-to-date.");
+                return true;
+            }
 
             var tempDir = CreateTempDirectory();
 
@@ -90,6 +94,7 @@ namespace arduino.net
             if (!VerifySize(tempDir, true)) return false;
 
             mLastSuccessfulCompilationDate = DateTime.Now;
+            mBuildStage = BuildStage.NeedsDeploy;
 
             BuildDwarf();
 
@@ -115,7 +120,11 @@ namespace arduino.net
 
         public bool Deploy(string boardName, string programmerName, bool debug)
         {
-            if (mDirtyStage == BuildStage.ReadyToRun) return true;
+            if (mBuildStage == BuildStage.ReadyToRun) 
+            {
+                Logger.LogCompiler("Deploy: No changes since last deployment.");
+                return true;
+            }
 
             if (!VerifySize(null, false)) throw new Exception("Sketch size is larger than supported Arduino memory. Remove some code to get it below the maximum and try again.");
 
@@ -138,7 +147,7 @@ namespace arduino.net
             // Successful deploy. Post actions.
 
             mLastSuccessfulDeploymentDate = DateTime.Now;
-            mDirtyStage = BuildStage.ReadyToRun;
+            mBuildStage = BuildStage.ReadyToRun;
             SessionSettings.Save();
             BuildDwarf();
 

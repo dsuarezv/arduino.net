@@ -121,11 +121,11 @@ namespace arduino.net
         }
 
 
-        private async void OpenAllProjectFiles()
+        private void OpenAllProjectFiles()
         {
             foreach (var f in IdeManager.CurrentProject.GetFileList()) OpenFile(f);
 
-            await OpenFile(IdeManager.CurrentProject.GetSketchFileName());
+            OpenFile(IdeManager.CurrentProject.GetSketchFileName());
         }
 
         private bool CloseAllProjectFiles()
@@ -148,7 +148,7 @@ namespace arduino.net
         // __ Document management _____________________________________________
 
 
-        private async Task OpenFile(string fileName)
+        private void OpenFile(string fileName, bool reloadIfAlreadyOpen = false)
         {
             var ti = GetTabForFileName(fileName);
 
@@ -158,13 +158,14 @@ namespace arduino.net
             {
                 ti.IsSelected = true;
                 editor = ti.Content as CodeTextBox;
+                if (!reloadIfAlreadyOpen) return;
             }
             else
             {
                 editor = CreateEditorTabItem(fileName);
             }
 
-            await editor.OpenFile(fileName);
+            editor.OpenFile(fileName);
         }
 
         public void OpenContent(string title, string content, string ext = null)
