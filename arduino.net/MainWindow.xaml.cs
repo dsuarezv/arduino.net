@@ -391,13 +391,18 @@ namespace arduino.net
 
             RunButton.IsEnabled = true;
             StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger enabled. Set breakpoints in the code with F9 and hit 'Run' when ready.");
-            IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsBuild);
+            DebuggerCheckbox_CheckedChanged();
         }
 
         private void DebuggerCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
             RunButton.IsEnabled = false;
             StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger Disabled.");
+            DebuggerCheckbox_CheckedChanged();
+        }
+
+        private void DebuggerCheckbox_CheckedChanged()
+        {
             IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsBuild);
         }
 

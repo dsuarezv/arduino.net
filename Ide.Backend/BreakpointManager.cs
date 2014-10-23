@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 
 
 namespace arduino.net
@@ -48,6 +49,7 @@ namespace arduino.net
             mBreakPoints.Add(bi);
 
             IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsBuild);
+            TouchBreakpointSource(bi);
 
             if (BreakPointAdded != null) BreakPointAdded(this, bi);
 
@@ -63,13 +65,14 @@ namespace arduino.net
             return result;
         }
 
-        public void Remove(BreakPointInfo br)
+        public void Remove(BreakPointInfo bi)
         {
-            if (!mBreakPoints.Remove(br)) return;
+            if (!mBreakPoints.Remove(bi)) return;
 
             IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsBuild);
+            TouchBreakpointSource(bi);
 
-            if (BreakPointRemoved != null) BreakPointRemoved(this, br);
+            if (BreakPointRemoved != null) BreakPointRemoved(this, bi);
 
             SessionSettings.Save();
         }
@@ -116,6 +119,11 @@ namespace arduino.net
             foreach (var bi in breakpoints) Add(bi);
 
             mNewBreakPointIndex = (byte)(GetMaxId(breakpoints) + 1);
+        }
+
+        private void TouchBreakpointSource(BreakPointInfo bi)
+        {
+            File.SetLastWriteTime(bi.SourceFileName, DateTime.Now);
         }
 
         private int GetMaxId(List<BreakPointInfo> brs)

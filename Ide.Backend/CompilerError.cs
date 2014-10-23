@@ -12,6 +12,8 @@ namespace arduino.net
         public static Regex ErrorRegex = new Regex(@"\s*(?<file>.*):(?<line>[0-9]+): error: (?<msg>.*$)", RegexOptions.Singleline | RegexOptions.Compiled);
         public static Regex WarningRegex = new Regex(@"\s*(?<file>.*):(?<line>[0-9]+): warning: (?<msg>.*$)", RegexOptions.Singleline | RegexOptions.Compiled);
 
+        // Linker error: to be added
+        // C:\Users\dave\Documents\develop\Arduino\ArduinoMotionSensorExample/ArduinoMotionSensorExample.ino:23: undefined reference to `DbgBreak'
 
         public string Type { get; private set; }
         public string FileName { get; private set; }

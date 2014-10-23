@@ -56,7 +56,7 @@ namespace arduino.net
         {
             mBuildStage = stage;
         }
-
+        
         public Task<bool> BuildAsync(string boardName, bool debug)
         {
             return Task.Run<bool>(() => Build(boardName, debug));
