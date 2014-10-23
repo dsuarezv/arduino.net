@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ namespace arduino.net
     public class Compiler
     {
         private BuildStage mDirtyStage = BuildStage.NeedsBuild;
+        private ObservableCollection<CompilerMsg> mCompilerErrors = new ObservableCollection<CompilerMsg>();
         private Project mProject;
         private Debugger mDebugger;
         private string mBoardName;
@@ -38,6 +40,12 @@ namespace arduino.net
             set { mProject = value; MarkAsDirty(BuildStage.NeedsBuild); }
         }
 
+        public ObservableCollection<CompilerMsg> CompilerMessages
+        {
+            get { return mCompilerErrors; }
+        }
+        
+
         public Compiler(Project p, Debugger d)
         {
             mProject = p;
@@ -61,6 +69,8 @@ namespace arduino.net
             var tempDir = CreateTempDirectory();
 
             SetupBoardName(boardName);
+
+            mCompilerErrors.Clear();
 
             var debuggerCmds = CreateDebuggerCompileCommands(tempDir, debug);
             var projectCmds = CreateProjectCompileCommands(tempDir, debug);
@@ -328,9 +338,19 @@ namespace arduino.net
             }
             
             if (cmd.BuildCommand == null) return true;
-            foreach (var s in cmd.BuildCommand.Output) Logger.LogCompiler("    " + s);
+            foreach (var s in cmd.BuildCommand.Output) ProcessOutputLine(s);
 
             return cmd.FinishedSuccessfully;
+        }
+
+        private void ProcessOutputLine(string line)
+        {
+            Logger.LogCompiler("    " + line);
+
+            var msg = CompilerMsg.GetMsgForLine(line);
+            if (msg == null) return;
+
+            mCompilerErrors.Add(msg);
         }
 
 

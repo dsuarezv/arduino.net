@@ -9,11 +9,13 @@ namespace arduino.net
     {
         private const string IdeSettingsExtension = ".ide_settings.user";
         private const string DefaultSketchTemplateFile = "templates/default.ino";
+        private const string DefaultSketchExtension = ".ino";
+        private const string DefaultSketchNameTemplate = "sketch_{0}{1}";
+        private static readonly string[] ProjectExtensions = new string[] { "h", "hpp", "s", "c", "cpp", "ino", "pde" };
+
 
         private string mProjectPath;
         private string mSketchFile;
-
-        private string mSdkPath;
 
         public string SketchFile
         {
@@ -30,8 +32,6 @@ namespace arduino.net
             mProjectPath = Path.GetDirectoryName(sketchFile);
             mSketchFile = Path.GetFileName(sketchFile);
 
-            if (sdkPath == null) mSdkPath = Configuration.ToolkitPath;
-
             if (!Directory.Exists(mProjectPath)) Directory.CreateDirectory(mProjectPath);
             if (!File.Exists(sketchFile)) CreateDefaultSketch(sketchFile);
         }
@@ -45,9 +45,7 @@ namespace arduino.net
         {
             List<string> result = new List<string>();
 
-            var extensions = new string[] { "h", "hpp", "s", "c", "cpp", "ino", "pde" };
-
-            foreach (var ext in extensions)
+            foreach (var ext in ProjectExtensions)
             {
                 result.AddRange(Directory.GetFileSystemEntries(path, "*." + ext, SearchOption.TopDirectoryOnly));
             }
@@ -101,14 +99,22 @@ namespace arduino.net
 
         public static string GetNewProjectFile(string sketchFolder)
         {
-            return Path.Combine(sketchFolder, Path.GetFileNameWithoutExtension(sketchFolder) + ".ino");
+            return Path.Combine(sketchFolder, Path.GetFileNameWithoutExtension(sketchFolder) + DefaultSketchExtension);
         }
 
         public static string GetDefaultNewProjectName()
         {
             var d = DateTime.Now;
 
-            return string.Format("sketch_{0}{1}", d.ToString("MMM").ToLower(), d.Day);
+            return string.Format(DefaultSketchNameTemplate, d.ToString("MMM").Trim('.').ToLower(), d.Day);
+        }
+
+        public static string GetDefaultNewProjectFullName()
+        {
+            var projectName = GetDefaultNewProjectName();
+            var sketchFolder = Path.Combine(Configuration.SketchBookPath, projectName);
+
+            return GetNewProjectFile(sketchFolder);
         }
 
         private static void CreateDefaultSketch(string sketchFile)

@@ -58,12 +58,16 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="WPFFolderBrowser">
+      <HintPath>..\libs\WpfFolderBrowser\WPFFolderBrowser.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FolderBrowserDialog.cs" />
     <Compile Include="SelectionAdapters.cs" />
     <Compile Include="FontManager.cs" />
     <Compile Include="MemoryDumpPad.xaml.cs">

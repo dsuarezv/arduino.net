@@ -239,6 +239,8 @@ namespace arduino.net
 
         private void mMainTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
         {
+            IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsBuild);
+
             if (mSyntaxHighlighter == null) return;
 
             mSyntaxHighlighter(mMainTextBox, e);

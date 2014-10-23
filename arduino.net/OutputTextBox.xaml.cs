@@ -76,14 +76,10 @@ namespace arduino.net
                 var lineNo = mContentTextBox.PointToPlace(e.Location).iLine;
                 var line = mContentTextBox.GetLineText(lineNo);
 
-                string fileName;
-                string errMsg;
-                int lineNumber;
-
-                if (CompilerMsg.IsErrorLocation(line, out fileName, out lineNumber, out errMsg))
-                {
-                    IdeManager.GoToFileAndLine(fileName, lineNumber + 1);
-                }
+                var msg = CompilerMsg.GetMsgForLine(line);
+                if (msg == null) return;
+    
+                IdeManager.GoToFileAndLine(msg.FileName, msg.LineNumber + 1);
             }
         }
 

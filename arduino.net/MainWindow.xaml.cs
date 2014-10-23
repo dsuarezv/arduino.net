@@ -13,13 +13,12 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Shell;
+using Microsoft.Win32;
+using WPFFolderBrowser;
 
 
 namespace arduino.net
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -31,19 +30,22 @@ namespace arduino.net
         {
             try
             {
-                Configuration.Initialize(@"..\");
+                Configuration.PropertyValueRequired += Configuration_PropertyValueRequired;
+                Configuration.Initialize();
 
                 //var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
                 //var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
-                var sketch = @"C:\Users\dave\Documents\develop\Arduino\ArduinoMotionSensorExample\ArduinoMotionSensorExample.ino";
+                //var sketch = @"C:\Users\dave\Documents\develop\Arduino\ArduinoMotionSensorExample\ArduinoMotionSensorExample.ino";
+
+                ProjectPad1.TargetTabControl = OpenFilesTab;
+
+                CreateEmptyProject();
 
                 IdeManager.Debugger = new Debugger();
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
 
-                SetupProject(sketch);                
-                
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
                 
                 UpdateBoardUi();
@@ -54,9 +56,39 @@ namespace arduino.net
             }
         }
 
+        private string Configuration_PropertyValueRequired(string propertyName)
+        {
+            string result = null;
+
+            switch (propertyName)
+            {
+                case "SketchBookPath":
+                    var d = new WPFFolderBrowserDialog()
+                    {
+                        Title = "Select sketchbook folder"
+                    };
+
+                    if ((bool)d.ShowDialog())
+                    {
+                        return d.FileName;
+                    }
+
+                    break;
+                case "CurrentBoard": 
+                    
+                    break;
+            }
+
+            return result;
+        }
+
+        private void CreateEmptyProject()
+        {
+            ProjectPad1.OpenProject(Project.GetDefaultNewProjectFullName());
+        }
+
         private void SetupProject(string sketch)
         {
-            ProjectPad1.TargetTabControl = OpenFilesTab;
             ProjectPad1.OpenProject(sketch);
 
             StatusControl.SetState(ActionStatus.Info, "Project", "Project loaded successfully");
@@ -148,8 +180,6 @@ namespace arduino.net
         {
             SelectBoard();
         }
-
-        
         
         private void SelectSerialButton_Click(object sender, RoutedEventArgs e)
         {
@@ -186,7 +216,7 @@ namespace arduino.net
         {
             var c = Configuration.CurrentComPort;
             var ports = ComportAdapter.Get(IdeManager.Debugger.GetAvailableComPorts());
-            var selected = SelectConfigSection("Select serial port", ports, ref c, "img/comports");
+            var selected = GetConfigValue("Select serial port", ports, ref c, "img/comports");
             if (selected != null)
             {
                 Configuration.CurrentComPort = c;
@@ -200,7 +230,7 @@ namespace arduino.net
         private bool SelectProgrammer()
         {
             var c = Configuration.CurrentProgrammer;
-            var selected = SelectConfigSection("Select programmer", Configuration.Programmers, ref c, "img/programmers");
+            var selected = GetConfigValue("Select programmer", Configuration.Programmers, ref c, "img/programmers");
             if (selected != null) 
             {
                 Configuration.CurrentProgrammer = c;
@@ -214,7 +244,7 @@ namespace arduino.net
         private bool SelectBoard()
         {
             var c = Configuration.CurrentBoard;
-            var selected = SelectConfigSection("Select board", Configuration.Boards, ref c, "img/boards");
+            var selected = GetConfigValue("Select board", Configuration.Boards, ref c, "img/boards");
             if (selected != null) 
             {
                 Configuration.CurrentBoard = c;
@@ -225,7 +255,7 @@ namespace arduino.net
             return selected != null;
         }
 
-        private ConfigSection SelectConfigSection(string title, ConfigSection masterSection, ref string current, string imagesDirectory)
+        private ConfigSection GetConfigValue(string title, ConfigSection masterSection, ref string current, string imagesDirectory)
         {
             var result = SelectionWindow.Show(this, title, masterSection.GetAllSections(), masterSection.GetSection(current), imagesDirectory);
             if (result == null) return null;
@@ -291,12 +321,13 @@ namespace arduino.net
 
             var compiler = IdeManager.Compiler;
             bool result = await compiler.BuildAsync(Configuration.CurrentBoard, debug);
-            var elfFile = compiler.GetElfFile();
 
             if (result)
             {
                 if (debug)
                 {
+                    var elfFile = compiler.GetElfFile();
+
                     ProjectPad1.OpenContent("Sketch dissasembly",
                         ObjectDumper.GetSingleString(
                             ObjectDumper.GetDisassemblyWithSource(elfFile)), ".disassembly");

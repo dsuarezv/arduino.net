@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using System.Reflection;
 
 
 namespace arduino.net
@@ -9,29 +10,45 @@ namespace arduino.net
     public class Configuration
     {
         public const string AppName = "arduino.net";
+        public static readonly string DefaultToolkitPath = Path.Combine(GetExecutablePath(), "../");
 
 
         private static ConfigSection mBaseConfig;
         private static ConfigSection mBoards;
         private static ConfigSection mProgrammers;
-        private static string mToolkitPath;
+
+
+        public static event Func<string, string> PropertyValueRequired;
+
+
+        public static string ToolkitPath
+        {
+            get { return CheckProperty("ToolkitPath", "editor", "toolkitpath"); }
+            set { mBaseConfig.GetSection("editor")["toolkitpath"] = value; }
+        }
+
+        public static string SketchBookPath
+        {
+            get { return CheckProperty("SketchBookPath", "editor", "sketchbookfolder"); }
+            set { mBaseConfig.GetSection("editor")["sketchbookfolder"] = value; }
+        }
 
 
         public static string CurrentBoard
         {
-            get { return mBaseConfig.GetSection("target")["board"]; }
+            get { return CheckProperty("CurrentBoard", "target", "board"); }
             set { mBaseConfig.GetSection("target")["board"] = value; }
         }
 
         public static string CurrentProgrammer
         {
-            get { return mBaseConfig.GetSection("target")["programmer"]; }
+            get { return CheckProperty("CurrentProgrammer", "target", "programmer"); }
             set { mBaseConfig.GetSection("target")["programmer"] = value; }
         }
 
         public static string CurrentComPort
         {
-            get { return mBaseConfig.GetSection("target")["serialport"]; }
+            get { return CheckProperty("CurrentComPort", "target", "serialport"); }
             set { mBaseConfig.GetSection("target")["serialport"] = value; }
         }
 
@@ -41,15 +58,9 @@ namespace arduino.net
 
         public static IList<string> LibraryPaths = new List<string>();
 
-
-        public static string ToolkitPath
-        {
-            get { return mToolkitPath; }
-        }
-
         public static string ToolsPath
         { 
-            get { return Path.Combine(mToolkitPath, "hardware/tools/avr/bin/"); }
+            get { return Path.Combine(ToolkitPath, "hardware/tools/avr/bin/"); }
         }
 
         public static ConfigSection Boards
@@ -62,27 +73,28 @@ namespace arduino.net
             get { return mProgrammers; }
         }
 
-        public static void Initialize(string toolkitPath)
+        public static void Initialize()
         {
-            mToolkitPath = toolkitPath;
+            mBaseConfig = ConfigSection.LoadFromFile(GetPreferencesFile());
 
-            LibraryPaths.Add(Path.Combine(toolkitPath, "libraries"));
-            var configPath = Path.Combine(toolkitPath, "hardware/arduino");
+            if (ToolkitPath == null) ToolkitPath = DefaultToolkitPath;
+
+            LibraryPaths.Add(Path.Combine(ToolkitPath, "libraries"));
+            var configPath = Path.Combine(ToolkitPath, "hardware/arduino");
 
             mBoards = ConfigSection.LoadFromFile(Path.Combine(configPath, "boards.txt"));
             mProgrammers = ConfigSection.LoadFromFile(Path.Combine(configPath, "programmers.txt"));
-            mBaseConfig = ConfigSection.LoadFromFile(GetPreferencesFile());
         }
 
         public static void Save()
         {
             mBaseConfig.SaveToFile(GetPreferencesFile());
-    }
+        }
 
         private static string GetPreferencesFile()
         {
             return Path.Combine(GetPreferencesDirectory(), "preferences.txt");
-}
+        }
 
         private static string GetPreferencesDirectory()
         {
@@ -91,6 +103,27 @@ namespace arduino.net
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
             return path;
+        }
+
+        private static string GetExecutablePath()
+        {
+            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        }
+
+        private static string CheckProperty(string name, string section, string entry)
+        {
+            var val = mBaseConfig.GetSection(section)[entry];
+
+            if (val == null)
+            {
+                if (PropertyValueRequired != null) 
+                {
+                    val = PropertyValueRequired(name);
+                    if (val != null) mBaseConfig.GetSection(section)[entry] = val;
+                }
+            }
+
+            return val;
         }
     }
 }

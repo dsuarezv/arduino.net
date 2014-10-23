@@ -35,5 +35,7 @@ namespace arduino.net
         {
             return Application.Current.Resources[resourceName] as System.Windows.Media.SolidColorBrush;
         }
+
+        
     }
 }

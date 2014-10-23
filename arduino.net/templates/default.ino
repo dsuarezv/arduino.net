@@ -1,7 +1,7 @@
 ﻿
 
 void setup() {
-	// Add any initializetion code here
+	// Add any initialization code here
 }
 
 

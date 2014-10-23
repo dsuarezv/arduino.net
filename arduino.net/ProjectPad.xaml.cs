@@ -51,7 +51,7 @@ namespace arduino.net
             {
                 Title = "Choose new sketch folder...",
                 Filter = "All files (*.*)|*.*",
-                FileName = System.IO.Path.Combine(Configuration.SketchBookPath, Project.GetDefaultNewProjectName())
+                FileName = Project.GetDefaultNewProjectFullName()
             };
 
             if (!(bool)dialog.ShowDialog()) return;
