@@ -39,12 +39,12 @@ namespace arduino.net
 
                 ProjectPad1.TargetTabControl = OpenFilesTab;
 
-                CreateEmptyProject();
-
                 IdeManager.Debugger = new Debugger();
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
+
+                CreateEmptyProject();
 
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
                 
