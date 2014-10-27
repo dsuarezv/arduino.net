@@ -17,7 +17,7 @@
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="11, 0, 10, 0" VerticalAlignment="Top"> 
                     <Button Name="NewButton" Content="New" Click="NewButton_Click" Style="{DynamicResource PadMenuButtonStyle}" FontSize="14" />
                     <Button Name="OpenButton" Content="Open" Click="OpenButton_Click" Style="{DynamicResource PadMenuButtonStyle}" FontSize="14" />
-                    <Button Name="RefreshButton" Content="Refresh" Click="RefreshButton_Click" Style="{DynamicResource PadMenuButtonStyle}" FontSize="14" />
+                    <Button Name="RefreshButton" Content="Refresh" Click="RefreshButton_Click" Style="{DynamicResource PadMenuButtonStyle}" FontSize="14" IsEnabled="False" />
                     <Button Name="AddFileButton" Content="Add file" Click="AddFileButton_Click" Style="{DynamicResource PadMenuButtonStyle}" FontSize="14" IsEnabled="False"/>
                     <Button Name="AddLibrarybutton" Content="Add lib" Click="AddLibrarybutton_Click" Style="{DynamicResource PadMenuButtonStyle}" FontSize="14" IsEnabled="False" />
                 </StackPanel>
