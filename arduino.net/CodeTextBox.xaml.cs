@@ -92,7 +92,7 @@ namespace arduino.net
         }
 
 
-        public async Task OpenFile(string fileName)
+        public void OpenFile(string fileName)
         {
             if (!CheckChanges()) return;
 
@@ -100,13 +100,9 @@ namespace arduino.net
 
             ApplySyntaxHighlight(Path.GetExtension(mFileName));
 
-            using (var f = new StreamReader(fileName))
-            {
-                mIsLoading = true;
-                mMainTextBox.Text = await f.ReadToEndAsync();
-                mIsLoading = false;
-            }
-
+            mIsLoading = true;
+            mMainTextBox.OpenFile(fileName, Encoding.UTF8);
+            mIsLoading = false;
         }
 
         public void OpenContent(string content, string highlightExt)
@@ -133,18 +129,21 @@ namespace arduino.net
 
         public void SaveFileAs(string fileName)
         {
-            using (var w = new StreamWriter(fileName))
-            {
-                w.Write(mMainTextBox.Text);
-            }
+            if (!mMainTextBox.IsChanged) return;
+
+            mMainTextBox.SaveToFile(fileName, Encoding.UTF8);
+
+            IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsBuild);
         }
 
-        public void CloseFile()
+        public bool CloseFile()
         {
-            if (!CheckChanges()) return;
+            if (!CheckChanges()) return false;
 
             mMainTextBox.Text = "";
             mFileName = null;
+
+            return true;
         }
 
         public void Find(string text)

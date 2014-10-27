@@ -30,6 +30,8 @@ namespace arduino.net
         {
             base.FillAttributes(node);
             Name = node.GetAttr("name").GetStringValue();
+
+            //if (Name == "ret") System.Diagnostics.Debugger.Break();
         }
     }
 
@@ -108,6 +110,8 @@ namespace arduino.net
 
         public virtual string GetValueRepresentation(Debugger debugger, byte[] value)
         {
+            if (Type == null) return "<type not available>";
+
             return Type.GetValueRepresentation(debugger, value);
         }
 
@@ -115,13 +119,15 @@ namespace arduino.net
         {
  	        base.FillAttributes(node);
 
+            //if (Name == "ret") System.Diagnostics.Debugger.Break();
+
             mLocationString = node.GetAttr("location").RawValue;
             mTypeId = node.GetAttr("type").GetReferenceValue();
         }
 
         public override void SetupReferences(DwarfTextParser parser, Dictionary<int, DwarfObject> index)
         {
-            //if (Name == "arg3") System.Diagnostics.Debugger.Break();
+            //if (Name == "ret") System.Diagnostics.Debugger.Break();
 
             if (mTypeId > -1) Type = DwarfBaseType.GetTypeFromIndex(index, mTypeId);
             if (mLocationString != null) Location = DwarfLocation.Get(parser, mLocationString);
@@ -165,7 +171,19 @@ namespace arduino.net
         {
             long intValue = GetIntFromBytes(value);
 
-            return string.Format("{0} ({1})", intValue, Name);
+            return string.Format("{0} ({1})", GetValueRepresentation(intValue), Name);
+        }
+
+        private string GetValueRepresentation(long intValue)
+        {
+            switch (ByteSize)
+            {
+                case 1: return ((byte)intValue).ToString();
+                case 2: return ((Int16)intValue).ToString();
+                case 4: return ((Int32)intValue).ToString();
+            }
+
+            return intValue.ToString();
         }
 
         public static DwarfBaseType GetTypeFromIndex(Dictionary<int, DwarfObject> index, int key)
@@ -220,8 +238,6 @@ namespace arduino.net
             if (pointerValue == 0) return string.Format("{0} ({1} *)", pointerValue, PointerToType.Name);
 
             // Create a new expression to get the pointer value
-
-            //pointerValue += 0x800000;    // TODO: get this from the config
 
             var program = new List<string>();
             program.Add(string.Format("DW_OP_addr: {0:X}", pointerValue));

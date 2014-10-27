@@ -89,6 +89,8 @@ namespace arduino.net
             var att = DwarfParserAttribute.Get(line);
             if (att != null)
             {
+                //if (att.RawValue == "ret\t") System.Diagnostics.Debugger.Break();
+
                 if (mCurrentNode == null) throw new Exception("Orphan attribute");
                 mCurrentNode.Attributes.Add(att.Name, att);
                 return true;
@@ -241,10 +243,12 @@ namespace arduino.net
         {
             if (RawValue == null) return null;
 
-            var m = IndirectStringRegEx.Match(RawValue);
-            if (!m.Success) return null;
+            string val = RawValue;
 
-            return m.Groups[1].Value.Trim(' ', '\t');
+            var m = IndirectStringRegEx.Match(RawValue);
+            if (m.Success) val = m.Groups[1].Value;
+
+            return val.Trim(' ', '\t');
         }
 
         public int GetIntValue()

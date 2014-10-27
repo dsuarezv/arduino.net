@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,8 @@ namespace arduino.net
 {
     public class Compiler
     {
-        private bool mIsDirty = true;
+        private BuildStage mBuildStage = BuildStage.NeedsBuild;
+        private ObservableCollection<CompilerMsg> mCompilerErrors = new ObservableCollection<CompilerMsg>();
         private Project mProject;
         private Debugger mDebugger;
         private string mBoardName;
@@ -19,7 +21,7 @@ namespace arduino.net
 
         public bool IsDirty
         {
-            get { return mIsDirty; }
+            get { return mBuildStage != BuildStage.ReadyToRun; }
         }
 
         public DateTime LastSuccessfulCompilationDate
@@ -32,7 +34,17 @@ namespace arduino.net
             get { return mLastSuccessfulDeploymentDate; }
         }
 
+        public Project Project
+        {
+            get { return mProject; }
+            set { mProject = value; MarkAsDirty(BuildStage.NeedsBuild); }
+        }
 
+        public ObservableCollection<CompilerMsg> CompilerMessages
+        {
+            get { return mCompilerErrors; }
+        }
+        
 
         public Compiler(Project p, Debugger d)
         {
@@ -40,11 +52,11 @@ namespace arduino.net
             mDebugger = d;
         }
 
-        public void MarkAsDirty()
+        public void MarkAsDirty(BuildStage stage)
         {
-            mIsDirty = true;
+            mBuildStage = stage;
         }
-
+        
         public Task<bool> BuildAsync(string boardName, bool debug)
         {
             return Task.Run<bool>(() => Build(boardName, debug));
@@ -52,9 +64,17 @@ namespace arduino.net
 
         public bool Build(string boardName, bool debug)
         {
+            if (mBuildStage != BuildStage.NeedsBuild)
+            {
+                Logger.LogCompiler("Build is up-to-date.");
+                return true;
+            }
+
             var tempDir = CreateTempDirectory();
 
             SetupBoardName(boardName);
+
+            mCompilerErrors.Clear();
 
             var debuggerCmds = CreateDebuggerCompileCommands(tempDir, debug);
             var projectCmds = CreateProjectCompileCommands(tempDir, debug);
@@ -74,6 +94,9 @@ namespace arduino.net
             if (!VerifySize(tempDir, true)) return false;
 
             mLastSuccessfulCompilationDate = DateTime.Now;
+            mBuildStage = BuildStage.NeedsDeploy;
+
+            BuildDwarf();
 
             return true;
         }
@@ -97,6 +120,12 @@ namespace arduino.net
 
         public bool Deploy(string boardName, string programmerName, bool debug)
         {
+            if (mBuildStage == BuildStage.ReadyToRun) 
+            {
+                Logger.LogCompiler("Deploy: No changes since last deployment.");
+                return true;
+            }
+
             if (!VerifySize(null, false)) throw new Exception("Sketch size is larger than supported Arduino memory. Remove some code to get it below the maximum and try again.");
 
             var tempDir = CreateTempDirectory();
@@ -118,7 +147,7 @@ namespace arduino.net
             // Successful deploy. Post actions.
 
             mLastSuccessfulDeploymentDate = DateTime.Now;
-            mIsDirty = false;
+            mBuildStage = BuildStage.ReadyToRun;
             SessionSettings.Save();
             BuildDwarf();
 
@@ -318,9 +347,19 @@ namespace arduino.net
             }
             
             if (cmd.BuildCommand == null) return true;
-            foreach (var s in cmd.BuildCommand.Output) Logger.LogCompiler("    " + s);
+            foreach (var s in cmd.BuildCommand.Output) ProcessOutputLine(s);
 
             return cmd.FinishedSuccessfully;
+        }
+
+        private void ProcessOutputLine(string line)
+        {
+            Logger.LogCompiler("    " + line);
+
+            var msg = CompilerMsg.GetMsgForLine(line);
+            if (msg == null) return;
+
+            mCompilerErrors.Add(msg);
         }
 
 
@@ -435,4 +474,6 @@ namespace arduino.net
             return Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]);
         }
     }
+
+    public enum BuildStage { NeedsBuild, NeedsDeploy, ReadyToRun }
 }

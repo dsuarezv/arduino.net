@@ -104,6 +104,8 @@ namespace arduino.net
 
         private DwarfObject ParseNode(DwarfParserNode node)
         {
+            //if (node.Id == 0x2f97) System.Diagnostics.Debugger.Break();
+
             DwarfObject result = null;
 
             switch (node.TagType)
@@ -144,6 +146,8 @@ namespace arduino.net
 
         private DwarfObject SetupNewObject(DwarfParserNode node, DwarfObject obj)
         {
+            //if (node.Id == 0x2f97) System.Diagnostics.Debugger.Break();
+
             obj.FillAttributes(node);
 
             if (node.Children != null)
@@ -221,14 +225,30 @@ namespace arduino.net
                 var variable = mTarget as DwarfVariable;
                 if (variable != null) 
                 {
-                    container.Variables.Add(variable.Name, variable);
+                    if (!container.Variables.ContainsKey(variable.Name))
+                    {
+                        container.Variables.Add(variable.Name, variable);
+                    }
+                    else
+                    {
+                        Console.WriteLine("DWARF: Duplicated variable: {0}.{1}", container.Name, variable.Name);
+                    }
+
                     return;
                 }
 
                 var param = mTarget as DwarfFormalParameter;
                 if (param != null)
                 {
-                    container.Variables.Add(param.Name, param);
+                    if (!container.Variables.ContainsKey(param.Name))
+                    {
+                        container.Variables.Add(param.Name, variable);
+                    }
+                    else
+                    {
+                        Console.WriteLine("DWARF: Duplicated param: {0}.{1}", container.Name, param.Name);
+                    }
+
                     return;
                 }
             }

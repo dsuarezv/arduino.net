@@ -12,43 +12,39 @@ namespace arduino.net
         public static Regex ErrorRegex = new Regex(@"\s*(?<file>.*):(?<line>[0-9]+): error: (?<msg>.*$)", RegexOptions.Singleline | RegexOptions.Compiled);
         public static Regex WarningRegex = new Regex(@"\s*(?<file>.*):(?<line>[0-9]+): warning: (?<msg>.*$)", RegexOptions.Singleline | RegexOptions.Compiled);
 
+        // Linker error: to be added
+        // C:\Users\dave\Documents\develop\Arduino\ArduinoMotionSensorExample/ArduinoMotionSensorExample.ino:23: undefined reference to `DbgBreak'
 
-        public string FileName;
-        public string Message;
-        public int LineNumber;
+        public string Type { get; private set; }
+        public string FileName { get; private set; }
+        public string Message { get; private set; }
+        public int LineNumber { get; private set; }
 
-
-        // __ Error output matching ___________________________________________
-
-
-        public static bool IsErrorLocation(string line, out string fileName, out int lineNumber, out string errMsg)
+        
+        public static CompilerMsg GetMsgForLine(string line)
         {
-            lineNumber = 0;
-            fileName = null;
+            var err = GetLineMatch(ErrorRegex, line, "Error");
+            if (err != null) return err;
 
-            if (IsLineMatch(ErrorRegex, line, out fileName, out lineNumber, out errMsg)) return true;
-            if (IsLineMatch(WarningRegex, line, out fileName, out lineNumber, out errMsg)) return true;
+            var warn = GetLineMatch(WarningRegex, line, "Warning");
+            if (warn != null) return warn;
 
-            return false;
+            return null;
         }
 
-        private static bool IsLineMatch(Regex regex, string line, out string fileName, out int lineNumber, out string msg)
+        private static CompilerMsg GetLineMatch(Regex regex, string line, string type)
         {
             var m = regex.Match(line);
-            if (m.Success)
-            {
-                lineNumber = m.Groups["line"].GetIntValue() - 1;
-                fileName = m.Groups["file"].Value;
-                msg = m.Groups["msg"].Value;
-                return true;
-            }
 
-            lineNumber = 0;
-            fileName = null;
-            msg = null;
-            return false;
+            if (!m.Success) return null;
+            
+            return new CompilerMsg()
+            {
+                Type = type,
+                LineNumber = m.Groups["line"].GetIntValue() - 1,
+                FileName = m.Groups["file"].Value,
+                Message = m.Groups["msg"].Value
+            };
         }
     }
-
-    // Add a couple of classes for CompilerError and CompilerWarning, and some code to take all the compiler output and generate an observable collection of errors/warnings
 }
