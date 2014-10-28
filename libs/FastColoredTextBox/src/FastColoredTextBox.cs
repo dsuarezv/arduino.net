@@ -174,6 +174,7 @@ namespace FastColoredTextBoxNS
             LeftBracket2 = '\x0';
             RightBracket2 = '\x0';
             SyntaxHighlighter = new SyntaxHighlighter();
+            HoveredWordRegex = "[a-zA-Z]";
             language = Language.Custom;
             PreferredLineWidth = 0;
             needRecalc = true;
@@ -803,6 +804,12 @@ namespace FastColoredTextBoxNS
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public HotkeysMapping HotkeysMapping{ get; set;}
+
+        /// <summary>
+        /// Hovered word regular expression. This is the regex used to select the word under the mouse.
+        /// </summary>
+        [DefaultValue("[a-zA-Z]")]
+        public string HoveredWordRegex { get; set; }
 
         /// <summary>
         /// Default text style
@@ -1742,7 +1749,7 @@ namespace FastColoredTextBoxNS
                 return;
             //get word under mouse
             var r = new Range(this, place, place);
-            string hoveredWord = r.GetFragment("[a-zA-Z]").Text;
+            string hoveredWord = r.GetFragment(HoveredWordRegex).Text;
             //event handler
             var ea = new ToolTipNeededEventArgs(place, hoveredWord);
             ToolTipNeeded(this, ea);

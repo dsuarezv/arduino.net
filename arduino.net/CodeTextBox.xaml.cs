@@ -65,7 +65,8 @@ namespace arduino.net
                 ReservedCountOfLineNumberChars = 5,
                 BackColor = backColor,
                 IndentBackColor = backColor,
-                LineNumberColor = Color.FromArgb(180, 180, 180)
+                LineNumberColor = Color.FromArgb(180, 180, 180),
+                HoveredWordRegex = @"[a-zA-Z0-9->]"
             };
 
             mMainTextBox.PaintLine += mMainTextBox_PaintLine;
