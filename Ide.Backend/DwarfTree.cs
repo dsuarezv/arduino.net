@@ -116,7 +116,8 @@ namespace arduino.net
                 case "const_type": result = SetupNewObject(node, new DwarfConstType()); break;
                 case "pointer_type": result = SetupNewObject(node, new DwarfPointerType()); break;
                 case "class_type": result = SetupNewObject(node, new DwarfClassType()); break;
-                case "structure_type": break;
+                case "structure_type": result = SetupNewObject(node, new DwarfStructType()); break;
+                case "member": result = SetupNewObject(node, new DwarfMember()); break;
                 case "subprogram": result = CreateSubProgram(node); break;
                 case "formal_parameter": result = SetupNewObject(node, new DwarfFormalParameter()); break;
                 case "variable": result = SetupNewObject(node, new DwarfVariable()); break;
@@ -146,7 +147,7 @@ namespace arduino.net
 
         private DwarfObject SetupNewObject(DwarfParserNode node, DwarfObject obj)
         {
-            //if (node.Id == 0x2f97) System.Diagnostics.Debugger.Break();
+            //if (node.Id == 0x7a) System.Diagnostics.Debugger.Break();
 
             obj.FillAttributes(node);
 
@@ -189,6 +190,7 @@ namespace arduino.net
             {
                 if (container is DwarfCompileUnit) { To((DwarfCompileUnit)container); return; }
                 if (container is DwarfSubprogram) { To((DwarfSubprogram)container); return; }
+                if (container is DwarfStructType) { To((DwarfStructType)container); return; }
             }
 
             public void To(DwarfCompileUnit container)
@@ -249,6 +251,18 @@ namespace arduino.net
                         Console.WriteLine("DWARF: Duplicated param: {0}.{1}", container.Name, param.Name);
                     }
 
+                    return;
+                }
+            }
+
+            public void To(DwarfStructType container)
+            {
+                if (!IsValidInput(container)) return;
+
+                var member = mTarget as DwarfMember;
+                if (member != null)
+                {
+                    container.Members.Add(member);
                     return;
                 }
             }

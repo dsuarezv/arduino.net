@@ -44,7 +44,9 @@ namespace arduino.net
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
 
-                CreateEmptyProject();
+                //CreateEmptyProject();
+                OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
+                
 
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
                 
@@ -87,7 +89,7 @@ namespace arduino.net
             ProjectPad1.OpenProject(Project.GetDefaultNewProjectFullName());
         }
 
-        private void SetupProject(string sketch)
+        private void OpenProject(string sketch)
         {
             ProjectPad1.OpenProject(sketch);
 
@@ -152,11 +154,13 @@ namespace arduino.net
                     break;
 
                 case DebuggerStatus.Stopped:
+#if !SHORTCUT
                     if (IdeManager.Compiler.IsDirty)
                     {
                         var success = await LaunchDeploy();
                         if (!success) break;
                     }
+#endif
 
                     if (IsDebugBuild())
                     {

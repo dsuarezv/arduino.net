@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace arduino.net
 {
-    public class Debugger: IDisposable
+    public class Debugger: IDisposable, IDebugger
     {
         private int mDebuggerBytesCount = 0;
         private string mComPort;
@@ -377,5 +377,13 @@ namespace arduino.net
 
             return string.Format("{0}: {1}\n", symbolName, symbol.GetValueRepresentation(IdeManager.Debugger, val));
         }
+    }
+
+
+    public interface IDebugger
+    {
+        RegisterManager RegManager { get; }
+
+        byte[] GetTargetMemDump(Int32 address, byte size);
     }
 }

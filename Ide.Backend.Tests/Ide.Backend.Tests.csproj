@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="ConfigSectionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DwarfStructTypeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ide.Backend\Ide.Backend.csproj">
