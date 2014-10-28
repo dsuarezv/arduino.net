@@ -73,11 +73,8 @@ namespace arduino.net
             mMainTextBox.KeyDown += mMainTextBox_KeyDown;
             mMainTextBox.KeyPress += mMainTextBox_KeyPress;
             mMainTextBox.TextChanged += mMainTextBox_TextChanged;
-            mMainTextBox.TextSource.LineInserted += TextSource_LineInserted;
-            mMainTextBox.TextSource.LineRemoved += TextSource_LineRemoved;
 
             mMainTextBox.ToolTipNeeded += mMainTextBox_ToolTipNeeded;
-
             
             C5Brush = new SolidBrush(UiConfig.GetWinformsColor(UiConfig.Color5));
             C6Brush = new SolidBrush(UiConfig.GetWinformsColor(UiConfig.Color6));
@@ -103,6 +100,9 @@ namespace arduino.net
 
             mIsLoading = true;
             mMainTextBox.OpenFile(fileName, Encoding.UTF8);
+            mMainTextBox.TextSource.LineInserted += TextSource_LineInserted;
+            mMainTextBox.TextSource.LineRemoved += TextSource_LineRemoved;
+
             mIsLoading = false;
         }
 
@@ -112,6 +112,9 @@ namespace arduino.net
 
             mIsLoading = true;
             mMainTextBox.Text = content;
+            mMainTextBox.TextSource.LineInserted += TextSource_LineInserted;
+            mMainTextBox.TextSource.LineRemoved += TextSource_LineRemoved;
+
             mIsLoading = false;
 
             if (highlightExt == null) return;
