@@ -66,7 +66,7 @@ namespace arduino.net
                 BackColor = backColor,
                 IndentBackColor = backColor,
                 LineNumberColor = Color.FromArgb(180, 180, 180),
-                HoveredWordRegex = @"[a-zA-Z0-9->]"
+                HoveredWordRegex = @"[a-zA-Z0-9]"
             };
 
             mMainTextBox.PaintLine += mMainTextBox_PaintLine;

@@ -267,7 +267,7 @@ namespace arduino.net
         {
             if (mSiblingId == -1) return;
 
-            // The sibling points to the structure definition that describes the class.
+            // There is a sibling, but I don't get what it is supposed to point to.
         }
 
         public override string GetValueRepresentation(IDebugger debugger, byte[] value)
@@ -300,8 +300,8 @@ namespace arduino.net
         public override void SetupReferences(DwarfTextParser parser, Dictionary<int,DwarfObject> index)
         {
             if (mSiblingId == -1) return;
-            
-            // There is a sibling, but I don't get what it is supposed to point to.
+
+            // The sibling points to the structure definition that describes the class.
         }
     }
 
