@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace arduino.net
 {
-    public class DwarfTree
+    public class DwarfTree: IWatchProvider
     {
         private DwarfTextParser mParser;
         //private Dictionary<string, DwarfNamedObject> mIndexByName = new Dictionary<string, DwarfNamedObject>();

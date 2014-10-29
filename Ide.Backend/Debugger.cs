@@ -329,57 +329,6 @@ namespace arduino.net
 
 
     
-    public class Watch
-    {
-        public string Name;
-
-
-        public string GetValue()
-        {
-            return GetWatchValue(Name);
-        }
-
-        public string GetValue(string functionName)
-        {
-            return GetWatchValue(functionName, Name);
-        }
-
-        public string GetValue(DwarfSubprogram function)
-        {
-            return GetWatchValue(function, Name);
-        }
-
-
-        public static string GetWatchValue(string symbolName)
-        {
-            var pc = IdeManager.Debugger.RegManager.Registers["PC"];
-            var function = IdeManager.Dwarf.GetFunctionAt(pc);
-            if (function == null) return symbolName + ": <current context not found>\n";
-
-            return GetWatchValue(function, symbolName);
-        }
-
-        public static string GetWatchValue(string functionName, string symbolName)
-        {
-            var function = IdeManager.Dwarf.GetFunctionByName(functionName);
-            if (function == null) return symbolName + ": <context not found>\n";
-
-            return GetWatchValue(function, symbolName);
-        }
-
-        public static string GetWatchValue(DwarfSubprogram function, string symbolName)
-        {
-            var symbol = IdeManager.Dwarf.GetSymbol(symbolName, function);
-            if (symbol == null) return symbolName + ": <not in current context>\n";
-
-            var val = symbol.GetValue(IdeManager.Debugger);
-            if (val == null) return symbolName + ": <symbol has no location debug information>\n";
-
-            return string.Format("{0}: {1}\n", symbolName, symbol.GetValueRepresentation(IdeManager.Debugger, val));
-        }
-    }
-
-
     public interface IDebugger
     {
         RegisterManager RegManager { get; }

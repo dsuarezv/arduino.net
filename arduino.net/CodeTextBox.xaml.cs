@@ -216,7 +216,7 @@ namespace arduino.net
 
             if (IdeManager.Debugger.Status == DebuggerStatus.Break)
             {
-                var val = Watch.GetWatchValue(e.HoveredWord);
+                var val = Watch.GetWatchValue(IdeManager.Debugger, IdeManager.Dwarf, e.HoveredWord);
 
                 e.ToolTipText = val;
             }
