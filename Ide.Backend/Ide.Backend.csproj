@@ -47,6 +47,7 @@
     <Compile Include="DwarfTextParser.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="DwarfTree.cs" />
+    <Compile Include="DwarfTypes.cs" />
     <Compile Include="IdeManager.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ObjectDumper.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="RegisterManager.cs" />
     <Compile Include="SketchFileParser.cs" />
     <Compile Include="SymbolTableParser.cs" />
+    <Compile Include="Watch.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
