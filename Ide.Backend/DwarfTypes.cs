@@ -13,6 +13,8 @@ namespace arduino.net
     {
         public int ByteSize;
         public int Encoding;
+        public List<DwarfMember> Members;
+
 
         public override void FillAttributes(DwarfParserNode node)
         {
@@ -28,11 +30,11 @@ namespace arduino.net
             }
         }
 
-        public virtual string GetValueRepresentation(IDebugger debugger, byte[] value)
+        public virtual string GetValueRepresentation(IDebugger debugger, byte[] rawValue)
         {
-            long intValue = GetIntFromBytes(value);
+            long intValue = GetIntFromBytes(rawValue);
 
-            return string.Format("{0} ({1})", GetValueRepresentation(intValue), Name);
+            return GetValueRepresentation(intValue);
         }
 
         private string GetValueRepresentation(long intValue)
@@ -68,6 +70,11 @@ namespace arduino.net
 
             return intValue;
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
 
@@ -89,14 +96,14 @@ namespace arduino.net
             PointerToType = GetTypeFromIndex(index, mTypeId);
         }
 
-        public override string GetValueRepresentation(IDebugger debugger, byte[] value)
+        public override string GetValueRepresentation(IDebugger debugger, byte[] rawValue)
         {
-            if (PointerToType == null) return base.GetValueRepresentation(debugger, value);
+            if (PointerToType == null) return base.GetValueRepresentation(debugger, rawValue);
 
-            var pointerValue = GetIntFromBytes(value);
+            var pointerValue = GetIntFromBytes(rawValue);
 
             // Null pointer?
-            if (pointerValue == 0) return string.Format("0x{0:X} ({1} *) null", pointerValue, PointerToType.Name);
+            if (pointerValue == 0) return string.Format("<null>", pointerValue, PointerToType.Name);
 
             // Create a new expression to get the pointer value
 
@@ -106,8 +113,13 @@ namespace arduino.net
 
             var targetRawValue = pointerTargetLocation.GetValue(debugger, PointerToType);
 
-            return string.Format("0x{0:X} ({1} *) -> {2}", pointerValue, PointerToType.Name, 
+            return string.Format("0x{0:X} -> {1}", pointerValue, 
                 PointerToType.GetValueRepresentation(debugger, targetRawValue));
+        }
+
+        public override string ToString()
+        {
+            return PointerToType.Name + "*";
         }
     }
 
@@ -116,7 +128,10 @@ namespace arduino.net
     {
         private int mSiblingId;
 
-        public List<DwarfMember> Members = new List<DwarfMember>();
+        public DwarfStructType()
+        {
+            Members = new List<DwarfMember>();
+        }
 
         public override void FillAttributes(DwarfParserNode node)
         {
@@ -128,22 +143,57 @@ namespace arduino.net
         {
             if (mSiblingId == -1) return;
 
-            // There is a sibling, but I don't get what it is supposed to point to.
+            // There is a sibling. Have to check the spec to see what it points to.
         }
 
-        public override string GetValueRepresentation(IDebugger debugger, byte[] value)
+        public override string GetValueRepresentation(IDebugger debugger, byte[] rawValue)
         {
             return "<struct>";
+        }
 
-            //var sb = new StringBuilder();
+        public override string ToString()
+        {
+            return "struct " + Name;
+        }
+    }
 
-            //foreach (var m in Members)
-            //{
-            //    sb.Append(m.GetValueRepresentation(debugger, value));
-            //    sb.Append('\n');
-            //}
 
-            //return sb.ToString();
+    public class DwarfMember : DwarfBaseType
+    {
+        protected string mLocationString;
+        private int mTypeId;
+
+        public DwarfLocation Location;
+        public DwarfBaseType Type;
+
+        public override void FillAttributes(DwarfParserNode node)
+        {
+            base.FillAttributes(node);
+            mLocationString = node.GetAttr("data_member_location").RawValue;
+            mTypeId = node.GetAttr("type").GetReferenceValue();
+        }
+
+        public override void SetupReferences(DwarfTextParser parser, Dictionary<int, DwarfObject> index)
+        {
+            if (mTypeId > -1) Type = DwarfBaseType.GetTypeFromIndex(index, mTypeId);
+            if (mLocationString != null) Location = DwarfLocation.Get(parser, mLocationString);
+        }
+
+        public override string GetValueRepresentation(IDebugger debugger, byte[] rawValue)
+        {
+            var result = Type.GetValueRepresentation(debugger, rawValue);
+            return result;
+            //return string.Format("{0}: {1}", Name, result);
+        }
+
+        public byte[] GetMemberRawValue(byte[] value)
+        {
+            return Location.GetValue(value, Type);
+        }
+
+        public override string ToString()
+        {
+            return Type.ToString();
         }
     }
 
@@ -154,6 +204,11 @@ namespace arduino.net
 
         public int Declaration;
 
+        public DwarfClassType()
+        {
+            Members = new List<DwarfMember>();
+        }
+
         public override void FillAttributes(DwarfParserNode node)
         {
             base.FillAttributes(node);
@@ -161,34 +216,11 @@ namespace arduino.net
             mSiblingId = node.GetAttr("sibling").GetReferenceValue();
         }
 
-        public override void SetupReferences(DwarfTextParser parser, Dictionary<int,DwarfObject> index)
+        public override void SetupReferences(DwarfTextParser parser, Dictionary<int, DwarfObject> index)
         {
             if (mSiblingId == -1) return;
 
-            // The sibling points to the structure definition that describes the class.
-        }
-    }
-
-
-    public class DwarfMember : DwarfLocatedObject
-    {
-        public override void FillAttributes(DwarfParserNode node)
-        {
-            base.FillAttributes(node);
-            mLocationString = node.GetAttr("data_member_location").RawValue;
-        }
-
-        public override string GetValueRepresentation(IDebugger debugger, byte[] value)
-        {
-            var memberValue = GetMemberFragment(value);
-            var result = Type.GetValueRepresentation(debugger, memberValue);
-
-            return string.Format("{0}: {1}", Name, result);
-        }
-
-        private byte[] GetMemberFragment(byte[] value)
-        {
-            return Location.GetValue(value, Type);
+            // The sibling points to the structure containing the virtual pointer table. 
         }
     }
 

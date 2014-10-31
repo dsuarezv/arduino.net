@@ -14,16 +14,19 @@ namespace arduino.net
 
         private byte[] mRegistersPacket;
         private SortedDictionary<string, int> mRegisters;
+
         
         public SortedDictionary<string, int> Registers
         {
             get { return mRegisters; }
         }
 
+
         public RegisterManager()
         { 
             mRegisters = new SortedDictionary<string, int>();
         }
+
 
         public void UpdateRegisters(byte[] registersPacket)
         {
@@ -47,6 +50,7 @@ namespace arduino.net
             UpdateWordRegister("Y", 29, 30);
             UpdateWordRegister("Z", 31, 32);
         }
+
 
         private void UpdateWordRegister(string name, int indexLow, int indexHigh)
         {

@@ -15,6 +15,7 @@ namespace arduino.net
         public static Debugger Debugger;
         public static Compiler Compiler;
         public static DwarfTree Dwarf;
+        public static WatchManager WatchManager;
 
 
         public static void GoToFileAndLine(string fileName, int lineNumber)

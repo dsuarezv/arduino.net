@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace arduino.net
 {
-    public class DwarfTree: IWatchProvider
+    public class DwarfTree: IDwarfProvider
     {
         private DwarfTextParser mParser;
         //private Dictionary<string, DwarfNamedObject> mIndexByName = new Dictionary<string, DwarfNamedObject>();
@@ -57,21 +57,37 @@ namespace arduino.net
 
         public DwarfLocatedObject GetSymbol(string symbolName, DwarfSubprogram currentFunc)
         {
-            // Search in this function first
-            DwarfLocatedObject result;
-
-            if (currentFunc == null) return null;
-
-            if (currentFunc.Variables.TryGetValue(symbolName, out result))
+            if (currentFunc != null)
             {
-                return result;
+                // Search in this function first
+
+                DwarfLocatedObject result;
+
+                if (currentFunc.Variables.TryGetValue(symbolName, out result))
+                {
+                    return result;
+                }
+
+                // Then, search global vars in this file. 
+
+                DwarfVariable globalVar;
+
+                if (currentFunc.Parent.Variables.TryGetValue(symbolName, out globalVar))
+                {
+                    return globalVar;
+                }
             }
 
-            DwarfVariable globalVar;
+            // Finally, search all global variables
 
-            if (currentFunc.Parent.Variables.TryGetValue(symbolName, out globalVar))
-            {
-                return globalVar;
+            DwarfVariable globalVar2;
+
+            foreach (var cu in mCompileUnits)
+            { 
+                if (cu.Variables.TryGetValue(symbolName, out globalVar2))
+                {
+                    return globalVar2;
+                }
             }
 
             return null;            
@@ -84,6 +100,29 @@ namespace arduino.net
             if (symbol == null) return null;
 
             return symbol.GetValue(debugger);
+        }
+
+        public IList<string> GetAllGlobalVariables()
+        {
+            var result = new List<string>();
+
+            foreach (var cu in mCompileUnits)
+            {
+                result.AddRange(cu.Variables.Keys);
+            }
+
+            return result;
+        }
+
+        public IList<string> GetLocalVariables(DwarfSubprogram currentFunc)
+        {
+            if (currentFunc == null) return null;
+
+            var result = new List<string>();
+
+            result.AddRange(currentFunc.Variables.Keys);
+
+            return result;
         }
         
         

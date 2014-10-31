@@ -26,19 +26,24 @@ namespace arduino.net
             InitializeComponent();
         }
 
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (!DesignerProperties.GetIsInDesignMode(this))
-            { 
-                //WatchesGrid.ItemsSource = IdeManager.Debugger.Watches;
-                IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
-            }
+        public void UpdateWatches()
+        { 
+            
         }
 
-        private void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            UpdateWatchesValues();
+            //if (!DesignerProperties.GetIsInDesignMode(this))
+            //{ 
+            //    //WatchesGrid.ItemsSource = IdeManager.Debugger.Watches;
+            //    IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
+            //}
         }
+
+        //private void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
+        //{
+        //    UpdateWatchesValues();
+        //}
 
 
 

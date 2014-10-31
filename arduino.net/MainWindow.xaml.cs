@@ -43,6 +43,7 @@ namespace arduino.net
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
+                IdeManager.WatchManager = new WatchManager(IdeManager.Debugger);
 
                 //CreateEmptyProject();
                 OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
@@ -467,6 +468,8 @@ namespace arduino.net
             });
 
             UpdateDwarf();
+
+            WatchesPad1.UpdateWatches();
         }
         
         private void Debugger_SerialCharWorker(object state)

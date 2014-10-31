@@ -108,12 +108,12 @@ namespace arduino.net
             return Location.GetValue(debugger, Type);
         }
 
-        public virtual string GetValueRepresentation(IDebugger debugger, byte[] value)
-        {
-            if (Type == null) return "<type not available>";
+        //public virtual string GetValueRepresentation(IDebugger debugger, byte[] value)
+        //{
+        //    if (Type == null) return "<type not available>";
 
-            return Type.GetValueRepresentation(debugger, value);
-        }
+        //    return Type.GetValueRepresentation(debugger, value);
+        //}
 
         public override void FillAttributes(DwarfParserNode node)
         {

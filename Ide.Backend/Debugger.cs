@@ -16,7 +16,6 @@ namespace arduino.net
         private SerialPort mSerialPort;
         private BreakPointManager mBreakPoints = new BreakPointManager();
         private RegisterManager mRegisters = new RegisterManager();
-        private ObservableCollection<Watch> mWatches = new ObservableCollection<Watch>();
         private ObservableCollection<TracepointInfo> mTracePoints = new ObservableCollection<TracepointInfo>();
         private ConcurrentQueue<byte> mReceivedCharsQueue = new ConcurrentQueue<byte>();
         private byte[] mTraceQueryBuffer;
@@ -65,11 +64,6 @@ namespace arduino.net
             get { return mRegisters; }
         }
 
-        public ObservableCollection<Watch> Watches
-        {
-            get { return mWatches; }
-        }
-
         public DebuggerStatus Status
         {
             get { return mStatus; }
@@ -86,10 +80,6 @@ namespace arduino.net
         }
 
 
-        public Debugger()
-        {
-            
-        }
 
         public string[] GetAvailableComPorts()
         {
@@ -310,6 +300,7 @@ namespace arduino.net
         }
     }
 
+
     public delegate void TargetConnectedDelegate(object sender);
 
     public delegate void BreakPointDelegate(object sender, BreakPointInfo breakpoint);
@@ -320,13 +311,13 @@ namespace arduino.net
 
     public delegate void StatusChangedDelegate(object sender, DebuggerStatus newState);
     
+
     public enum DebuggerStatus
     { 
         Stopped, 
         Running, 
         Break
     }
-
 
     
     public interface IDebugger
