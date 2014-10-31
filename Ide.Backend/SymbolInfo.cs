@@ -83,25 +83,30 @@ namespace arduino.net
 
 
         /// <summary>
-        /// Returns a string replresenting the symbol, type and value. Also prints inmmediate children.
+        /// Returns a string representing the symbol, type and value. Also prints inmmediate children.
         /// </summary>
         /// <returns></returns>
         public string GetInspectRepresentation()
         {
-            var result = GetString();
+            return GetThisAndChildrenAsString();
+        }
+
+        public string GetThisAndChildrenAsString()
+        {
+            var result = GetThisAsString();
 
             if (HasChildren)
-            { 
+            {
                 foreach (var si in Children)
                 {
-                    result += "\n  " + si.GetString();
+                    result += "\n  " + si.GetThisAsString();
                 }
             }
 
             return result;
         }
 
-        private string GetString()
+        public string GetThisAsString()
         {
             return string.Format("{0} ({1}): {2}", SymbolName, TypeName, Value);
         }
