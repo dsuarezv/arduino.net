@@ -323,6 +323,7 @@ namespace arduino.net
     public interface IDebugger
     {
         RegisterManager RegManager { get; }
+        DebuggerStatus Status { get; }
 
         byte[] GetTargetMemDump(Int32 address, byte size);
     }

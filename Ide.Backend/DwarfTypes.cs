@@ -105,6 +105,8 @@ namespace arduino.net
             // Null pointer?
             if (pointerValue == 0) return string.Format("<null>", pointerValue, PointerToType.Name);
 
+            if (debugger.Status != DebuggerStatus.Break) return "<Arduino is running>";
+
             // Create a new expression to get the pointer value
 
             var program = new List<string>();

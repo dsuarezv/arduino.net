@@ -68,6 +68,21 @@ namespace arduino.net
             }
         }
 
+        public string SingleContent
+        {
+            get
+            {
+                return GetAsString();
+            }
+        }
+
+        public string ContentWithDirectChidren
+        {
+            get
+            {
+                return GetAsStringWithChildren();
+            }
+        }
 
         public SymbolInfo(IDebugger debugger, string name, DwarfBaseType type, byte[] rawValue)
         {
@@ -82,31 +97,22 @@ namespace arduino.net
         }
 
 
-        /// <summary>
-        /// Returns a string representing the symbol, type and value. Also prints inmmediate children.
-        /// </summary>
-        /// <returns></returns>
-        public string GetInspectRepresentation()
+        private string GetAsStringWithChildren()
         {
-            return GetThisAndChildrenAsString();
-        }
-
-        public string GetThisAndChildrenAsString()
-        {
-            var result = GetThisAsString();
+            var result = GetAsString();
 
             if (HasChildren)
             {
                 foreach (var si in Children)
                 {
-                    result += "\n  " + si.GetThisAsString();
+                    result += "\n  " + si.GetAsString();
                 }
             }
 
             return result;
         }
 
-        public string GetThisAsString()
+        private string GetAsString()
         {
             return string.Format("{0} ({1}): {2}", SymbolName, TypeName, Value);
         }

@@ -60,11 +60,17 @@ namespace Ide.Backend.Tests
         private RegisterManager mRegMan = new RegisterManager();
 
         //public int Address = 0;
-        public byte[] Data = new byte[] { 0xCD, 0xCD, 0xCD, 0xCD };
+        public byte[] Data = new byte[] { 0xCD, 0xCD, 0xCD, 0xCD };        
 
         public RegisterManager RegManager
         {
             get { return mRegMan; }
+        }
+
+        public DebuggerStatus Status
+        {
+            get;
+            set;
         }
 
         public byte[] GetTargetMemDump(int address, byte size)

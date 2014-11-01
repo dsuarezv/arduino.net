@@ -11,14 +11,6 @@ namespace arduino.net
     public class WatchManager
     {
         private IDebugger mDebugger;
-        //private IDwarfProvider mDwarf;
-        private ObservableCollection<string> mWatchNames = new ObservableCollection<string>();
-
-
-        public ObservableCollection<string> WatchNames
-        {
-            get { return mWatchNames; }
-        }
 
 
         public WatchManager(IDebugger debugger)
@@ -26,14 +18,18 @@ namespace arduino.net
             mDebugger = debugger;
         }
 
-        public IList<SymbolInfo> GetValues()
+
+        public IList<SymbolInfo> GetValues(IList<string> symbolNames)
         {
+            if (mDebugger.Status != DebuggerStatus.Break) return null;
+
             var currentFunction = GetCurrentFunction();
             if (currentFunction == null) return null;
             
             List<SymbolInfo> result = new List<SymbolInfo>();
+            if (symbolNames == null) return result;
 
-            foreach (var name in mWatchNames)
+            foreach (var name in symbolNames)
             {
                 var s = GetSymbol(currentFunction, name);
                 if (s != null) result.Add(s);
@@ -66,37 +62,6 @@ namespace arduino.net
             var pc = mDebugger.RegManager.Registers["PC"];
             return IdeManager.Dwarf.GetFunctionAt(pc);
         }
-
-        
-        
-
-        //public static string GetWatchValue(IDebugger debugger, IWatchProvider provider, string symbolName)
-        //{
-        //    var pc = debugger.RegManager.Registers["PC"];
-        //    var function = provider.GetFunctionAt(pc);
-        //    if (function == null) return symbolName + ": <current context not found>\n";
-
-        //    return GetWatchValue(debugger, provider, function, symbolName);
-        //}
-
-        //public static string GetWatchValue(IDebugger debugger, IWatchProvider provider, string functionName, string symbolName)
-        //{
-        //    var function = provider.GetFunctionByName(functionName);
-        //    if (function == null) return symbolName + ": <context not found>\n";
-
-        //    return GetWatchValue(debugger, provider, function, symbolName);
-        //}
-
-        //public static string GetWatchValue(IDebugger debugger, IWatchProvider provider, DwarfSubprogram function, string symbolName)
-        //{
-        //    var symbol = provider.GetSymbol(symbolName, function);
-        //    if (symbol == null) return symbolName + ": <not in current context>\n";
-
-        //    var val = symbol.GetValue(debugger);
-        //    if (val == null) return symbolName + ": <symbol has no location debug information>\n";
-
-        //    return string.Format("{0}: {1}\n", symbolName, symbol.GetValueRepresentation(debugger, val));
-        //}
     }
 
     

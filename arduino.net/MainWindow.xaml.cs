@@ -469,7 +469,12 @@ namespace arduino.net
 
             UpdateDwarf();
 
-            WatchesPad1.UpdateWatches();
+
+
+            Dispatcher.Invoke(() =>
+            {
+                WatchesPad1.UpdateWatches();
+            });
         }
         
         private void Debugger_SerialCharWorker(object state)

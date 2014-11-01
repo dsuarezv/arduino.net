@@ -21,38 +21,44 @@ namespace arduino.net
     /// </summary>
     public partial class WatchesPad : UserControl
     {
+        private List<string> mWatchNames = new List<string>();
+
+
         public WatchesPad()
         {
             InitializeComponent();
         }
 
+
         public void UpdateWatches()
-        { 
-            
+        {
+            var values = IdeManager.WatchManager.GetValues(GetWatchNames());
+            if (values == null) return;
+
+            MainTreeView.ItemsSource = values;
         }
 
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        private IList<string> GetWatchNames()
         {
-            //if (!DesignerProperties.GetIsInDesignMode(this))
-            //{ 
-            //    //WatchesGrid.ItemsSource = IdeManager.Debugger.Watches;
-            //    IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
-            //}
+            return mWatchNames;
         }
 
-        //private void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
-        //{
-        //    UpdateWatchesValues();
-        //}
+
+        // __ Control event handlers __________________________________________
 
 
-
-        private void UpdateWatchesValues()
+        private void AddNewButton_Click(object sender, RoutedEventArgs e)
         {
-            Dispatcher.Invoke(() =>
-            {
+            var name = NewWatchTextBox.Text;
+            if (String.IsNullOrWhiteSpace(name)) return;
 
-            });
+            name = name.Trim();
+
+            NewWatchTextBox.Text = "";
+
+            mWatchNames.Add(name);
+
+            UpdateWatches();
         }
     }
 }

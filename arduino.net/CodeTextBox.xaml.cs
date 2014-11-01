@@ -219,7 +219,7 @@ namespace arduino.net
                 var si = IdeManager.WatchManager.GetInmmediateValue(e.HoveredWord);
                 if (si == null) return;
 
-                e.ToolTipText = si.GetInspectRepresentation();
+                e.ToolTipText = si.ContentWithDirectChidren;
             }
         }
 

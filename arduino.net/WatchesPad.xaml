@@ -3,12 +3,29 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:arduino.net;assembly=Ide.Backend"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300" Loaded="UserControl_Loaded">
+             d:DesignHeight="300" d:DesignWidth="300">
 
     <Grid Margin="0, 0, 0, 20">
         <Expander Header="Watches" IsExpanded="True" Style="{DynamicResource PadExpanderStyle}"  >
-            
+            <Grid Margin="10, 0">
+                <TextBox Name="NewWatchTextBox"  Margin="0,0,69,214" Height="26"/>
+                <Button Content="Add" Name="AddNewButton" VerticalAlignment="Top" HorizontalAlignment="Right" Width="64" Height="26" Margin="0,-1,0,0" Click="AddNewButton_Click"/>
+                <TreeView Name="MainTreeView" Margin="0, 30, 0, 0" Background="White" BorderBrush="{x:Null}" >
+                    <TreeView.Resources>
+                        <HierarchicalDataTemplate DataType="{x:Type local:SymbolInfo}" ItemsSource="{Binding Children}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding SymbolName}" />
+                                <TextBlock Text=" [" Foreground="Blue" />
+                                <TextBlock Text="{Binding TypeName}" Foreground="Blue" />
+                                <TextBlock Text="] " Foreground="Blue" />
+                                <TextBlock Text="{Binding Value}" Foreground="Orange" />
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeView.Resources>
+                </TreeView>
+            </Grid>
         </Expander>
     </Grid>
 </UserControl>
