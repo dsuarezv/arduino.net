@@ -230,7 +230,6 @@ namespace arduino.net
                 if (container is DwarfCompileUnit) { To((DwarfCompileUnit)container); return; }
                 if (container is DwarfSubprogram) { To((DwarfSubprogram)container); return; }
                 if (container is DwarfStructType) { To((DwarfStructType)container); return; }
-                if (container is DwarfClassType) { To((DwarfClassType)container); return; }
             }
 
             public void To(DwarfCompileUnit container)
@@ -307,17 +306,7 @@ namespace arduino.net
                 }
             }
 
-            public void To(DwarfClassType container)
-            {
-                if (!IsValidInput(container)) return;
-
-                var member = mTarget as DwarfMember;
-                if (member != null)
-                {
-                    container.Members.Add(member);
-                    return;
-                }
-            }
+            
 
             
             // __ Helpers _____________________________________________________

@@ -218,15 +218,15 @@ namespace arduino.net
     }
 
 
-    public class DwarfClassType : DwarfBaseType
+    public class DwarfClassType : DwarfStructType
     {
         private int mSiblingId;
 
         public int Declaration;
 
-        public DwarfClassType()
+        public DwarfClassType(): base()
         {
-            Members = new List<DwarfMember>();
+            
         }
 
         public override void FillAttributes(DwarfParserNode node)
