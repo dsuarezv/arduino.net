@@ -15,8 +15,8 @@ namespace arduino.net
         
         
         private static Regex mIncludeRegex = new Regex("^\\s*#include\\s*[<\\\"](?<file>\\S+)[\\\">]", RegexOptions.Multiline);
-        private static Regex mFunctionRegEx = new Regex(@"(?<return_type>[\w\[\]\*]+)\s+(?<name>[&\[\]:\*\w]+)\s*\((?<arguments>[&,\[\]\*\w\s]*)\)(?=\s*\{)", RegexOptions.Multiline);
-        private static Regex mPrototypeRegEx = new Regex(@"(?<return_type>[\w\[\]\*]+)\s+(?<name>[&\[\]:\*\w]+)\s*\((?<arguments>[&,\[\]\*\w\s]*)\)(?<attributes>\s__attribute__\s*\(\([\w,\s]+\)\))*(?=\s*\;)", RegexOptions.Multiline);
+        private static Regex mFunctionRegEx = new Regex(@"(?<return_type>[\w\[\]\*]+)\s+(?<name>[&\[\]\*\w]+)\s*\((?<arguments>[&,\[\]\*\w\s]*)\)(?=\s*\{)", RegexOptions.Multiline);
+        private static Regex mPrototypeRegEx = new Regex(@"(?<return_type>[\w\[\]\*]+)\s+(?<name>[&\[\]\*\w]+)\s*\((?<arguments>[&,\[\]\*\w\s]*)\)(?<attributes>\s__attribute__\s*\(\([\w,\s]+\)\))*(?=\s*\;)", RegexOptions.Multiline);
         private static Regex mCommentsRegEx = new Regex(
                                 "('.')" +
                                 "|(\"(?:[^\"\\\\]|\\\\.)*\")" +                  // double-quoted string
