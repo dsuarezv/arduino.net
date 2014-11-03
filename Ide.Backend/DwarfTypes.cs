@@ -242,6 +242,16 @@ namespace arduino.net
 
             // The sibling points to the structure containing the virtual pointer table. 
         }
+
+        public override string GetValueRepresentation(IDebugger debugger, byte[] rawValue)
+        {
+            return "<class>";
+        }
+
+        public override string ToString()
+        {
+            return "class " + Name;
+        }
     }
 
 
