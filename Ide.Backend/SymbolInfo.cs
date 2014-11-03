@@ -35,7 +35,7 @@ namespace arduino.net
                 foreach (var member in mType.Members)
                 {
                     mChildren.Add(
-                        new SymbolInfo(mDebugger, member.Name, member.Type, member.GetMemberRawValue(mRawValue)));
+                        new SymbolInfo(mDebugger, member.Name, member.Type, member.GetMemberRawValue(mDebugger, mRawValue)));
                 }
 
                 return mChildren;

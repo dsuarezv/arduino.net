@@ -61,9 +61,10 @@ namespace arduino.net
 
         protected long GetIntFromBytes(byte[] value)
         {
+            int numBytes = (ByteSize == -1) ? value.Length : ByteSize;
             long intValue = 0;
 
-            for (int i = 0; i < ByteSize; ++i)
+            for (int i = 0; i < numBytes; ++i)
             {
                 intValue += ((long)(value[i])) << i * 8;
             }
@@ -81,7 +82,19 @@ namespace arduino.net
     public class DwarfPointerType: DwarfBaseType
     {
         private int mTypeId;
-        public DwarfBaseType PointerToType;
+        private DwarfMember mPointedSymbol;
+
+
+        public DwarfBaseType PointedSymbolType;
+
+
+        public DwarfPointerType()
+        {
+            Members = new List<DwarfMember>();
+
+            mPointedSymbol = new DwarfPointerMember() { Name = "->" };
+            Members.Add(mPointedSymbol);
+        }
 
         public override void FillAttributes(DwarfParserNode node)
         {
@@ -93,35 +106,23 @@ namespace arduino.net
         {
             if (mTypeId == -1) return;
 
-            PointerToType = GetTypeFromIndex(index, mTypeId);
+            PointedSymbolType = GetTypeFromIndex(index, mTypeId);
+            mPointedSymbol.Type = PointedSymbolType;
+            mPointedSymbol.ByteSize = -1;
         }
 
         public override string GetValueRepresentation(IDebugger debugger, byte[] rawValue)
         {
-            if (PointerToType == null) return base.GetValueRepresentation(debugger, rawValue);
-
             var pointerValue = GetIntFromBytes(rawValue);
+            if (pointerValue == 0) return "<null>";
 
-            // Null pointer?
-            if (pointerValue == 0) return string.Format("<null>", pointerValue, PointerToType.Name);
-
-            if (debugger.Status != DebuggerStatus.Break) return "<Arduino is running>";
-
-            // Create a new expression to get the pointer value
-
-            var program = new List<string>();
-            program.Add(string.Format("DW_OP_addr: {0:X}", pointerValue));
-            var pointerTargetLocation = new DwarfLocation() { RawLocationProgram = program };
-
-            var targetRawValue = pointerTargetLocation.GetValue(debugger, PointerToType);
-
-            return string.Format("0x{0:X} -> {1}", pointerValue, 
-                PointerToType.GetValueRepresentation(debugger, targetRawValue));
+            return string.Format("0x{0:X}", pointerValue);
+                
         }
 
         public override string ToString()
         {
-            return PointerToType.Name + "*";
+            return PointedSymbolType.Name + "*";
         }
     }
 
@@ -183,19 +184,36 @@ namespace arduino.net
 
         public override string GetValueRepresentation(IDebugger debugger, byte[] rawValue)
         {
-            var result = Type.GetValueRepresentation(debugger, rawValue);
-            return result;
-            //return string.Format("{0}: {1}", Name, result);
+            return Type.GetValueRepresentation(debugger, rawValue);
         }
 
-        public byte[] GetMemberRawValue(byte[] value)
+        public virtual byte[] GetMemberRawValue(IDebugger debugger, byte[] parentRawValue)
         {
-            return Location.GetValue(value, Type);
+            return Location.GetValue(parentRawValue, Type);
         }
 
         public override string ToString()
         {
             return Type.ToString();
+        }
+    }
+
+    public class DwarfPointerMember: DwarfMember
+    {
+        public override byte[] GetMemberRawValue(IDebugger debugger, byte[] rawValue)
+        {
+            if (debugger.Status != DebuggerStatus.Break) return null;
+            if (Type == null) return null;
+
+            // Create a new expression to get the pointer value
+            var pointerValue = GetIntFromBytes(rawValue);
+            if (pointerValue == 0) return null;
+
+            var program = new List<string>();
+            program.Add(string.Format("DW_OP_addr: {0:X}", pointerValue));
+            var pointerTargetLocation = new DwarfLocation() { RawLocationProgram = program };
+
+            return pointerTargetLocation.GetValue(debugger, Type);
         }
     }
 

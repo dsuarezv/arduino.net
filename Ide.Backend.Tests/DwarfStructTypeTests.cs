@@ -9,7 +9,7 @@ namespace Ide.Backend.Tests
     {
         public static DwarfBaseType IntType = new DwarfBaseType() { ByteSize = 2, Name = "int" };
         public static DwarfBaseType BoolType = new DwarfBaseType() { ByteSize = 1, Name = "bool" };
-        public static DwarfBaseType IntPointerType = new DwarfPointerType() { ByteSize = 2, Name = "int *", PointerToType = IntType };
+        public static DwarfBaseType IntPointerType = new DwarfPointerType() { ByteSize = 2, Name = "int *", PointedSymbolType = IntType };
 
         [TestMethod]
         public void DwarfStructTypeGetValue()

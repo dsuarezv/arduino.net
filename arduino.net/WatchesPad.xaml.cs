@@ -60,5 +60,13 @@ namespace arduino.net
 
             UpdateWatches();
         }
+
+        private void NewWatchTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                AddNewButton_Click(null, null);
+            }
+        }
     }
 }
