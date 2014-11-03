@@ -13,7 +13,13 @@ namespace arduino.net
         private byte[] mRawValue;
         private DwarfBaseType mType;
         private string mName;
-        
+
+
+        public bool IsRoot
+        {
+            get;
+            set;
+        }
 
         public bool HasChildren
         { 
@@ -94,6 +100,7 @@ namespace arduino.net
             mName = name;
             mType = type;
             mRawValue = rawValue;
+            IsRoot = false;
         }
 
 

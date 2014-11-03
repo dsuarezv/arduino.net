@@ -4,16 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:arduino.net;assembly=Ide.Backend"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="300">
 
     <Grid Margin="0, 0, 0, 20">
         <Expander Header="Watches" IsExpanded="True" Style="{DynamicResource PadExpanderStyle}"  >
             <Grid Margin="10, 0">
-                <TextBox Name="NewWatchTextBox" Margin="0,0,69,214" Background="{x:Null}" KeyDown="NewWatchTextBox_KeyDown" />
+                <TextBox Name="NewWatchTextBox" Margin="0,0,69,0" Background="{x:Null}" KeyDown="NewWatchTextBox_KeyDown" Height="25" VerticalAlignment="Top" />
                 <Button Content="Add" Name="AddNewButton" VerticalAlignment="Top" HorizontalAlignment="Right" Width="64" Height="26" Margin="0,-1,0,0" Click="AddNewButton_Click"/>
-                <TreeView Name="MainTreeView" Margin="0, 30, 0, 0" Background="{x:Null}" BorderBrush="{x:Null}" >
+                <TreeView Name="MainTreeView" Margin="0, 30, 0, 0" Background="{x:Null}" BorderBrush="{x:Null}" MinHeight="250">
                     <TreeView.Resources>
+                        <BooleanToVisibilityConverter x:Key="CloseButtonVisibility" />
                         <HierarchicalDataTemplate DataType="{x:Type local:SymbolInfo}" ItemsSource="{Binding Children}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding SymbolName}" Foreground="{DynamicResource C0}" />
@@ -21,6 +21,7 @@
                                 <TextBlock Text="{Binding TypeName}" Foreground="{DynamicResource C1}" />
                                 <TextBlock Text=") " Foreground="{DynamicResource C1}" />
                                 <TextBlock Text="{Binding Value}" Foreground="{DynamicResource C6}" />
+                                <Button Name="DeleteWatchButton" Content="x" HorizontalAlignment="Right" Click="DeleteWatchButton_Click" Visibility="{Binding IsRoot, Converter={StaticResource CloseButtonVisibility}}"/>
                             </StackPanel>
                         </HierarchicalDataTemplate>
                     </TreeView.Resources>

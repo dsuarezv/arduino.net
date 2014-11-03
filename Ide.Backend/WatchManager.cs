@@ -26,7 +26,7 @@ namespace arduino.net
             var currentFunction = GetCurrentFunction();
             if (currentFunction == null) return null;
             
-            List<SymbolInfo> result = new List<SymbolInfo>();
+            ObservableCollection<SymbolInfo> result = new ObservableCollection<SymbolInfo>();
             if (symbolNames == null) return result;
 
             foreach (var name in symbolNames)
@@ -54,7 +54,7 @@ namespace arduino.net
             var val = symbol.GetValue(mDebugger);
             if (val == null) return null;
 
-            return new SymbolInfo(mDebugger, name, symbol.Type, val);
+            return new SymbolInfo(mDebugger, name, symbol.Type, val) { IsRoot = true };
         }
         
         private DwarfSubprogram GetCurrentFunction()

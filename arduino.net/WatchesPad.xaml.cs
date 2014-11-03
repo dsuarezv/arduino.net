@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -67,6 +68,19 @@ namespace arduino.net
             {
                 AddNewButton_Click(null, null);
             }
+        }
+
+        private void DeleteWatchButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            SymbolInfo si = button.DataContext as SymbolInfo;
+            if (si == null) return;
+
+            var symbols = MainTreeView.ItemsSource as ObservableCollection<SymbolInfo>;
+            if (symbols == null) return;
+
+            symbols.Remove(si);
+            mWatchNames.Remove(si.SymbolName);
         }
     }
 }
