@@ -116,7 +116,7 @@ namespace arduino.net
             var pointerValue = GetIntFromBytes(rawValue);
             if (pointerValue == 0) return "<null>";
 
-            return string.Format("0x{0:X}", pointerValue);
+            return string.Format("0x{0:x}", pointerValue);
                 
         }
 
@@ -205,12 +205,12 @@ namespace arduino.net
             if (debugger.Status != DebuggerStatus.Break) return null;
             if (Type == null) return null;
 
-            // Create a new expression to get the pointer value
+            // Create a new Location Program to get the pointer value
             var pointerValue = GetIntFromBytes(rawValue);
             if (pointerValue == 0) return null;
 
             var program = new List<string>();
-            program.Add(string.Format("DW_OP_addr: {0:X}", pointerValue));
+            program.Add(string.Format("DW_OP_addr: {0:x}", pointerValue));
             var pointerTargetLocation = new DwarfLocation() { RawLocationProgram = program };
 
             return pointerTargetLocation.GetValue(debugger, Type);

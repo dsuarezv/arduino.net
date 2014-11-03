@@ -26,13 +26,13 @@ namespace arduino.net
         //    "6 byte block: 64 93 1 65 93 1 	(DW_OP_reg20; DW_OP_piece: 1; DW_OP_reg21; DW_OP_piece: 1)"
         //    "2 byte block: 23 5 	(DW_OP_plus_uconst: 5)"
 
-        private static Regex LocationReferenceRegExpr = new Regex(@"0x([a-f0-9]+)\s\(location list\)");
-        private static Regex InlineLocationRegExpr = new Regex(@"[0-9]+ byte block:\s[0-9a-f\s]*\(([\w\s:;]+)\)");
+        private static Regex LocationReferenceRegExpr = new Regex(@"0x([a-fA-F0-9]+)\s\(location list\)");
+        private static Regex InlineLocationRegExpr = new Regex(@"[0-9]+ byte block:\s[0-9a-fA-F\s]*\(([\w\s:;]+)\)");
         
         private static Regex OpRegisterRegExpr = new Regex(@"DW_OP_reg(?<reg>[0-9]+)|DW_OP_regx:\s(?<reg>[0-9]+)");
         private static Regex OpRegisterOffsetRegExpr = new Regex(@"DW_OP_breg(?<reg>[0-9]+):\s+(?<offset>[0-9]+)");
         private static Regex OpConstantOffsetRegExpr = new Regex(@"DW_OP_plus_uconst: (?<offset>[0-9]+)");
-        private static Regex OpAddressRegExpr = new Regex(@"DW_OP_addr: ([0-9a-f]+)");
+        private static Regex OpAddressRegExpr = new Regex(@"DW_OP_addr: ([0-9a-fA-F]+)");
 
         internal List<string> RawLocationProgram;
 
