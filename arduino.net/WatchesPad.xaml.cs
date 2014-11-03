@@ -22,9 +22,6 @@ namespace arduino.net
     /// </summary>
     public partial class WatchesPad : UserControl
     {
-        private List<string> mWatchNames = new List<string>();
-
-
         public WatchesPad()
         {
             InitializeComponent();
@@ -33,16 +30,10 @@ namespace arduino.net
 
         public void UpdateWatches()
         { 
-            var values = IdeManager.WatchManager.GetValues(GetWatchNames());
+            var values = IdeManager.WatchManager.GetValues();
             if (values == null) return;
 
             MainTreeView.ItemsSource = values;
-        }
-
-
-        private IList<string> GetWatchNames()
-        {
-            return mWatchNames;
         }
 
 
@@ -58,7 +49,7 @@ namespace arduino.net
 
             NewWatchTextBox.Text = "";
 
-            mWatchNames.Add(name);
+            IdeManager.WatchManager.SymbolNames.Add(name);
 
             UpdateWatches();
         }
@@ -81,7 +72,7 @@ namespace arduino.net
             if (symbols == null) return;
 
             symbols.Remove(si);
-            mWatchNames.Remove(si.SymbolName);
+            IdeManager.WatchManager.SymbolNames.Remove(si.SymbolName);
         }
     }
 }

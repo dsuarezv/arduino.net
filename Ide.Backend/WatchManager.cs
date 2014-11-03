@@ -8,18 +8,26 @@ using System.Threading.Tasks;
 
 namespace arduino.net
 {
-    public class WatchManager
+    public class WatchManager: IPersistenceListener
     {
         private IDebugger mDebugger;
+        private ObservableCollection<string> mSymbolNames = new ObservableCollection<string>();
+
+
+        public ObservableCollection<string> SymbolNames
+        {
+            get { return mSymbolNames; }
+        }
 
 
         public WatchManager(IDebugger debugger)
         {
             mDebugger = debugger;
+            SessionSettings.RegisterPersistenceListener(this);
         }
 
 
-        public IList<SymbolInfo> GetValues(IList<string> symbolNames)
+        public IList<SymbolInfo> GetValues()
         {
             if (mDebugger.Status != DebuggerStatus.Break) return null;
 
@@ -27,9 +35,9 @@ namespace arduino.net
             if (currentFunction == null) return null;
             
             ObservableCollection<SymbolInfo> result = new ObservableCollection<SymbolInfo>();
-            if (symbolNames == null) return result;
+            if (mSymbolNames == null) return result;
 
-            foreach (var name in symbolNames)
+            foreach (var name in mSymbolNames)
             {
                 var s = GetSymbol(currentFunction, name);
                 if (s != null) result.Add(s);
@@ -61,6 +69,20 @@ namespace arduino.net
         {
             var pc = mDebugger.RegManager.Registers["PC"];
             return IdeManager.Dwarf.GetFunctionAt(pc);
+        }
+
+
+        // __ IPersistenceListener ____________________________________________
+
+
+        public object GetObjectToPersist()
+        {
+            return mSymbolNames;
+        }
+
+        public void RestorePersistedObject(object obj)
+        {
+            mSymbolNames = obj as ObservableCollection<string>;
         }
     }
 

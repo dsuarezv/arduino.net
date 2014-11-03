@@ -18,14 +18,12 @@ namespace arduino.net
         public bool DisableTargetDateCheck = false;
         public bool FinishedSuccessfully = true;
 
+
         protected string EffectiveSourceFile;
 
-        public BuildTarget()
-        { 
-            
-        }
-
+        
         public abstract void SetupCommand(string boardName);
+
 
         public virtual void SetupSources(string tempDir)
         {
@@ -105,6 +103,7 @@ namespace arduino.net
         }
     }
 
+
     public class CopyBuildTarget : BuildTarget
     {
         public CopyBuildTarget()
@@ -123,6 +122,7 @@ namespace arduino.net
         }
     }
 
+
     public class CppBuildTarget : BuildTarget
     {
         public override void SetupCommand(string boardName)
@@ -137,7 +137,6 @@ namespace arduino.net
             BuildCommand = new Command()
             {
                 Program = Path.Combine(Configuration.ToolkitPath, compiler),
-                //Arguments = string.Format("-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
                 Arguments = string.Format("-c -g {8} -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
                     config["mcu"],
                     config["f_cpu"],
@@ -180,6 +179,7 @@ namespace arduino.net
             return "-Os";   // Optimize for size.
         }
     }
+
 
     public class AssemblerBuildTarget : CppBuildTarget
     {
@@ -291,6 +291,7 @@ namespace arduino.net
         }
     }
 
+
     public class DebugBuildTarget: CppBuildTarget
     {
         public Debugger Debugger = null;
@@ -373,6 +374,7 @@ namespace arduino.net
             return "-O0";  // In debug, disable optimization. Most debug info is lost if enabled.
         }
     }
+
 
     public class InoBuildTarget : DebugBuildTarget
     {

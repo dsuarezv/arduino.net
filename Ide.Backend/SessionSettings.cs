@@ -33,7 +33,10 @@ namespace arduino.net
 
                 foreach (var l in mListeners)
                 {
-                    f.Serialize(writer, l.GetObjectToPersist());
+                    var obj = l.GetObjectToPersist();
+                    if (obj == null) continue;
+
+                    f.Serialize(writer, obj);
                 }
             }
         }
