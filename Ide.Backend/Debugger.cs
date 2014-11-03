@@ -111,6 +111,25 @@ namespace arduino.net
             mSerialPort = null;
         }
 
+
+        public void TouchProjectFilesAffectedByDebugging(Project p)
+        {
+            List<string> filesToTouch = new List<string>();
+
+            filesToTouch.Add(p.GetSketchFileName());
+
+            foreach (var bi in mBreakPoints.BreakPoints)
+            {
+                var f = Path.Combine(p.ProjectPath, bi.SourceFileName);
+                if (!filesToTouch.Contains(f)) filesToTouch.Add(f);
+            }
+
+            foreach (var f in filesToTouch)
+            {
+                if (File.Exists(f)) File.SetLastWriteTime(f, DateTime.Now);
+            }
+        }
+
        
         // __ Debugger commands _______________________________________________
 

@@ -32,12 +32,13 @@ namespace arduino.net
 
 
         public void UpdateWatches()
-        {
+        { 
             var values = IdeManager.WatchManager.GetValues(GetWatchNames());
             if (values == null) return;
 
             MainTreeView.ItemsSource = values;
         }
+
 
         private IList<string> GetWatchNames()
         {
