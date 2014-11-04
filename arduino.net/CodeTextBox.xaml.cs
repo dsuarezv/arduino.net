@@ -216,10 +216,10 @@ namespace arduino.net
 
             if (IdeManager.Debugger.Status == DebuggerStatus.Break)
             {
-                var si = IdeManager.WatchManager.GetInmmediateValue(e.HoveredWord);
+                var si = IdeManager.WatchManager.GetInmmediateValue(e.HoveredWord, IdeManager.Dwarf);
                 if (si == null) return;
 
-                e.ToolTipText = si.ContentWithDirectChidren;
+                e.ToolTipText = si.GetAsStringWithChildren();
             }
         }
 

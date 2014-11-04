@@ -11,12 +11,12 @@ namespace arduino.net
     public class WatchManager: IPersistenceListener
     {
         private IDebugger mDebugger;
-        private ObservableCollection<string> mSymbolNames = new ObservableCollection<string>();
+        private ObservableCollection<SymbolInfo> mSymbols = new ObservableCollection<SymbolInfo>();
 
 
-        public ObservableCollection<string> SymbolNames
+        public ObservableCollection<SymbolInfo> Symbols
         {
-            get { return mSymbolNames; }
+            get { return mSymbols; }
         }
 
 
@@ -27,48 +27,30 @@ namespace arduino.net
         }
 
 
-        public IList<SymbolInfo> GetValues()
+        public void Refresh(DwarfTree dwarf)
         {
-            if (mDebugger.Status != DebuggerStatus.Break) return null;
+            var currentFunc = GetCurrentFunction(dwarf);
 
-            var currentFunction = GetCurrentFunction();
-            if (currentFunction == null) return null;
-            
-            ObservableCollection<SymbolInfo> result = new ObservableCollection<SymbolInfo>();
-            if (mSymbolNames == null) return result;
-
-            foreach (var name in mSymbolNames)
+            foreach (var s in mSymbols)
             {
-                var s = GetSymbol(currentFunction, name);
-                if (s != null) result.Add(s);
+                s.Refresh(currentFunc, dwarf);
             }
-
-            return result;
         }
 
-        public SymbolInfo GetInmmediateValue(string name)
+        public SymbolInfo GetInmmediateValue(string name, DwarfTree dwarf)
         {
-            return GetSymbol(GetCurrentFunction(), name);
+            var symbol = new SymbolInfo(mDebugger, name) { IsRoot = true };
+            symbol.Refresh(GetCurrentFunction(dwarf), dwarf);
+
+            return symbol;
         }
 
-
-        private SymbolInfo GetSymbol(DwarfSubprogram currentFunction, string name)
+        private DwarfSubprogram GetCurrentFunction(DwarfTree dwarf)
         {
-            if (currentFunction == null) return null;
+            if (!mDebugger.RegManager.Registers.ContainsKey("PC")) return null;
 
-            var symbol = IdeManager.Dwarf.GetSymbol(name, currentFunction);
-            if (symbol == null) return null;
-
-            var val = symbol.GetValue(mDebugger);
-            if (val == null) return null;
-
-            return new SymbolInfo(mDebugger, name, symbol.Type, val) { IsRoot = true };
-        }
-        
-        private DwarfSubprogram GetCurrentFunction()
-        {
             var pc = mDebugger.RegManager.Registers["PC"];
-            return IdeManager.Dwarf.GetFunctionAt(pc);
+            return dwarf.GetFunctionAt(pc);
         }
 
 
@@ -77,12 +59,13 @@ namespace arduino.net
 
         public object GetObjectToPersist()
         {
-            return mSymbolNames;
+            //return mSymbols;
+            return null;
         }
 
         public void RestorePersistedObject(object obj)
         {
-            mSymbolNames = obj as ObservableCollection<string>;
+            //mSymbols = obj as ObservableCollection<string>;
         }
     }
 

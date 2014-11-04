@@ -27,17 +27,19 @@ namespace arduino.net
             InitializeComponent();
         }
 
-
         public void UpdateWatches()
         { 
-            var values = IdeManager.WatchManager.GetValues();
-            if (values == null) return;
-
-            MainTreeView.ItemsSource = values;
+            IdeManager.WatchManager.Refresh(IdeManager.Dwarf);
         }
 
 
         // __ Control event handlers __________________________________________
+
+        
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            MainTreeView.ItemsSource = IdeManager.WatchManager.Symbols;
+        }
 
 
         private void AddNewButton_Click(object sender, RoutedEventArgs e)
@@ -49,7 +51,7 @@ namespace arduino.net
 
             NewWatchTextBox.Text = "";
 
-            IdeManager.WatchManager.SymbolNames.Add(name);
+            IdeManager.WatchManager.Symbols.Add(new SymbolInfo(IdeManager.Debugger, name) { IsRoot = true });
 
             UpdateWatches();
         }
@@ -68,11 +70,7 @@ namespace arduino.net
             SymbolInfo si = button.DataContext as SymbolInfo;
             if (si == null) return;
 
-            var symbols = MainTreeView.ItemsSource as ObservableCollection<SymbolInfo>;
-            if (symbols == null) return;
-
-            symbols.Remove(si);
-            IdeManager.WatchManager.SymbolNames.Remove(si.SymbolName);
+            IdeManager.WatchManager.Symbols.Remove(si);
         }
     }
 }

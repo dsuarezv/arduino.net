@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:arduino.net;assembly=Ide.Backend"
-             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="300">
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="300"
+             Loaded="UserControl_Loaded">
 
     <Grid Margin="0, 0, 0, 20">
         <Expander Header="Watches" IsExpanded="True" Style="{DynamicResource PadExpanderStyle}"  >
@@ -12,7 +13,13 @@
                 <TextBox Name="NewWatchTextBox" Margin="0,10,69,0" Background="{x:Null}" KeyDown="NewWatchTextBox_KeyDown" Height="25" VerticalAlignment="Top" VerticalContentAlignment="Center" Padding="3, 0"/>
                 <Button Content="Add" Name="AddNewButton" VerticalAlignment="Top" HorizontalAlignment="Right" Width="64" Height="25" Margin="0,10,0,0" Click="AddNewButton_Click"/>
                 <TreeView Name="MainTreeView" Margin="0, 40, 0, 0" Background="{x:Null}" BorderBrush="{x:Null}" MinHeight="200">
-                    <TreeView.Resources>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+
+                    <TreeView.Resources>                       
                         <BooleanToVisibilityConverter x:Key="CloseButtonVisibility" />
                         <HierarchicalDataTemplate DataType="{x:Type local:SymbolInfo}" ItemsSource="{Binding Children}">
                             <Grid >
