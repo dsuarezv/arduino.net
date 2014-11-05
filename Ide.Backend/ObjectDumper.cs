@@ -14,7 +14,7 @@ namespace arduino.net
         public const string NmCommand = "avr-nm.exe";
         public const string SizeCommand = "avr-size";
 
-        private static Regex SizeRegEx = new Regex(@"\s+(?<text>[0-9]+)\s+(?<data>[0-9]+)\s+(?<bss>[0-9]+)\s+(?<dec>[0-9]+)\s+(?<hex>[0-9a-f]+)\s+(?<elf>.*\.elf)", RegexOptions.Compiled | RegexOptions.Multiline);
+        private static Regex SizeRegEx = new Regex(@"\s+(?<text>[0-9]+)\s+(?<data>[0-9]+)\s+(?<bss>[0-9]+)\s+(?<dec>[0-9]+)\s+(?<hex>[0-9a-fA-F]+)\s+(?<elf>.*\.elf)", RegexOptions.Compiled | RegexOptions.Multiline);
 
 
         public static List<string> GetHelp()

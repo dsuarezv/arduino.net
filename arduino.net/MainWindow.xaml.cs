@@ -43,8 +43,11 @@ namespace arduino.net
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
+                IdeManager.WatchManager = new WatchManager(IdeManager.Debugger);
 
-                CreateEmptyProject();
+                //CreateEmptyProject();
+                OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
+                
 
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
                 
@@ -87,7 +90,7 @@ namespace arduino.net
             ProjectPad1.OpenProject(Project.GetDefaultNewProjectFullName());
         }
 
-        private void SetupProject(string sketch)
+        private void OpenProject(string sketch)
         {
             ProjectPad1.OpenProject(sketch);
 
@@ -152,11 +155,13 @@ namespace arduino.net
                     break;
 
                 case DebuggerStatus.Stopped:
+#if !SHORTCUT
                     if (IdeManager.Compiler.IsDirty)
                     {
                         var success = await LaunchDeploy();
                         if (!success) break;
                     }
+#endif
 
                     if (IsDebugBuild())
                     {
@@ -404,6 +409,7 @@ namespace arduino.net
         private void DebuggerCheckbox_CheckedChanged()
         {
             IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsBuild);
+            IdeManager.Debugger.TouchProjectFilesAffectedByDebugging(IdeManager.CurrentProject);
         }
 
         private void Debugger_StatusChanged(object sender, DebuggerStatus newState)
@@ -463,6 +469,13 @@ namespace arduino.net
             });
 
             UpdateDwarf();
+
+
+
+            Dispatcher.Invoke(() =>
+            {
+                WatchesPad1.UpdateWatches();
+            });
         }
         
         private void Debugger_SerialCharWorker(object state)

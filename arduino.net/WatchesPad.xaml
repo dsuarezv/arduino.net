@@ -3,12 +3,160 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300" Loaded="UserControl_Loaded">
+             xmlns:local="clr-namespace:arduino.net;assembly=Ide.Backend"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="300"
+             Loaded="UserControl_Loaded">
+    <UserControl.Resources>
+        <Style x:Key="ExpandCollapseToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid
+                              Width="15"
+                              Height="13"
+                              Background="Transparent">
+                            <Path x:Name="ExpandPath"
+                                  HorizontalAlignment="Left" 
+                                  VerticalAlignment="Center" 
+                                  Margin="1,1,1,1"
+                                  Fill="{StaticResource C0}"
+                                  Data="M 3 0 L 8 4 L 3 8 Z"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked"
+                                     Value="True">
+                                <Setter Property="Data"
+                                        TargetName="ExpandPath"
+                                        Value="M 0 3 L 8 3 L 4 8 Z"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="{x:Type TreeViewItem}" TargetType="{x:Type TreeViewItem}">
+            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TreeViewItem}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition MinWidth="19"
+                                                  Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <ToggleButton x:Name="Expander"
+                                          Style="{StaticResource ExpandCollapseToggleStyle}"
+                                          IsChecked="{Binding Path=IsExpanded,
+                                                      RelativeSource={RelativeSource TemplatedParent}}"
+                                          ClickMode="Press"/>
+                            <Border Name="Bd"
+                                    Grid.Column="1"
+                                    Grid.ColumnSpan="2"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter x:Name="PART_Header"
+                                                  ContentSource="Header"
+                                                  HorizontalAlignment="Stretch"/>
+                            </Border>
+                            <ItemsPresenter x:Name="ItemsHost"
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Grid.ColumnSpan="2"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="false">
+                                <Setter TargetName="ItemsHost"
+                                        Property="Visibility"
+                                        Value="Collapsed"/>
+                            </Trigger>
+                            <Trigger Property="HasItems" Value="false">
+                                <Setter TargetName="Expander"
+                                        Property="Visibility"
+                                        Value="Hidden"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="HasHeader" Value="false"/>
+                                    <Condition Property="Width" Value="Auto"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="PART_Header"
+                                        Property="MinWidth"
+                                        Value="75"/>
+                            </MultiTrigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="HasHeader" Value="false"/>
+                                    <Condition Property="Height" Value="Auto"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="PART_Header"
+                                        Property="MinHeight"
+                                        Value="19"/>
+                            </MultiTrigger>
+                            <Trigger Property="IsSelected" Value="true">
+                                <Setter TargetName="Bd" Property="Background"
+                                        Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="true"/>
+                                    <Condition Property="IsSelectionActive" Value="false"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Bd"
+                                        Property="Background"
+                                        Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                            </MultiTrigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <BooleanToVisibilityConverter x:Key="CloseButtonVisibility" />
+        <HierarchicalDataTemplate DataType="{x:Type local:SymbolInfo}" ItemsSource="{Binding Children}" x:Key="WatchTreeViewDataTemplate">
+            <Grid >
+                <StackPanel Orientation="Horizontal" Margin="0, 0, 20, 0">
+                    
+                    <TextBlock Text="{Binding SymbolName}" Foreground="{DynamicResource C0}" />
+                    <TextBlock Text="{Binding Value}" Foreground="{DynamicResource C5}" Margin="5, 0, 0, 0"/>
+                    <TextBlock Text="{Binding TypeName}" Foreground="{DynamicResource C1}" Margin="10, 0, 0, 0"/>
+                </StackPanel>
+                <Button Name="DeleteWatchButton" 
+                        Width="13" 
+                        Height="13"
+                        HorizontalAlignment="Right" 
+                        Click="DeleteWatchButton_Click" 
+                        Visibility="{Binding IsRoot, Converter={StaticResource CloseButtonVisibility}}" 
+                        Style="{StaticResource CloseButtonStyle}"/>
+            </Grid>
+        </HierarchicalDataTemplate>
+    </UserControl.Resources>
 
     <Grid Margin="0, 0, 0, 20">
         <Expander Header="Watches" IsExpanded="True" Style="{DynamicResource PadExpanderStyle}"  >
-            
+            <Grid Margin="10, 0">
+                <TextBox Name="NewWatchTextBox" Margin="0,10,69,0" Background="{x:Null}" KeyDown="NewWatchTextBox_KeyDown" Height="25" VerticalAlignment="Top" VerticalContentAlignment="Center" Padding="3, 0"/>
+                <Button Content="Add" Name="AddNewButton" VerticalAlignment="Top" HorizontalAlignment="Right" Width="64" Height="25" Margin="0,10,0,0" Click="AddNewButton_Click"/>
+                <TreeView Name="MainTreeView" Margin="0, 40, 0, 0" Background="{x:Null}" BorderBrush="{x:Null}" MinHeight="200" PreviewKeyDown="MainTreeView_PreviewKeyDown" ItemTemplate="{DynamicResource WatchTreeViewDataTemplate}"/>
+            </Grid>
         </Expander>
     </Grid>
 </UserControl>

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace arduino.net
 {
-    public class DwarfTree
+    public class DwarfTree: IDwarfProvider
     {
         private DwarfTextParser mParser;
         //private Dictionary<string, DwarfNamedObject> mIndexByName = new Dictionary<string, DwarfNamedObject>();
@@ -57,21 +57,37 @@ namespace arduino.net
 
         public DwarfLocatedObject GetSymbol(string symbolName, DwarfSubprogram currentFunc)
         {
-            // Search in this function first
-            DwarfLocatedObject result;
-
-            if (currentFunc == null) return null;
-
-            if (currentFunc.Variables.TryGetValue(symbolName, out result))
+            if (currentFunc != null)
             {
-                return result;
+                // Search in this function first
+
+                DwarfLocatedObject result;
+
+                if (currentFunc.Variables.TryGetValue(symbolName, out result))
+                {
+                    return result;
+                }
+
+                // Then, search global vars in this file. 
+
+                DwarfVariable globalVar;
+
+                if (currentFunc.Parent.Variables.TryGetValue(symbolName, out globalVar))
+                {
+                    return globalVar;
+                }
             }
 
-            DwarfVariable globalVar;
+            // Finally, search all global variables
 
-            if (currentFunc.Parent.Variables.TryGetValue(symbolName, out globalVar))
-            {
-                return globalVar;
+            DwarfVariable globalVar2;
+
+            foreach (var cu in mCompileUnits)
+            { 
+                if (cu.Variables.TryGetValue(symbolName, out globalVar2))
+                {
+                    return globalVar2;
+                }
             }
 
             return null;            
@@ -84,6 +100,29 @@ namespace arduino.net
             if (symbol == null) return null;
 
             return symbol.GetValue(debugger);
+        }
+
+        public IList<string> GetAllGlobalVariables()
+        {
+            var result = new List<string>();
+
+            foreach (var cu in mCompileUnits)
+            {
+                result.AddRange(cu.Variables.Keys);
+            }
+
+            return result;
+        }
+
+        public IList<string> GetLocalVariables(DwarfSubprogram currentFunc)
+        {
+            if (currentFunc == null) return null;
+
+            var result = new List<string>();
+
+            result.AddRange(currentFunc.Variables.Keys);
+
+            return result;
         }
         
         
@@ -116,7 +155,8 @@ namespace arduino.net
                 case "const_type": result = SetupNewObject(node, new DwarfConstType()); break;
                 case "pointer_type": result = SetupNewObject(node, new DwarfPointerType()); break;
                 case "class_type": result = SetupNewObject(node, new DwarfClassType()); break;
-                case "structure_type": break;
+                case "structure_type": result = SetupNewObject(node, new DwarfStructType()); break;
+                case "member": result = SetupNewObject(node, new DwarfMember()); break;
                 case "subprogram": result = CreateSubProgram(node); break;
                 case "formal_parameter": result = SetupNewObject(node, new DwarfFormalParameter()); break;
                 case "variable": result = SetupNewObject(node, new DwarfVariable()); break;
@@ -146,7 +186,7 @@ namespace arduino.net
 
         private DwarfObject SetupNewObject(DwarfParserNode node, DwarfObject obj)
         {
-            //if (node.Id == 0x2f97) System.Diagnostics.Debugger.Break();
+            //if (node.Id == 0x7a) System.Diagnostics.Debugger.Break();
 
             obj.FillAttributes(node);
 
@@ -163,8 +203,6 @@ namespace arduino.net
 
             return obj;
         }
-
-
 
 
         // __ Collection dispatching __________________________________________
@@ -189,6 +227,7 @@ namespace arduino.net
             {
                 if (container is DwarfCompileUnit) { To((DwarfCompileUnit)container); return; }
                 if (container is DwarfSubprogram) { To((DwarfSubprogram)container); return; }
+                if (container is DwarfStructType) { To((DwarfStructType)container); return; }
             }
 
             public void To(DwarfCompileUnit container)
@@ -252,6 +291,20 @@ namespace arduino.net
                     return;
                 }
             }
+
+            public void To(DwarfStructType container)
+            {
+                if (!IsValidInput(container)) return;
+
+                var member = mTarget as DwarfMember;
+                if (member != null)
+                {
+                    container.Members.Add(member);
+                    return;
+                }
+            }
+
+            
 
             
             // __ Helpers _____________________________________________________

@@ -52,6 +52,7 @@ namespace arduino.net
             mDebugger = d;
         }
 
+
         public void MarkAsDirty(BuildStage stage)
         {
             mBuildStage = stage;
@@ -64,7 +65,7 @@ namespace arduino.net
 
         public bool Build(string boardName, bool debug)
         {
-            if (mBuildStage != BuildStage.NeedsBuild)
+            if (IsBuildUpToDate())
             {
                 Logger.LogCompiler("Build is up-to-date.");
                 return true;
@@ -84,8 +85,8 @@ namespace arduino.net
             var linkCmds = CreateLinkCommand(tempDir, projectCmds, debuggerCmds, librariesCmds);
             var elfCmds = CreateImageCommands(tempDir);
 
-            if (!RunCommands(debuggerCmds, tempDir)) return false;
             if (!RunCommands(projectCmds, tempDir)) return false;
+            if (!RunCommands(debuggerCmds, tempDir)) return false;
             if (!RunCommands(librariesCmds, tempDir)) return false;
             if (!RunCommands(coreCmds, tempDir)) return false;
             if (!RunCommands(coreLibCmds, tempDir)) return false;
@@ -108,7 +109,7 @@ namespace arduino.net
                 try
                 {
                     File.Delete(f);
-        }
+                }
                 catch { }
             }
         }
@@ -120,7 +121,7 @@ namespace arduino.net
 
         public bool Deploy(string boardName, string programmerName, bool debug)
         {
-            if (mBuildStage == BuildStage.ReadyToRun) 
+            if (IsDeployUpToDate()) 
             {
                 Logger.LogCompiler("Deploy: No changes since last deployment.");
                 return true;
@@ -159,6 +160,16 @@ namespace arduino.net
             IdeManager.Dwarf = new DwarfTree(new DwarfTextParser(GetElfFile()));
         }
 
+
+        private bool IsBuildUpToDate()
+        {
+            return (mBuildStage != BuildStage.NeedsBuild);
+        }
+
+        private bool IsDeployUpToDate()
+        {
+            return (mBuildStage == BuildStage.ReadyToRun);
+        }
 
         private void SetupBoardName(string boardName)
         {
@@ -215,7 +226,7 @@ namespace arduino.net
             return GetCommandsForFiles(tempDir, debug, fileList, false);
         }
 
-        private List<BuildTarget> GetCommandsForFiles(string tempDir, bool debug, List<string> fileList, bool copyToTmp = true)
+        private List<BuildTarget> GetCommandsForFiles(string tempDir, bool debug, IList<string> fileList, bool copyToTmp = true)
         {
             var result = new List<BuildTarget>();
             var debugger = debug ? mDebugger : null;

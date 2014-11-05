@@ -65,18 +65,16 @@ namespace arduino.net
                 ReservedCountOfLineNumberChars = 5,
                 BackColor = backColor,
                 IndentBackColor = backColor,
-                LineNumberColor = Color.FromArgb(180, 180, 180)
+                LineNumberColor = Color.FromArgb(180, 180, 180),
+                HoveredWordRegex = @"[a-zA-Z0-9]"
             };
 
-            mMainTextBox.PaintLine += mMainTextBox_PaintLine;
-            mMainTextBox.KeyDown += mMainTextBox_KeyDown;
-            mMainTextBox.KeyPress += mMainTextBox_KeyPress;
-            mMainTextBox.TextChanged += mMainTextBox_TextChanged;
-            mMainTextBox.TextSource.LineInserted += TextSource_LineInserted;
-            mMainTextBox.TextSource.LineRemoved += TextSource_LineRemoved;
+            mMainTextBox.PaintLine += MainTextBox_PaintLine;
+            mMainTextBox.KeyDown += MainTextBox_KeyDown;
+            mMainTextBox.KeyPress += MainTextBox_KeyPress;
+            mMainTextBox.TextChanged += MainTextBox_TextChanged;
 
-            mMainTextBox.ToolTipNeeded += mMainTextBox_ToolTipNeeded;
-
+            mMainTextBox.ToolTipNeeded += MainTextBox_ToolTipNeeded;
             
             C5Brush = new SolidBrush(UiConfig.GetWinformsColor(UiConfig.Color5));
             C6Brush = new SolidBrush(UiConfig.GetWinformsColor(UiConfig.Color6));
@@ -102,6 +100,9 @@ namespace arduino.net
 
             mIsLoading = true;
             mMainTextBox.OpenFile(fileName, Encoding.UTF8);
+            mMainTextBox.TextSource.LineInserted += TextSource_LineInserted;
+            mMainTextBox.TextSource.LineRemoved += TextSource_LineRemoved;
+
             mIsLoading = false;
         }
 
@@ -111,6 +112,9 @@ namespace arduino.net
 
             mIsLoading = true;
             mMainTextBox.Text = content;
+            mMainTextBox.TextSource.LineInserted += TextSource_LineInserted;
+            mMainTextBox.TextSource.LineRemoved += TextSource_LineRemoved;
+
             mIsLoading = false;
 
             if (highlightExt == null) return;
@@ -201,20 +205,22 @@ namespace arduino.net
 
         private bool CheckChanges()
         {
+            // TODO: add "Save changes?" prompt here.
             // returns true is operation can proceed (either changes were saved or discarded)
             // or false if not (pending changes dialog was cancelled)
             return true;
         }
 
-        private void mMainTextBox_ToolTipNeeded(object sender, ToolTipNeededEventArgs e)
+        private void MainTextBox_ToolTipNeeded(object sender, ToolTipNeededEventArgs e)
         {
             if (string.IsNullOrEmpty(e.HoveredWord)) return;
 
             if (IdeManager.Debugger.Status == DebuggerStatus.Break)
             {
-                var val = Watch.GetWatchValue(e.HoveredWord);
+                var si = IdeManager.WatchManager.GetInmmediateValue(e.HoveredWord, IdeManager.Dwarf);
+                if (si == null) return;
 
-                e.ToolTipText = val;
+                e.ToolTipText = si.GetAsStringWithChildren();
             }
         }
 
@@ -234,7 +240,7 @@ namespace arduino.net
             IdeManager.Debugger.BreakPoints.ShiftBreakpointsForFile(mFileName, e.Index, e.Count);
         }
 
-        private void mMainTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
+        private void MainTextBox_TextChanged(object sender, FastColoredTextBoxNS.TextChangedEventArgs e)
         {
             if (mSyntaxHighlighter == null) return;
 
@@ -243,8 +249,19 @@ namespace arduino.net
 
         private void DeleteBreakpointsInRange(int start, int numLines)
         {
-            // Check if there is any breakpoint in the deleted range. Delete that breakpoint.
+            int startLine = start;
+            int endLine = start + numLines;
 
+            // Cannot remove while enumerating, so keep a list of breakpoints in the deleted range to remove them later.
+
+            List<BreakPointInfo> brToRemove = new List<BreakPointInfo>();
+
+            foreach (var br in mBreakpoints.Values)
+            {
+                if (br.LineNumber >= start && br.LineNumber <= endLine) brToRemove.Add(br);
+            }
+
+            foreach (var br in brToRemove) mBreakpoints.Remove(br.LineNumber);
         }
 
         private void ApplySyntaxHighlight(string ext)
@@ -268,8 +285,7 @@ namespace arduino.net
         // __ Keyboard shortcuts ______________________________________________
 
 
-
-        private void mMainTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        private void MainTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             if (e.Control)
             { 
@@ -303,7 +319,7 @@ namespace arduino.net
             }
         }
 
-        private void mMainTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
+        private void MainTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
         {
             if (!CanEdit()) e.Handled = true;
         }
@@ -318,11 +334,11 @@ namespace arduino.net
             
         }
 
+
+        // __ Custom drawing __________________________________________________
         
-        // __ Breakpoint handling _____________________________________________
-
-
-        private void mMainTextBox_PaintLine(object sender, PaintLineEventArgs e)
+        
+        private void MainTextBox_PaintLine(object sender, PaintLineEventArgs e)
         {
             var re = e.LineRect;
             var l = e.LineIndex + 1;
@@ -347,7 +363,11 @@ namespace arduino.net
                 e.Graphics.FillRectangle(C7Brush, new Rectangle(xStart, re.Top, re.Width - xStart, re.Height));
             }
         }
-        
+
+
+        // __ Breakpoint handling _____________________________________________
+
+
         private void Debugger_BreakPointRemoved(object sender, BreakPointInfo breakpoint)
         {
             if (breakpoint.SourceFileName != mFileName) return;

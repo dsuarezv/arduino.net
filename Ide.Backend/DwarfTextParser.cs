@@ -165,7 +165,7 @@ namespace arduino.net
     [System.Diagnostics.DebuggerDisplay("{Id} {TagType}")]
     public class DwarfParserNode
     {
-        private static Regex RegExpr = new Regex(@"<([0-9a-f]+)><([0-9a-f]+)>: Abbrev Number: ([0-9]+) \(DW_TAG_([a-z_]+)\)", RegexOptions.Compiled);
+        private static Regex RegExpr = new Regex(@"<([0-9a-fA-F]+)><([0-9a-fA-F]+)>: Abbrev Number: ([0-9]+) \(DW_TAG_([a-z_]+)\)", RegexOptions.Compiled);
 
         public int LineNumber;
         public int Id;
@@ -209,7 +209,7 @@ namespace arduino.net
     {
         public static DwarfParserAttribute Empty = new DwarfParserAttribute();
 
-        private static Regex RegExpr = new Regex(@"<[ ]*([0-9a-f]+)> + DW_AT_([a-z_]+)\s*: *(.+)", RegexOptions.Compiled);
+        private static Regex RegExpr = new Regex(@"<[ ]*([0-9a-fA-F]+)> + DW_AT_([a-z_]+)\s*: *(.+)", RegexOptions.Compiled);
         private static Regex IndirectStringRegEx = new Regex(@"\(indirect string, offset: 0x[0-9a-fA-F]+\): (.+)", RegexOptions.Compiled);
 
         public int Id;
@@ -289,7 +289,7 @@ namespace arduino.net
         public int Id;
         public string Program;
 
-        private static Regex RegExpr = new Regex(@"(?<id>[0-9a-f]+) \w+ \w+ \((?<program>[\w; :]+)\)", RegexOptions.Compiled);
+        private static Regex RegExpr = new Regex(@"(?<id>[0-9a-fA-F]+) \w+ \w+ \((?<program>[\w; :]+)\)", RegexOptions.Compiled);
         
         public static DwarfParserLocation Get(string s)
         {

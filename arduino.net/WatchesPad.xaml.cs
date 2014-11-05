@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -26,28 +27,61 @@ namespace arduino.net
             InitializeComponent();
         }
 
+        public void UpdateWatches()
+        { 
+            IdeManager.WatchManager.Refresh(IdeManager.Dwarf);
+        }
+
+
+        // __ Control event handlers __________________________________________
+
+        
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            if (!DesignerProperties.GetIsInDesignMode(this))
-            { 
-                //WatchesGrid.ItemsSource = IdeManager.Debugger.Watches;
-                IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
+            MainTreeView.ItemsSource = IdeManager.WatchManager.Symbols;
+        }
+
+
+        private void AddNewButton_Click(object sender, RoutedEventArgs e)
+        {
+            var name = NewWatchTextBox.Text;
+            if (String.IsNullOrWhiteSpace(name)) return;
+
+            name = name.Trim();
+
+            NewWatchTextBox.Text = "";
+
+            IdeManager.WatchManager.AddSymbol(name);
+
+            UpdateWatches();
+        }
+
+        private void NewWatchTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                AddNewButton_Click(null, null);
             }
         }
 
-        private void Debugger_BreakPointHit(object sender, BreakPointInfo breakpoint)
+        private void DeleteWatchButton_Click(object sender, RoutedEventArgs e)
         {
-            UpdateWatchesValues();
+            Button button = sender as Button;
+            SymbolInfo si = button.DataContext as SymbolInfo;
+            if (si == null) return;
+
+            IdeManager.WatchManager.Symbols.Remove(si);
         }
 
-
-
-        private void UpdateWatchesValues()
+        private void MainTreeView_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            Dispatcher.Invoke(() =>
+            if (e.Key == Key.Delete)
             {
+                var si = MainTreeView.SelectedItem as SymbolInfo;
+                if (si == null || !si.IsRoot) return;
 
-            });
+                IdeManager.WatchManager.Symbols.Remove(si);
+            }
         }
     }
 }

@@ -36,12 +36,24 @@ namespace arduino.net
             if (!File.Exists(sketchFile)) CreateDefaultSketch(sketchFile);
         }
 
-        public List<string> GetFileList()
+        public IList<string> GetFileList()
         {
             return GetCodeFilesOnPath(mProjectPath);
         }
 
-        public static List<string> GetCodeFilesOnPath(string path)
+        public IList<string> GetFileListWithFullPaths()
+        {
+            List<string> result = new List<string>();
+
+            foreach (var f in GetFileList())
+            {
+                result.Add(Path.Combine(mProjectPath, f));
+            }
+
+            return result;
+        }
+
+        public static IList<string> GetCodeFilesOnPath(string path)
         {
             List<string> result = new List<string>();
 

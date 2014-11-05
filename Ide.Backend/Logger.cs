@@ -33,5 +33,10 @@ namespace arduino.net
         {
             Log(1, msg, args);
         }
+
+        public static void LogDebugger(string msg, params object[] args)
+        {
+            Log(1, msg, args);
+        }
     }
 }

@@ -9,14 +9,13 @@ using System.Threading;
 
 namespace arduino.net
 {
-    public class Debugger: IDisposable
+    public class Debugger: IDisposable, IDebugger
     {
         private int mDebuggerBytesCount = 0;
         private string mComPort;
         private SerialPort mSerialPort;
         private BreakPointManager mBreakPoints = new BreakPointManager();
         private RegisterManager mRegisters = new RegisterManager();
-        private ObservableCollection<Watch> mWatches = new ObservableCollection<Watch>();
         private ObservableCollection<TracepointInfo> mTracePoints = new ObservableCollection<TracepointInfo>();
         private ConcurrentQueue<byte> mReceivedCharsQueue = new ConcurrentQueue<byte>();
         private byte[] mTraceQueryBuffer;
@@ -65,11 +64,6 @@ namespace arduino.net
             get { return mRegisters; }
         }
 
-        public ObservableCollection<Watch> Watches
-        {
-            get { return mWatches; }
-        }
-
         public DebuggerStatus Status
         {
             get { return mStatus; }
@@ -86,10 +80,6 @@ namespace arduino.net
         }
 
 
-        public Debugger()
-        {
-            
-        }
 
         public string[] GetAvailableComPorts()
         {
@@ -119,6 +109,25 @@ namespace arduino.net
         {
             mSerialPort.Dispose();
             mSerialPort = null;
+        }
+
+
+        public void TouchProjectFilesAffectedByDebugging(Project p)
+        {
+            List<string> filesToTouch = new List<string>();
+
+            filesToTouch.Add(p.GetSketchFileName());
+
+            foreach (var bi in mBreakPoints.BreakPoints)
+            {
+                var f = Path.Combine(p.ProjectPath, bi.SourceFileName);
+                if (!filesToTouch.Contains(f)) filesToTouch.Add(f);
+            }
+
+            foreach (var f in filesToTouch)
+            {
+                if (File.Exists(f)) File.SetLastWriteTime(f, DateTime.Now);
+            }
         }
 
        
@@ -310,6 +319,7 @@ namespace arduino.net
         }
     }
 
+
     public delegate void TargetConnectedDelegate(object sender);
 
     public delegate void BreakPointDelegate(object sender, BreakPointInfo breakpoint);
@@ -320,6 +330,7 @@ namespace arduino.net
 
     public delegate void StatusChangedDelegate(object sender, DebuggerStatus newState);
     
+
     public enum DebuggerStatus
     { 
         Stopped, 
@@ -327,55 +338,12 @@ namespace arduino.net
         Break
     }
 
-
     
-    public class Watch
+    public interface IDebugger
     {
-        public string Name;
+        RegisterManager RegManager { get; }
+        DebuggerStatus Status { get; }
 
-
-        public string GetValue()
-        {
-            return GetWatchValue(Name);
-        }
-
-        public string GetValue(string functionName)
-        {
-            return GetWatchValue(functionName, Name);
-        }
-
-        public string GetValue(DwarfSubprogram function)
-        {
-            return GetWatchValue(function, Name);
-        }
-
-
-        public static string GetWatchValue(string symbolName)
-        {
-            var pc = IdeManager.Debugger.RegManager.Registers["PC"];
-            var function = IdeManager.Dwarf.GetFunctionAt(pc);
-            if (function == null) return symbolName + ": <current context not found>\n";
-
-            return GetWatchValue(function, symbolName);
-        }
-
-        public static string GetWatchValue(string functionName, string symbolName)
-        {
-            var function = IdeManager.Dwarf.GetFunctionByName(functionName);
-            if (function == null) return symbolName + ": <context not found>\n";
-
-            return GetWatchValue(function, symbolName);
-        }
-
-        public static string GetWatchValue(DwarfSubprogram function, string symbolName)
-        {
-            var symbol = IdeManager.Dwarf.GetSymbol(symbolName, function);
-            if (symbol == null) return symbolName + ": <not in current context>\n";
-
-            var val = symbol.GetValue(IdeManager.Debugger);
-            if (val == null) return symbolName + ": <symbol has no location debug information>\n";
-
-            return string.Format("{0}: {1}\n", symbolName, symbol.GetValueRepresentation(IdeManager.Debugger, val));
-        }
+        byte[] GetTargetMemDump(Int32 address, byte size);
     }
 }
