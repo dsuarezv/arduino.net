@@ -10,10 +10,11 @@ namespace arduino.net
 {
     public class SymbolInfo: DependencyObject
     {
-        private IDebugger mDebugger;
         private List<SymbolInfo> mChildren;
-        private byte[] mRawValue;
         private DwarfBaseType mType;
+        private DwarfMember mMember;
+        private IDebugger mDebugger;
+        private byte[] mRawValue;
 
 
         public bool IsRoot { get; set; }
@@ -24,23 +25,6 @@ namespace arduino.net
         public bool IsExpanded { get { return (bool)GetValue(IsExpandedProperty); } set { SetValue(IsExpandedProperty, value); } }
 
         public IList<SymbolInfo> Children { get { return (IList<SymbolInfo>)GetValue(ChildrenProperty); } }
-
-
-            //get
-            //{
-            //    if (mChildren != null) return mChildren;
-            //    if (mType == null || mType.Members == null || mRawValue == null) return null;
-
-            //    mChildren = new List<SymbolInfo>();
-
-            //    foreach (var member in mType.Members)
-            //    {
-            //        mChildren.Add(
-            //            new SymbolInfo(mDebugger, member.Name) { mType = member } );
-            //    }
-
-            //    return mChildren;
-            //}
 
 
         public static readonly DependencyProperty TypeNameProperty = DependencyProperty.Register("TypeName", typeof(string), typeof(SymbolInfo));
@@ -81,7 +65,12 @@ namespace arduino.net
             SetValue(ValueProperty, val);
             SetValue(TypeNameProperty, mType.Name);
 
-            if (mType.Members != null)
+            RefreshChildren();
+        }
+
+        private void RefreshChildren()
+        {
+            if (mType != null && mType.Members != null)
             {
                 if (mChildren == null) mChildren = new List<SymbolInfo>();
 
@@ -89,37 +78,30 @@ namespace arduino.net
                 {
                     foreach (var member in mType.Members)
                     {
-                        mChildren.Add(new SymbolInfo(mDebugger, member.Name) { mType = member });
+                        mChildren.Add(new SymbolInfo(mDebugger, member.Name) { mMember = member });
                     }
                 }
 
                 SetValue(ChildrenProperty, mChildren);
             }
 
-            RefreshChildren();
-        }
-
-        private void RefreshChildren()
-        {
             if (mChildren != null && IsExpanded)
             {
-                foreach (var f in mChildren) f.Refresh(mRawValue);
+                foreach (var f in mChildren) f.RefreshMember(mRawValue);
             }
         }
 
 
-        private void Refresh(byte[] parentRawValue)
+        private void RefreshMember(byte[] parentRawValue)
         {
-            if (mType == null) return;
-            
-            var member = mType as DwarfMember;
-            if (member == null || member.Type == null) return;
+            if (mMember == null || mMember.Type == null) return;
 
-            mRawValue = member.GetMemberRawValue(mDebugger, parentRawValue);
-            var val = member.Type.GetValueRepresentation(mDebugger, mRawValue);
+            mType = mMember.Type;
+            mRawValue = mMember.GetMemberRawValue(mDebugger, parentRawValue);
+            var val = mType.GetValueRepresentation(mDebugger, mRawValue);
 
-            SetValue(TypeNameProperty, member.Type.Name);
             SetValue(ValueProperty, val);
+            SetValue(TypeNameProperty, mType.Name);
 
             RefreshChildren();
         }
@@ -142,6 +124,21 @@ namespace arduino.net
         private string GetAsString()
         {
             return string.Format("{0} ({1}): {2}", SymbolName, TypeName, Value);
+        }
+
+        protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (e.Property == IsExpandedProperty)
+            {
+                bool val = (bool)GetValue(IsExpandedProperty);
+
+                if (val)
+                {
+                    RefreshChildren();
+                }
+            }
+
+            base.OnPropertyChanged(e);
         }
     }
 }
