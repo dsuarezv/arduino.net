@@ -120,7 +120,14 @@ namespace arduino.net
 
         private string GetAsString()
         {
-            return string.Format("{0} ({1}): {2}", SymbolName, TypeName, Value);
+            if (TypeName == null && Value == null)
+            {
+                return string.Format("{0} is not a symbol that can be inspected.", SymbolName);
+            }
+
+            var type = (TypeName == null) ? "" : " (" + TypeName + ')';
+            var val = (Value == null) ? "" : ": " + Value;
+            return string.Format("{0}{1}{2}", SymbolName, type, val);            
         }
 
 
