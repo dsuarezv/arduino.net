@@ -134,9 +134,10 @@
         <HierarchicalDataTemplate DataType="{x:Type local:SymbolInfo}" ItemsSource="{Binding Children}" x:Key="WatchTreeViewDataTemplate">
             <Grid >
                 <StackPanel Orientation="Horizontal" Margin="0, 0, 20, 0">
-                    <TextBlock Text="{Binding TypeName}" Foreground="{DynamicResource C1}" />
-                    <TextBlock Text="{Binding SymbolName}" Foreground="{DynamicResource C0}" Margin="5, 0, 0, 0"/>
+                    
+                    <TextBlock Text="{Binding SymbolName}" Foreground="{DynamicResource C0}" />
                     <TextBlock Text="{Binding Value}" Foreground="{DynamicResource C5}" Margin="5, 0, 0, 0"/>
+                    <TextBlock Text="{Binding TypeName}" Foreground="{DynamicResource C1}" Margin="10, 0, 0, 0"/>
                 </StackPanel>
                 <Button Name="DeleteWatchButton" 
                         Width="13" 
