@@ -21,6 +21,7 @@
         <SolidColorBrush x:Key="B0" Color="#FFF0F0F0"/>
 		<SolidColorBrush x:Key="B1" Color="#FFE5E5E5"/>
         <SolidColorBrush x:Key="B1-MouseOver" Color="#FFDCDCDC"/>
+        <SolidColorBrush x:Key="B1-Highlight" Color="#FFC7BEBE"/>
 
 		<SolidColorBrush x:Key="B0-Text" Color="#FF3d444e"/>
 		<SolidColorBrush x:Key="C0-Text" Color="#FFF0F0F0"/>
@@ -396,6 +397,76 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+
+
+
+        <!-- Parts by Dave Kerr.
+             http://www.codeproject.com/Articles/242628/A-Simple-Cross-Button-for-WPF
+        -->
+        <Style x:Key="CloseButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="SnapsToDevicePixels" Value="false" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid Background="Transparent">
+
+                            <Ellipse x:Name="backgroundEllipse" />
+
+                            <Path x:Name="ButtonPath"
+                              Margin="4"
+                              Stroke="{StaticResource B1-Highlight}"
+                              StrokeThickness="1.5"
+                              StrokeStartLineCap="Square"
+                              StrokeEndLineCap="Square"
+                              Stretch="Uniform"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Center">
+                                <Path.Data>
+                                    <PathGeometry>
+                                        <PathGeometry.Figures>
+                                            <PathFigure StartPoint="0,0">
+                                                <LineSegment Point="1,1"/>
+                                            </PathFigure>
+                                            <PathFigure StartPoint="0,1">
+                                                <LineSegment Point="1,0"/>
+                                            </PathFigure>
+                                        </PathGeometry.Figures>
+                                    </PathGeometry>
+                                </Path.Data>
+                            </Path>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="backgroundEllipse" Property="Fill"
+                                    Value="{StaticResource C5}" />
+                                <Setter TargetName="ButtonPath" Property="Stroke" 
+                                    Value="{StaticResource C7}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="backgroundEllipse" Property="Fill"
+                                    Value="{StaticResource C5}" />
+                                <Setter TargetName="backgroundEllipse" Property="Stroke"
+                                    Value="{StaticResource C5}" />
+                                <Setter TargetName="ButtonPath" Property="Stroke" 
+                                    Value="{StaticResource C7}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+
+
 
 
 
