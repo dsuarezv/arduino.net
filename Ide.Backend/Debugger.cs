@@ -194,13 +194,13 @@ namespace arduino.net
             Break = 253,
             TraceQuery = 250,
             TraceAnswer = 249,
+            CaptureAnswer = 248,
             Continue = 230
         }
 
         private void ProcessPacket(BinaryReader r)
         {
             byte b = r.ReadByte();
-            mDebuggerBytesCount++;
 
             if (b != 255)
             {
@@ -208,7 +208,9 @@ namespace arduino.net
                 return;
             }
 
-            DebuggerPacketType type = (DebuggerPacketType)r.ReadByte();
+            var typeByte = r.ReadByte();
+            DebuggerPacketType type = (DebuggerPacketType)typeByte;
+            mDebuggerBytesCount += 2;
 
             switch (type)
             {
@@ -231,8 +233,18 @@ namespace arduino.net
                     OnTargetTraceAnswer(memdump);
                     break;
 
-                default: 
+                case DebuggerPacketType.CaptureAnswer:
+                    int id = r.ReadByte();
+                    int value = r.ReadInt32();
+                    mDebuggerBytesCount += 5;
                     break;
+
+                default: 
+                    // It was not a packet for the debugger. Send to the char receiver the bytes consumed so far.
+                    OnSerialCharReceived(b);
+                    OnSerialCharReceived(typeByte);
+                    mDebuggerBytesCount -= 2;
+                    return;
             }
         }
 

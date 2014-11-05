@@ -4,6 +4,7 @@
 #define DBG_HEADER_MAGIC         255
 #define DBG_HEADER_CONNECT_TYPE  254
 #define DBG_HEADER_BREAK_TYPE    253
+#define DBG_HEADER_CAPTUREANSWER_TYPE 248
 #define DBG_HEADER_TRACEQUERY_TYPE    250
 #define DBG_HEADER_TRACEANSWER_TYPE   249
 #define DBG_HEADER_CONTINUE_TYPE      230
@@ -43,6 +44,12 @@ typedef struct
     uint8_t   Size;
 } DbgTraceAnswerPacket;
 
+typedef struct 
+{
+    DbgHeader Header;
+    uint8_t   CaptureId;
+    uint32_t  Value;
+} DbgCaptureAnswerPacket;
 
 
 static void DbgSendTrace(uint32_t address, uint8_t size);
@@ -116,3 +123,14 @@ static void DbgSendTrace(uint32_t address, uint8_t size)
     Serial.write((uint8_t*)address, size);
 }
 
+void DbgCaptureValue(uint8_t captureId, uint32_t value)
+{
+    DbgCaptureAnswerPacket p;
+    
+    p.Header.Magic = DBG_HEADER_MAGIC;
+    p.Header.Type = DBG_HEADER_CAPTUREANSWER_TYPE;
+    p.CaptureId = captureId;
+    p.Value = value;
+    
+    Serial.write((uint8_t*)&p, sizeof(DbgCaptureAnswerPacket));
+}
