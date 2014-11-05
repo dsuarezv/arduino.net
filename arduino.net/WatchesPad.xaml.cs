@@ -72,5 +72,16 @@ namespace arduino.net
 
             IdeManager.WatchManager.Symbols.Remove(si);
         }
+
+        private void MainTreeView_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                var si = MainTreeView.SelectedItem as SymbolInfo;
+                if (si == null || !si.IsRoot) return;
+
+                IdeManager.WatchManager.Symbols.Remove(si);
+            }
+        }
     }
 }
