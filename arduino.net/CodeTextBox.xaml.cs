@@ -205,6 +205,7 @@ namespace arduino.net
 
         private bool CheckChanges()
         {
+            // TODO: add "Save changes?" prompt here.
             // returns true is operation can proceed (either changes were saved or discarded)
             // or false if not (pending changes dialog was cancelled)
             return true;

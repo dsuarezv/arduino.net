@@ -16,15 +16,13 @@ namespace arduino.net
         private IDebugger mDebugger;
         private byte[] mRawValue;
 
-
-        public bool IsRoot { get; set; }
         
         public string Value { get { return (string)GetValue(ValueProperty); } }
         public string TypeName { get { return (string)GetValue(TypeNameProperty); } }
-        public string SymbolName { get; private set; }
         public bool IsExpanded { get { return (bool)GetValue(IsExpandedProperty); } set { SetValue(IsExpandedProperty, value); } }
-
         public IList<SymbolInfo> Children { get { return (IList<SymbolInfo>)GetValue(ChildrenProperty); } }
+        public string SymbolName { get; private set; }
+        public bool IsRoot { get; set; }
 
 
         public static readonly DependencyProperty TypeNameProperty = DependencyProperty.Register("TypeName", typeof(string), typeof(SymbolInfo));
@@ -37,9 +35,9 @@ namespace arduino.net
         {
             if (debugger == null) throw new ArgumentException("Debugger cannot be null");
             if (name == null) throw new ArgumentException("Name cannot be null");
-            
-            SymbolName = name;
+
             IsRoot = false;
+            SymbolName = name;
             mDebugger = debugger;
         }
 
@@ -59,11 +57,9 @@ namespace arduino.net
 
             mRawValue = symbol.GetValue(mDebugger);
             if (mRawValue == null) return;
-
-            var val = mType.GetValueRepresentation(mDebugger, mRawValue);
             
-            SetValue(ValueProperty, val);
-            SetValue(TypeNameProperty, mType.Name);
+            SetValue(ValueProperty, mType.GetValueRepresentation(mDebugger, mRawValue));
+            SetValue(TypeNameProperty, mType.GetTypeRepresentation());
 
             RefreshChildren();
         }
@@ -91,23 +87,24 @@ namespace arduino.net
             }
         }
 
-
         private void RefreshMember(byte[] parentRawValue)
         {
-            if (mMember == null || mMember.Type == null) return;
+            if (mMember == null || mMember.MemberType == null) return;
 
-            mType = mMember.Type;
+            mType = mMember.MemberType;
             mRawValue = mMember.GetMemberRawValue(mDebugger, parentRawValue);
-            var val = mType.GetValueRepresentation(mDebugger, mRawValue);
 
-            SetValue(ValueProperty, val);
-            SetValue(TypeNameProperty, mType.Name);
+            SetValue(ValueProperty, mType.GetValueRepresentation(mDebugger, mRawValue));
+            SetValue(TypeNameProperty, mType.GetTypeRepresentation());
 
             RefreshChildren();
         }
 
         public string GetAsStringWithChildren()
         {
+            IsExpanded = true;
+            RefreshChildren();
+
             var result = GetAsString();
 
             if (mChildren != null)
@@ -125,6 +122,7 @@ namespace arduino.net
         {
             return string.Format("{0} ({1}): {2}", SymbolName, TypeName, Value);
         }
+
 
         protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
         {

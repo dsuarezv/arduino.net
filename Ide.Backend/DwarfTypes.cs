@@ -37,6 +37,11 @@ namespace arduino.net
             return GetValueRepresentation(intValue);
         }
 
+        public virtual string GetTypeRepresentation()
+        {
+            return Name;
+        }
+
         private string GetValueRepresentation(long intValue)
         {
             switch (ByteSize)
@@ -71,11 +76,6 @@ namespace arduino.net
 
             return intValue;
         }
-
-        public override string ToString()
-        {
-            return Name;
-        }
     }
 
 
@@ -107,7 +107,7 @@ namespace arduino.net
             if (mTypeId == -1) return;
 
             PointedSymbolType = GetTypeFromIndex(index, mTypeId);
-            mPointedSymbol.Type = PointedSymbolType;
+            mPointedSymbol.MemberType = PointedSymbolType;
             mPointedSymbol.ByteSize = -1;
         }
 
@@ -120,7 +120,7 @@ namespace arduino.net
                 
         }
 
-        public override string ToString()
+        public override string GetTypeRepresentation()
         {
             return PointedSymbolType.Name + "*";
         }
@@ -153,11 +153,6 @@ namespace arduino.net
         {
             return "<struct>";
         }
-
-        public override string ToString()
-        {
-            return "struct " + Name;
-        }
     }
 
 
@@ -167,7 +162,7 @@ namespace arduino.net
         private int mTypeId;
 
         public DwarfLocation Location;
-        public DwarfBaseType Type;
+        public DwarfBaseType MemberType;
 
         public override void FillAttributes(DwarfParserNode node)
         {
@@ -178,23 +173,23 @@ namespace arduino.net
 
         public override void SetupReferences(DwarfTextParser parser, Dictionary<int, DwarfObject> index)
         {
-            if (mTypeId > -1) Type = DwarfBaseType.GetTypeFromIndex(index, mTypeId);
+            if (mTypeId > -1) MemberType = DwarfBaseType.GetTypeFromIndex(index, mTypeId);
             if (mLocationString != null) Location = DwarfLocation.Get(parser, mLocationString);
         }
 
         public override string GetValueRepresentation(IDebugger debugger, byte[] rawValue)
         {
-            return Type.GetValueRepresentation(debugger, rawValue);
+            return MemberType.GetValueRepresentation(debugger, rawValue);
         }
 
         public virtual byte[] GetMemberRawValue(IDebugger debugger, byte[] parentRawValue)
         {
-            return Location.GetValue(parentRawValue, Type);
+            return Location.GetValue(parentRawValue, MemberType);
         }
 
-        public override string ToString()
+        public override string GetTypeRepresentation()
         {
-            return Type.ToString();
+            return MemberType.ToString();
         }
     }
 
@@ -203,7 +198,7 @@ namespace arduino.net
         public override byte[] GetMemberRawValue(IDebugger debugger, byte[] rawValue)
         {
             if (debugger.Status != DebuggerStatus.Break) return null;
-            if (Type == null) return null;
+            if (MemberType == null) return null;
 
             // Create a new Location Program to get the pointer value
             var pointerValue = GetIntFromBytes(rawValue);
@@ -213,7 +208,7 @@ namespace arduino.net
             program.Add(string.Format("DW_OP_addr: {0:x}", pointerValue));
             var pointerTargetLocation = new DwarfLocation() { RawLocationProgram = program };
 
-            return pointerTargetLocation.GetValue(debugger, Type);
+            return pointerTargetLocation.GetValue(debugger, MemberType);
         }
     }
 
@@ -246,11 +241,6 @@ namespace arduino.net
         public override string GetValueRepresentation(IDebugger debugger, byte[] rawValue)
         {
             return "<class>";
-        }
-
-        public override string ToString()
-        {
-            return "class " + Name;
         }
     }
 

@@ -25,21 +25,21 @@ namespace Ide.Backend.Tests
             {
                 Name = "myInt1",
                 Location = new DwarfLocation("DW_OP_plus_uconst: 0"),
-                Type = IntType
+                MemberType = IntType
             });
 
             t.Members.Add(new DwarfMember()
             {
                 Name = "myBool1",
                 Location = new DwarfLocation("DW_OP_plus_uconst: 2"),
-                Type = BoolType
+                MemberType = BoolType
             });
 
             t.Members.Add(new DwarfMember()
             {
                 Name = "myIntPointer1",
                 Location = new DwarfLocation("DW_OP_plus_uconst: 3"),
-                Type = IntPointerType
+                MemberType = IntPointerType
             });
 
             var value = new byte[] { 0xff, 0x01, 0x02, 0x03, 0x04 };

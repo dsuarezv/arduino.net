@@ -45,7 +45,7 @@ namespace arduino.net
             return symbol;
         }
 
-        private DwarfSubprogram GetCurrentFunction(DwarfTree dwarf)
+        public DwarfSubprogram GetCurrentFunction(DwarfTree dwarf)
         {
             if (!mDebugger.RegManager.Registers.ContainsKey("PC")) return null;
 
