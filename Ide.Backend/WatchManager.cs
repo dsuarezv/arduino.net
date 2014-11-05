@@ -53,19 +53,34 @@ namespace arduino.net
             return dwarf.GetFunctionAt(pc);
         }
 
+        public SymbolInfo AddSymbol(string name)
+        {
+            var result = new SymbolInfo(mDebugger, name) { IsRoot = true };
+
+            mSymbols.Add(result);
+
+            return result;
+        }
+
 
         // __ IPersistenceListener ____________________________________________
 
 
         public object GetObjectToPersist()
         {
-            //return mSymbols;
-            return null;
+            List<string> result = new List<string>();
+
+            foreach (var s in mSymbols) result.Add(s.SymbolName);
+
+            return result;
         }
 
         public void RestorePersistedObject(object obj)
         {
-            //mSymbols = obj as ObservableCollection<string>;
+            var symbolNames = obj as List<string>;
+            if (symbolNames == null) return;
+
+            foreach (var s in symbolNames) AddSymbol(s);
         }
     }
 

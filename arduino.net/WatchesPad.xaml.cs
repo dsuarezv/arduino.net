@@ -51,7 +51,7 @@ namespace arduino.net
 
             NewWatchTextBox.Text = "";
 
-            IdeManager.WatchManager.Symbols.Add(new SymbolInfo(IdeManager.Debugger, name) { IsRoot = true });
+            IdeManager.WatchManager.AddSymbol(name);
 
             UpdateWatches();
         }
