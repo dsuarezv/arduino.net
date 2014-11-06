@@ -16,6 +16,7 @@ namespace arduino.net
         public static Compiler Compiler;
         public static DwarfTree Dwarf;
         public static WatchManager WatchManager;
+        public static CapturePointManager CapturePointManager;
 
 
         public static void GoToFileAndLine(string fileName, int lineNumber)

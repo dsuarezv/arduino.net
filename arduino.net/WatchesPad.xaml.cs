@@ -38,6 +38,8 @@ namespace arduino.net
         
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            if (DesignerProperties.GetIsInDesignMode(this)) return;
+
             MainTreeView.ItemsSource = IdeManager.WatchManager.Symbols;
         }
 

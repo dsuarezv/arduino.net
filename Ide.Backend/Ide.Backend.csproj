@@ -36,6 +36,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BreakPointManager.cs" />
+    <Compile Include="CapturePointInfo.cs" />
+    <Compile Include="CapturePointManager.cs" />
     <Compile Include="CompilerBuildTargets.cs" />
     <Compile Include="CompilerError.cs" />
     <Compile Include="ConfigSection.cs" />

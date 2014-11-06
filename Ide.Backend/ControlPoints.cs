@@ -25,11 +25,4 @@ namespace arduino.net
     {
         public int HitCount = 0;
     }
-
-
-    [Serializable]
-    public class TracepointInfo: ControlPointInfo
-    {
-        public string SymbolToTrace;
-    }
 }

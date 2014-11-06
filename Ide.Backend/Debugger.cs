@@ -16,7 +16,6 @@ namespace arduino.net
         private SerialPort mSerialPort;
         private BreakPointManager mBreakPoints = new BreakPointManager();
         private RegisterManager mRegisters = new RegisterManager();
-        private ObservableCollection<TracepointInfo> mTracePoints = new ObservableCollection<TracepointInfo>();
         private ConcurrentQueue<byte> mReceivedCharsQueue = new ConcurrentQueue<byte>();
         private byte[] mTraceQueryBuffer;
         private DebuggerStatus mStatus = DebuggerStatus.Stopped;
@@ -27,6 +26,7 @@ namespace arduino.net
         public event BreakPointDelegate BreakPointHit;
         public event ByteDelegate SerialCharReceived;
         public event StatusChangedDelegate StatusChanged;
+        public event CaptureAnswerReceivedDelegate CaptureReceived;
 
         public string ComPort
         {
@@ -52,11 +52,6 @@ namespace arduino.net
         public BreakPointManager BreakPoints
         {
             get { return mBreakPoints; }
-        }
-
-        public ObservableCollection<TracepointInfo> TracePoints
-        {
-            get { return mTracePoints; }
         }
 
         public RegisterManager RegManager
@@ -110,7 +105,6 @@ namespace arduino.net
             mSerialPort.Dispose();
             mSerialPort = null;
         }
-
 
         public void TouchProjectFilesAffectedByDebugging(Project p)
         {
@@ -182,7 +176,7 @@ namespace arduino.net
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 Dispose();
             }
@@ -237,6 +231,7 @@ namespace arduino.net
                     int id = r.ReadByte();
                     int value = r.ReadInt32();
                     mDebuggerBytesCount += 5;
+                    OnTargetCaptureAnswer(id, value);
                     break;
 
                 default: 
@@ -306,6 +301,11 @@ namespace arduino.net
             mTraceQueryBuffer = memdump;
         }
 
+        private void OnTargetCaptureAnswer(int id, int value)
+        {
+            if (CaptureReceived != null) CaptureReceived(this, id, value);
+        }
+
         private void OnSerialCharReceived(byte b)
         {
             mReceivedCharsQueue.Enqueue(b);
@@ -342,6 +342,7 @@ namespace arduino.net
 
     public delegate void StatusChangedDelegate(object sender, DebuggerStatus newState);
     
+    public delegate void CaptureAnswerReceivedDelegate(object sender, int captureId, int value);
 
     public enum DebuggerStatus
     { 

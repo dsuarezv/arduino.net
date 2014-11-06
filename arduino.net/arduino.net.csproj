@@ -44,6 +44,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\FastColoredTextBox\src\bin\Debug\FastColoredTextBox.dll</HintPath>
     </Reference>
+    <Reference Include="OxyPlot, Version=0.0.0.0, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL" />
+    <Reference Include="OxyPlot.Wpf, Version=0.0.0.0, Culture=neutral, PublicKeyToken=75e952ba404cdbb0, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\oxyplot\lib\OxyPlot.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -70,6 +75,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CaptureMonitorControl.xaml.cs">
+      <DependentUpon>CaptureMonitorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CapturePointsPad.xaml.cs">
+      <DependentUpon>CapturePointsPad.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SelectionAdapters.cs" />
     <Compile Include="FontManager.cs" />
     <Compile Include="MemoryDumpPad.xaml.cs">
@@ -101,6 +112,14 @@
     <Compile Include="WatchesPad.xaml.cs">
       <DependentUpon>WatchesPad.xaml</DependentUpon>
     </Compile>
+    <Page Include="CaptureMonitorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CapturePointsPad.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CodeTextBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

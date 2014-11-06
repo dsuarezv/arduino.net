@@ -44,11 +44,11 @@ namespace arduino.net
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
                 IdeManager.WatchManager = new WatchManager(IdeManager.Debugger);
+                IdeManager.CapturePointManager = new CapturePointManager(IdeManager.Debugger);
 
                 //CreateEmptyProject();
                 OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
                 
-
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
                 
                 UpdateBoardUi();
