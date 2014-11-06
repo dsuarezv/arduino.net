@@ -13,23 +13,26 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace arduino.net
+namespace arduino.net.CaptureMonitors
 {
     /// <summary>
-    /// Interaction logic for CapturePointsPad.xaml
+    /// Interaction logic for BasicCaptureMonitor.xaml
     /// </summary>
-    public partial class CapturePointsPad : UserControl
+    public partial class BasicCaptureMonitor : UserControl, ICaptureMonitor
     {
-        
-
-        public CapturePointsPad()
+        public BasicCaptureMonitor()
         {
             InitializeComponent();
         }
 
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        public string MonitorName
         {
-            MainListBox.ItemsSource = IdeManager.CapturePointManager.CapturePoints;
+            get { return "Basic"; }
+        }
+
+        public void Setup(CapturePointInfo capture)
+        {
+            DataContext = capture;
         }
     }
 }

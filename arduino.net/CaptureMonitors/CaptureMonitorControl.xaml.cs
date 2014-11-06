@@ -12,8 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using OxyPlot;
-using OxyPlot.Series;
+using arduino.net;
 
 namespace arduino.net
 {
@@ -38,19 +37,11 @@ namespace arduino.net
             InitializeComponent();
         }
 
-        protected virtual void SetupTarget(CapturePointInfo capture)
+        private void SetupTarget(CapturePointInfo capture)
         {
             this.DataContext = capture;
 
-            if (capture == null) return;
-
-            var serie = new LineSeries();
-            serie.ItemsSource = capture.Values;
-
-            var model = new PlotModel() { Title = capture.SymbolToTrace };
-            model.Series.Add(serie);
-
-            //MainPlot.Model = model;
+            
         }
     }
 }

@@ -13,23 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace arduino.net
+namespace Ide.Wpf.DefaultCaptures
 {
     /// <summary>
-    /// Interaction logic for CapturePointsPad.xaml
+    /// Interaction logic for ChartCaptureMonitor.xaml
     /// </summary>
-    public partial class CapturePointsPad : UserControl
+    public partial class ChartCaptureMonitor : UserControl
     {
-        
-
-        public CapturePointsPad()
+        public ChartCaptureMonitor()
         {
             InitializeComponent();
-        }
-
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            MainListBox.ItemsSource = IdeManager.CapturePointManager.CapturePoints;
         }
     }
 }
