@@ -23,7 +23,7 @@
                     Add any captures by calling DbgCaptureValue(id, value) in your arduino sketch (DEVELOPMENT ONLY).
                 </TextBlock>
                 
-                <ListBox Name="MainListBox" BorderThickness="0" Background="Transparent" Padding="0">
+                <ListBox Name="MainListBox" BorderThickness="0" Background="Transparent" Padding="0" HorizontalContentAlignment="Stretch">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Grid>

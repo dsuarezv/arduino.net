@@ -12,11 +12,11 @@ namespace arduino.net
     [Serializable]
     public class CapturePointInfo : INotifyPropertyChanged 
     {
-        private ObservableCollection<int> mValues = new ObservableCollection<int>();
+        private ObservableCollection<CaptureData> mValues = new ObservableCollection<CaptureData>();
         private string mSymbolToTrace;
         private string mName;
         private int mId;
-        private int mLastValue;
+        private CaptureData mLastValue;
 
         
         public event PropertyChangedEventHandler PropertyChanged;
@@ -28,7 +28,7 @@ namespace arduino.net
             private set { mId = value; }
         }
 
-        public ObservableCollection<int> Values 
+        public ObservableCollection<CaptureData> Values 
         {
             get { return mValues; }
         }
@@ -43,7 +43,7 @@ namespace arduino.net
             set { mName = value; OnPropertyChanged("Name"); }
         }
 
-        public int LastValue
+        public CaptureData LastValue
         {
             get { return mLastValue; }
             set { mLastValue = value; OnPropertyChanged("LastValue"); }
@@ -58,8 +58,9 @@ namespace arduino.net
 
         public void AddValue(int value)
         {
-            Values.Add(value);
-            LastValue = value;
+            var c = new CaptureData() { Value = value, TimeStamp = DateTime.Now };
+            Values.Add(c);
+            LastValue = c;
         }
         
 
@@ -69,5 +70,11 @@ namespace arduino.net
 
             PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
+    }
+
+    public class CaptureData
+    {
+        public int Value { get; set; }
+        public DateTime TimeStamp { get; set; }
     }
 }

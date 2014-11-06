@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace arduino.net.CaptureMonitors
+namespace arduino.net
 {
     /// <summary>
     /// Interaction logic for BasicCaptureMonitor.xaml

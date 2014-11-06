@@ -464,6 +464,11 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="CaptureTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource B1-Text}"/>
+        </Style>
 
 
 

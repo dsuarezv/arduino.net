@@ -20,11 +20,11 @@ namespace arduino.net
     /// </summary>
     public partial class CapturePointsPad : UserControl
     {
-        
-
         public CapturePointsPad()
         {
             InitializeComponent();
+
+            CaptureMonitorFactory.RegisterCaptureMonitorControl(typeof(BasicCaptureMonitor));
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)

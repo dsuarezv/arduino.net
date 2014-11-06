@@ -7,12 +7,10 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <Border Height="30" Margin="0,0,0,15" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="2" BorderBrush="{DynamicResource C1}" CornerRadius="4" >
-            <TextBlock Margin="10,0" TextWrapping="Wrap" Text="{Binding SymbolToTrace}" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
-        </Border>
-        <Grid Name="Container" Margin="0,45,0,0" />
 
+        <TextBlock Name="TitleTextBlock" Height="30" TextWrapping="Wrap" Text="{Binding SymbolToTrace}" VerticalAlignment="Top" HorizontalAlignment="Stretch" Style="{DynamicResource CaptureTitleStyle}" />
 
+        <Grid Name="Container" Margin="0,30,0,0" />
 
     </Grid>
 </UserControl>

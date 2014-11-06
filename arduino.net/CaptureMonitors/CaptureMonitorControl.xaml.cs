@@ -25,7 +25,7 @@ namespace arduino.net
         public CapturePointInfo Target
         {
             get { return (CapturePointInfo)GetValue(TargetProperty); }
-            set { SetValue(TargetProperty, value); SetupTarget(value); }
+            set { SetValue(TargetProperty, value); }
         }
 
 
@@ -41,7 +41,19 @@ namespace arduino.net
         {
             this.DataContext = capture;
 
-            
+            var c = CaptureMonitorFactory.CreateInstance("Chart") as UIElement;
+            if (c == null) return;
+
+            ((ICaptureMonitor)c).Setup(capture);
+
+            Container.Children.Add(c);
+        }
+
+        protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+        {
+            base.OnPropertyChanged(e);
+
+            if (e.Property == TargetProperty) SetupTarget(Target);
         }
     }
 }

@@ -55,16 +55,20 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Ide.Wpf.Captures\Ide.Wpf.Captures.csproj">
-      <Project>{f99edddc-c7a6-4e7c-acd5-cd94a4b3d719}</Project>
-      <Name>Ide.Wpf.Captures</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Page Include="ChartCaptureMonitor.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\arduino.net\arduino.net.csproj">
+      <Project>{0986f160-80ea-4031-9f48-67c65d6cb2d1}</Project>
+      <Name>arduino.net</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Ide.Backend\Ide.Backend.csproj">
+      <Project>{4cb8f184-05ff-4cc9-9cd6-41f68589a5b3}</Project>
+      <Name>Ide.Backend</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

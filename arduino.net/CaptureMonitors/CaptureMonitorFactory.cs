@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.IO;
 
 namespace arduino.net
 {
@@ -19,11 +20,12 @@ namespace arduino.net
         }
 
 
-        public static void RegisterCaptureAssembly(string assemblyName)
+        public static void RegisterCaptureAssembly(string assemblyFileName)
         {
             try
-            { 
-                var a = Assembly.LoadFile(assemblyName);
+            {
+                var fullPath = Path.GetFullPath(assemblyFileName);
+                var a = Assembly.LoadFile(fullPath);
 
                 foreach (var c in a.GetTypes())
                 {
@@ -36,6 +38,7 @@ namespace arduino.net
         public static void RegisterCaptureMonitorControl(Type captureMonitorClass)
         {
             if (!IsValidCapturerType(captureMonitorClass)) return;
+            if (mMonitors.ContainsValue(captureMonitorClass)) return;
 
             var instance = CreateInstance(captureMonitorClass);
             if (instance == null) return;
@@ -49,6 +52,7 @@ namespace arduino.net
 
             return CreateInstance(mMonitors[captureMonitorName]);
         }
+
 
         private static ICaptureMonitor CreateInstance(Type capturerType)
         {
