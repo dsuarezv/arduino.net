@@ -38,7 +38,7 @@ namespace arduino.net
             InitializeComponent();
         }
 
-        private void SetupTarget(CapturePointInfo capture)
+        protected virtual void SetupTarget(CapturePointInfo capture)
         {
             this.DataContext = capture;
 

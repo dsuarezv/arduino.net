@@ -6,7 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         mc:Ignorable="d" 
         x:Class="arduino.net.MainWindow"
-        Title="ArduinoIDE.net" Height="900" Width="1000"
+        Title="ArduinoIDE.net" Height="900" Width="1200"
         WindowStyle="SingleBorderWindow" 
         ResizeMode="CanResizeWithGrip" 
         Icon="arduino-icon2.ico"
@@ -61,7 +61,7 @@
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="280"/>
                     </Grid.ColumnDefinitions>
                     
                     <TabControl Grid.Column="0" Name="OpenFilesTab" Margin="0, 0, 2, 0" Background="{StaticResource B0}" BorderBrush="{x:Null}" Padding="0"/>

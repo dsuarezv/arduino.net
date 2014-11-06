@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,37 +9,65 @@ using System.Windows;
 
 namespace arduino.net
 {
-    public class CapturePointInfo : DependencyObject
+    [Serializable]
+    public class CapturePointInfo : INotifyPropertyChanged 
     {
-        public int Id { get; private set; }
+        private ObservableCollection<int> mValues = new ObservableCollection<int>();
+        private string mSymbolToTrace;
+        private string mName;
+        private int mId;
+        private int mLastValue;
 
-        public ObservableCollection<int> Values { get; private set; }
+        
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        public string SymbolToTrace { get; private set; }
 
-        public string Name { get; set; }
+        public int Id
+        {
+            get { return mId; }
+            private set { mId = value; }
+        }
+
+        public ObservableCollection<int> Values 
+        {
+            get { return mValues; }
+        }
+
+        public string SymbolToTrace 
+        { 
+            get { return mSymbolToTrace; }
+        }
+
+        public string Name { 
+            get { return mName; }
+            set { mName = value; OnPropertyChanged("Name"); }
+        }
 
         public int LastValue
         {
-            get { return (int)GetValue(LastValueProperty); }
-            set { SetValue(LastValueProperty, value); }
-        }
-
-
-        public static readonly DependencyProperty LastValueProperty = DependencyProperty.Register("LastValue", typeof(int), typeof(CapturePointInfo));
+            get { return mLastValue; }
+            set { mLastValue = value; OnPropertyChanged("LastValue"); }
+        }        
 
 
         public CapturePointInfo(string symbolToTrace, int id)
         {
-            Values = new ObservableCollection<int>();
-            SymbolToTrace = symbolToTrace;
-            Id = id;
+            mSymbolToTrace = symbolToTrace;
+            mId = id;
         }
 
         public void AddValue(int value)
         {
             Values.Add(value);
             LastValue = value;
+        }
+        
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged == null) return;
+
+            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

@@ -31,7 +31,7 @@ namespace arduino.net
 
             // Not found, create new anonymous control point
 
-            var newCp = new CapturePointInfo("", captureId);
+            var newCp = new CapturePointInfo("Anonymous capture", captureId);
             newCp.AddValue(value);
 
             mCapturePoints.Add(newCp);
