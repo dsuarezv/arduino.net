@@ -1,11 +1,15 @@
 ﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="clr-namespace:arduino.net" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:local="clr-namespace:arduino.net" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-        mc:Ignorable="d" x:Class="arduino.net.MainWindow"
+        mc:Ignorable="d" 
+        x:Class="arduino.net.MainWindow"
         Title="ArduinoIDE.net" Height="900" Width="1000"
-        WindowStyle="SingleBorderWindow" ResizeMode="CanResizeWithGrip" Icon="arduino-icon2.ico"
+        WindowStyle="SingleBorderWindow" 
+        ResizeMode="CanResizeWithGrip" 
+        Icon="arduino-icon2.ico"
         Loaded="Window_Loaded" 
         Closing="Window_Closing">
     <Grid Width="auto">
@@ -23,7 +27,7 @@
                 <Button x:Name="DeployButton" Content="Deploy" Click="DeployButton_Click" Template="{DynamicResource HeaderRoundButton}" Margin="81,0.272,0,-0.272" Width="76" Height="76" FontSize="16" HorizontalAlignment="Left"/>
                 <Button x:Name="RunButton" Content="Run" Click="RunButton_Click" Template="{DynamicResource HeaderRoundButton}" Height="47" Margin="165.404,0,0,0" VerticalAlignment="Top" Width="47" FontSize="13" HorizontalAlignment="Left" IsEnabled="False"/>
                 <Button x:Name="StopButton" Content="Stop" Click="StopButton_Click" IsEnabled="False" Template="{DynamicResource HeaderRoundButton}" Height="47" Margin="219.831,0,0,0" FontSize="13" VerticalAlignment="Top" Width="47" HorizontalAlignment="Left"/>
-                <local:StatusHeaderControl x:Name="StatusControl" Margin="272,1,285,-1"/>
+                <local:StatusHeaderControl x:Name="StatusControl" Margin="272,0,285,0"/>
                 <CheckBox x:Name="DebuggerCheckbox" Content="Debugger" HorizontalAlignment="Left" Margin="156,60,0,0" Template="{DynamicResource HeaderCheckbox}" Width="79" Checked="DebuggerCheckbox_Checked" Unchecked="DebuggerCheckbox_Unchecked" Height="16" VerticalAlignment="Top"/>
                 
                 <Button Name="SelectBoardButton" Content="Board" Click="SelectBoardButton_Click" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="280" Style="{DynamicResource HeaderSelectionButtonStyle}" />
@@ -60,7 +64,7 @@
                         <ColumnDefinition Width="200"/>
                     </Grid.ColumnDefinitions>
                     
-                    <TabControl Grid.Column="0" Name="OpenFilesTab" Margin="0" Background="{StaticResource B0}" BorderBrush="{x:Null}" Padding="0"/>
+                    <TabControl Grid.Column="0" Name="OpenFilesTab" Margin="0, 0, 2, 0" Background="{StaticResource B0}" BorderBrush="{x:Null}" Padding="0"/>
                     <GridSplitter Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Stretch" Background="{StaticResource C0}" ShowsPreview="True" Width="2"/>
                     <local:CapturePointsPad Grid.Column="1" Margin="0"/>
                 </Grid>

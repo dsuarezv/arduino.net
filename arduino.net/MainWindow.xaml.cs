@@ -39,12 +39,14 @@ namespace arduino.net
 
                 ProjectPad1.TargetTabControl = OpenFilesTab;
 
+                IdeManager.CapturePointManager = new CapturePointManager();
                 IdeManager.Debugger = new Debugger();
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
+                IdeManager.Debugger.CaptureReceived += Debugger_CaptureReceived;
                 IdeManager.WatchManager = new WatchManager(IdeManager.Debugger);
-                IdeManager.CapturePointManager = new CapturePointManager(IdeManager.Debugger);
+                
 
                 //CreateEmptyProject();
                 OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
@@ -58,6 +60,7 @@ namespace arduino.net
                 DisplayException(ex);
             }
         }
+
 
         private string Configuration_PropertyValueRequired(string propertyName)
         {
@@ -475,6 +478,17 @@ namespace arduino.net
             Dispatcher.Invoke(() =>
             {
                 WatchesPad1.UpdateWatches();
+            });
+        }
+
+        private void Debugger_CaptureReceived(object sender, int captureId, int value)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                // Have to call this on the main thread. 
+                // Otherwise, DependencyObjects and ObservableCollections
+                // throw an expcetion if updated.
+                IdeManager.CapturePointManager.RecordCapture(captureId, value);
             });
         }
         

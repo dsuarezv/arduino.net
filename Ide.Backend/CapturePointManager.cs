@@ -18,15 +18,7 @@ namespace arduino.net
             get { return mCapturePoints; }
         }
 
-        public CapturePointManager(Debugger debugger)
-        {
-            if (debugger == null) throw new ArgumentException("Debugger cannot be null");
-            
-            mDebugger = debugger;
-            mDebugger.CaptureReceived += Debugger_CaptureReceived;
-        }
-
-        private void Debugger_CaptureReceived(object sender, int captureId, int value)
+        public void RecordCapture(int captureId, int value)
         {
             foreach (var cp in mCapturePoints)
             { 

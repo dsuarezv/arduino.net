@@ -38,7 +38,7 @@ namespace arduino.net
         public void AddValue(int value)
         {
             Values.Add(value);
-            //LastValue = value;
+            LastValue = value;
         }
     }
 }
