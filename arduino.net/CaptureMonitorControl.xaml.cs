@@ -39,7 +39,9 @@ namespace arduino.net
         }
 
         private void SetupTarget(CapturePointInfo capture)
-        { 
+        {
+            this.DataContext = capture;
+
             if (capture == null) return;
 
             var serie = new LineSeries();

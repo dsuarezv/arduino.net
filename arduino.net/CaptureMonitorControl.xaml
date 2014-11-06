@@ -7,8 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <TextBlock Text="Hola" />
-        <TextBlock TextWrapping="Wrap" Height="33" VerticalAlignment="Top" Margin="0,34,0,0" HorizontalAlignment="Center" Text="{Binding ElementName=Target, Path=SymbolToTrace}"/>
-        <TextBlock TextWrapping="Wrap" Height="33" VerticalAlignment="Top" Margin="0,0,0,0" HorizontalAlignment="Center" Text="{Binding ElementName=Target, Path=LastValue}"/>
+        <TextBlock TextWrapping="Wrap" Height="33" VerticalAlignment="Top" Margin="0,0,0,0" HorizontalAlignment="Center" Text="{Binding SymbolToTrace}"/>
+        <TextBlock TextWrapping="Wrap" Height="33" VerticalAlignment="Top" Margin="0,34,0,0" HorizontalAlignment="Center" Text="{Binding LastValue}"/>
     </Grid>
 </UserControl>

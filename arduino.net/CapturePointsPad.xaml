@@ -13,7 +13,7 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
-                            <net:CaptureMonitorControl />
+                            <net:CaptureMonitorControl Target="{Binding}" />
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
