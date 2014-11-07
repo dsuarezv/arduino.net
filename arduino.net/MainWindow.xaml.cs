@@ -162,6 +162,8 @@ namespace arduino.net
                         var success = await LaunchDeploy();
                         if (!success) break;
                     }
+#else
+                    UpdateDwarf();
 #endif
 
                     if (IsDebugBuild())
