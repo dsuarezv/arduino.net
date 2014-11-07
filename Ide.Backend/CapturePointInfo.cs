@@ -56,9 +56,8 @@ namespace arduino.net
             mId = id;
         }
 
-        public void AddValue(int value)
+        public void AddValue(CaptureData c)
         {
-            var c = new CaptureData() { Value = value, TimeStamp = DateTime.Now };
             Values.Add(c);
             LastValue = c;
         }
@@ -74,6 +73,7 @@ namespace arduino.net
 
     public class CaptureData
     {
+        public int Id { get; set; }
         public int Value { get; set; }
         public DateTime TimeStamp { get; set; }
     }

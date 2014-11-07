@@ -21,9 +21,6 @@ using OxyPlot.Series;
 
 namespace Ide.Wpf.DefaultCaptures
 {
-    /// <summary>
-    /// Interaction logic for ChartCaptureMonitor.xaml
-    /// </summary>
     public partial class ChartCaptureMonitor : UserControl, ICaptureMonitor
     {
         private PlotModel mModel;
@@ -73,7 +70,7 @@ namespace Ide.Wpf.DefaultCaptures
             mModel = new PlotModel();
             mModel.Axes.Add(new DateTimeAxis() { Position = AxisPosition.Bottom });
             mModel.Axes.Add(new LinearAxis() { Position = AxisPosition.Left });
-            mModel.Series.Add(new LineSeries() { Color = OxyColor.FromUInt32(0xFF45AEA9) });
+            mModel.Series.Add(new LineSeries() { Color = OxyColor.FromUInt32(0xFF2c333d) });
 
             MainPlot.Model = mModel;
         }

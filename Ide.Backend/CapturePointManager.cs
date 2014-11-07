@@ -18,21 +18,21 @@ namespace arduino.net
             get { return mCapturePoints; }
         }
 
-        public void RecordCapture(int captureId, int value)
+        public void RecordCapture(CaptureData data)
         {
             foreach (var cp in mCapturePoints)
             { 
-                if (cp.Id == captureId)
+                if (cp.Id == data.Id)
                 {
-                    cp.AddValue(value);
+                    cp.AddValue(data);
                     return;
                 }
             }
 
             // Not found, create new anonymous control point
 
-            var newCp = new CapturePointInfo("Anonymous capture", captureId);
-            newCp.AddValue(value);
+            var newCp = new CapturePointInfo("Anonymous capture", data.Id);
+            newCp.AddValue(data);
 
             mCapturePoints.Add(newCp);
         }

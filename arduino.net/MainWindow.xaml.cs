@@ -46,14 +46,14 @@ namespace arduino.net
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
-                IdeManager.Debugger.CaptureReceived += Debugger_CaptureReceived;
                 IdeManager.WatchManager = new WatchManager(IdeManager.Debugger);
                 
 
                 //CreateEmptyProject();
                 OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
                 
-                ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
+                Task.Factory.StartNew(Debugger_SerialCharWorker);
+                Task.Factory.StartNew(Debugger_CapturesWorker);
                 
                 UpdateBoardUi();
             }
@@ -478,18 +478,24 @@ namespace arduino.net
             });
         }
 
-        private void Debugger_CaptureReceived(object sender, int captureId, int value)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                // Have to call this on the main thread. 
-                // Otherwise, DependencyObjects and ObservableCollections
-                // throw an expcetion if updated.
-                IdeManager.CapturePointManager.RecordCapture(captureId, value);
-            });
-        }
         
-        private void Debugger_SerialCharWorker(object state)
+        private void Debugger_CapturesWorker()
+        {
+            try
+            { 
+                foreach (var c in IdeManager.Debugger.ReceivedCapturesQueue.GetConsumingEnumerable())
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        IdeManager.CapturePointManager.RecordCapture(c);
+                    });
+                }
+            }
+            catch (OperationCanceledException)
+            { }
+        }
+
+        private void Debugger_SerialCharWorker()
         {
             const int BufLen = 100;
             var queue = IdeManager.Debugger.ReceivedCharsQueue;
@@ -499,7 +505,7 @@ namespace arduino.net
             {
                 int bufIdx = 0;
 
-                while (queue.Count > 0 && bufIdx < BufLen)
+                while (!queue.IsEmpty && bufIdx < BufLen)
                 {
                     byte b;
                     if (!queue.TryDequeue(out b)) break;
