@@ -73,7 +73,7 @@ namespace Ide.Wpf.DefaultCaptures
             mModel = new PlotModel();
             mModel.Axes.Add(new DateTimeAxis() { Position = AxisPosition.Bottom });
             mModel.Axes.Add(new LinearAxis() { Position = AxisPosition.Left });
-            mModel.Series.Add(new LineSeries());
+            mModel.Series.Add(new LineSeries() { Color = OxyColor.FromUInt32(0xFF45AEA9) });
 
             MainPlot.Model = mModel;
         }

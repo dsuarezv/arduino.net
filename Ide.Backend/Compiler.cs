@@ -139,7 +139,7 @@ namespace arduino.net
                 if (!Build(boardName, debug)) return false;
             }
 
-            IdeManager.Debugger.Detach();
+            IdeManager.Debugger.Stop();
 
             var deployCmds = CreateDeployCommands(tempDir, programmerName);
 

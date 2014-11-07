@@ -145,15 +145,11 @@ namespace arduino.net
         {
             if (!RunButton.IsEnabled) return;
 
-            // This should be moved to the debugger: Run();
-            // Only problem is the clearEditorActiveLine and SetStatus calls that belong here.
-
             switch (IdeManager.Debugger.Status)
             {
                 case DebuggerStatus.Break:
                     ClearEditorActiveLine();
-                    IdeManager.Debugger.TargetContinue();
-                    StatusControl.SetState(ActionStatus.Info, "Debugger", "Arduino running...");
+                    IdeManager.Debugger.Run();
                     break;
 
                 case DebuggerStatus.Running:
@@ -171,9 +167,7 @@ namespace arduino.net
                     if (IsDebugBuild())
                     {
                         IdeManager.Debugger.ComPort = Configuration.CurrentComPort;
-                        IdeManager.Debugger.Attach();
-                        IdeManager.Debugger.TargetContinue();
-                        StatusControl.SetState(ActionStatus.Info, "Debugger", "Arduino running...");
+                        IdeManager.Debugger.Run();
                     }
                     break;
             }
@@ -181,9 +175,8 @@ namespace arduino.net
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
-            IdeManager.Debugger.Detach();
+            IdeManager.Debugger.Stop();
             ClearEditorActiveLine();
-            StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger dettached from Arduino.");
         }
 
         private void SelectBoardButton_Click(object sender, RoutedEventArgs e)
@@ -334,19 +327,7 @@ namespace arduino.net
 
             if (result)
             {
-                if (debug)
-                {
-                    var elfFile = compiler.GetElfFile();
-
-                    ProjectPad1.OpenContent("Sketch dissasembly",
-                        ObjectDumper.GetSingleString(
-                            ObjectDumper.GetDisassemblyWithSource(elfFile)), ".disassembly");
-
-                    ProjectPad1.OpenContent("Symbol table",
-                        ObjectDumper.GetSingleString(
-                            ObjectDumper.GetNmSymbolTable(elfFile)), ".symboltable");
-                }
-
+                //OpenDisassemblyAfterBuild();
                 StatusControl.SetState(ActionStatus.OK, "Compiler", "Build succeeded");
             }
             else
@@ -355,6 +336,21 @@ namespace arduino.net
             }
 
             return result;
+        }
+
+        private void OpenDisassemblyAfterBuild()
+        {
+            if (!IsDebugBuild()) return;
+
+            var elfFile = IdeManager.Compiler.GetElfFile();
+
+            ProjectPad1.OpenContent("Sketch dissasembly",
+                ObjectDumper.GetSingleString(
+                    ObjectDumper.GetDisassemblyWithSource(elfFile)), ".disassembly");
+
+            ProjectPad1.OpenContent("Symbol table",
+                ObjectDumper.GetSingleString(
+                    ObjectDumper.GetNmSymbolTable(elfFile)), ".symboltable");
         }
 
         private async Task<bool> LaunchDeploy()
@@ -421,7 +417,6 @@ namespace arduino.net
         {
             Dispatcher.Invoke( () =>
             {
-                // Update UI, what buttons are enabled and disabled.
                 switch (newState)
                 { 
                     case DebuggerStatus.Stopped:
@@ -431,6 +426,7 @@ namespace arduino.net
                         RunButton.IsEnabled = true;
                         DeployButton.IsEnabled = true;
                         DebuggerCheckbox.IsEnabled = true;
+                        StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger dettached from Arduino.");
                         break;
                     case DebuggerStatus.Running:
                         ProjectPad1.SetAllDocumentsReadOnly(true);
@@ -439,6 +435,7 @@ namespace arduino.net
                         RunButton.IsEnabled = false;
                         DeployButton.IsEnabled = false;
                         DebuggerCheckbox.IsEnabled = false;
+                        StatusControl.SetState(ActionStatus.Info, "Debugger", "Arduino running...");
                         break;
                     case DebuggerStatus.Break:
                         ProjectPad1.SetAllDocumentsReadOnly(true);
@@ -474,8 +471,6 @@ namespace arduino.net
             });
 
             UpdateDwarf();
-
-
 
             Dispatcher.Invoke(() =>
             {

@@ -75,13 +75,39 @@ namespace arduino.net
         }
 
 
+        // __ Public API ______________________________________________________
+
 
         public string[] GetAvailableComPorts()
         {
             return SerialPort.GetPortNames();
         }
 
-        public void Attach()
+        public void Run()
+        {
+            switch (Status)
+            {
+                case DebuggerStatus.Break:
+                    TargetContinue();
+                    break;
+
+                case DebuggerStatus.Running:
+                    break;
+
+                case DebuggerStatus.Stopped:
+                    IdeManager.Debugger.Attach();
+                    IdeManager.Debugger.TargetContinue();
+                    break;
+            }
+        }
+
+        public void Stop()
+        {
+            Detach();
+        }
+
+
+        private void Attach()
         {
             if (mSerialPort != null) return;
 
@@ -91,7 +117,7 @@ namespace arduino.net
             LaunchReadingThread();
         }
 
-        public void Detach()
+        private void Detach()
         {
             SetStatus(DebuggerStatus.Stopped);
 
@@ -142,7 +168,7 @@ namespace arduino.net
             return mTraceQueryBuffer;
         }
 
-        public void TargetContinue()
+        private void TargetContinue()
         {
             if (mSerialPort == null) Attach();
 
