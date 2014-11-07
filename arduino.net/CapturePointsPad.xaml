@@ -19,7 +19,7 @@
                 <TextBlock TextWrapping="Wrap" 
                            VerticalAlignment="Top"
                            Foreground="{DynamicResource B1-Text}"
-                           Margin="0,5">
+                           Margin="0,5" Visibility="Collapsed">
                     Add any captures by calling DbgCaptureValue(id, value) in your arduino sketch (DEVELOPMENT ONLY).
                 </TextBlock>
                 

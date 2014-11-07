@@ -31,7 +31,7 @@ namespace Ide.Wpf.DefaultCaptures
 
         public ChartCaptureMonitor()
         {
-            MaxNumberOfDataPoints = 10;
+            MaxNumberOfDataPoints = 100;
 
             InitializeComponent();
         }
