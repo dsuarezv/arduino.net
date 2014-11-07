@@ -37,7 +37,7 @@ namespace arduino.net
                 //var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
                 //var sketch = @"C:\Users\dave\Documents\develop\Arduino\ArduinoMotionSensorExample\ArduinoMotionSensorExample.ino";
 
-                CaptureMonitorFactory.RegisterCaptureAssembly(@"..\..\Ide.Wpf.DefaultCaptures\bin\Debug\Ide.Wpf.DefaultCaptures.dll");
+                CaptureMonitorFactory.RegisterCaptureAssembly(@"Ide.Wpf.DefaultCaptures.dll");
 
                 ProjectPad1.TargetTabControl = OpenFilesTab;
 
