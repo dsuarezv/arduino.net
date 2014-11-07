@@ -134,6 +134,13 @@ namespace arduino.net
 
         public void Dispose()
         {
+            mReceivedCapturesQueue.Dispose();
+
+            DisposeSerial();
+        }
+
+        private void DisposeSerial()
+        {
             mSerialPort.Dispose();
             mSerialPort = null;
         }
@@ -210,7 +217,7 @@ namespace arduino.net
             }
             catch (Exception ex)
             {
-                Dispose();
+                DisposeSerial();
             }
         }
 
