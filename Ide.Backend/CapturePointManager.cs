@@ -20,9 +20,19 @@ namespace arduino.net
 
         public void RecordCaptures(IList<CaptureData> data)
         {
+            // Dispatch a list of captures to their control points. 
+
+            int lastCapturePointId = -1;
+            CapturePointInfo point = null;
+
             foreach (var cd in data)
             {
-                var point = GetCapturePoint(cd.Id);
+                if (cd.Id != lastCapturePointId)
+                { 
+                    point = GetCapturePoint(cd.Id);
+                    lastCapturePointId = cd.Id;
+                }
+                
                 point.BeginBulkAdd();
                 point.AddValue(cd);
             }

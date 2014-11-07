@@ -508,14 +508,6 @@ namespace arduino.net
 
                     Thread.Sleep(100);
                 }
-
-                //foreach (var c in IdeManager.Debugger.ReceivedCapturesQueue)
-                //{
-                //    Dispatcher.Invoke(() =>
-                //    {
-                //        IdeManager.CapturePointManager.RecordCapture(c);
-                //    });
-                //}
             }
             catch (OperationCanceledException)
             { }
