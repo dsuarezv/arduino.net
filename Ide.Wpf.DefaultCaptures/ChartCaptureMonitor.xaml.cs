@@ -24,6 +24,7 @@ namespace Ide.Wpf.DefaultCaptures
     public partial class ChartCaptureMonitor : UserControl, ICaptureMonitor
     {
         private PlotModel mModel;
+        private CapturePointInfo mCapturePoint;
 
 
         public int MaxNumberOfDataPoints { get; set; }
@@ -45,17 +46,20 @@ namespace Ide.Wpf.DefaultCaptures
         {
             SetupModel();
 
-            capture.Values.CollectionChanged += Values_CollectionChanged;
+            mCapturePoint = capture;
+
+            capture.NewValuesAdded += capture_NewValuesAdded;
         }
 
-        private void Values_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action != NotifyCollectionChangedAction.Add) return;
 
+        private void capture_NewValuesAdded(object sender, int beginIndex, int numItems)
+        {
             var s = mModel.Series[0] as LineSeries;
 
-            foreach (CaptureData cd in e.NewItems)
+            for (int i = beginIndex; i < beginIndex + numItems; ++i)
             {
+                var cd = mCapturePoint.Values[i];
+
                 s.Points.Add(new DataPoint(DateTimeAxis.ToDouble(cd.TimeStamp), cd.Value));
             }
 
@@ -70,7 +74,7 @@ namespace Ide.Wpf.DefaultCaptures
             mModel = new PlotModel();
             mModel.Axes.Add(new DateTimeAxis() { Position = AxisPosition.Bottom });
             mModel.Axes.Add(new LinearAxis() { Position = AxisPosition.Left });
-            mModel.Series.Add(new LineSeries() { Color = OxyColor.FromUInt32(0xFF2c333d) });
+            mModel.Series.Add(new LineSeries() { Color = OxyColor.FromUInt32(0xFFB7D1DE) });
 
             MainPlot.Model = mModel;
         }

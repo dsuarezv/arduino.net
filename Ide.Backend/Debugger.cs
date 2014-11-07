@@ -17,7 +17,7 @@ namespace arduino.net
         private BreakPointManager mBreakPoints = new BreakPointManager();
         private RegisterManager mRegisters = new RegisterManager();
         private ConcurrentQueue<byte> mReceivedCharsQueue = new ConcurrentQueue<byte>();
-        private BlockingCollection<CaptureData> mReceivedCapturesQueue = new BlockingCollection<CaptureData>(new ConcurrentQueue<CaptureData>());
+        private ConcurrentQueue<CaptureData> mReceivedCapturesQueue = new ConcurrentQueue<CaptureData>();
         private byte[] mTraceQueryBuffer;
         private DebuggerStatus mStatus = DebuggerStatus.Stopped;
         private BreakPointInfo mLastBreakPoint;
@@ -50,7 +50,7 @@ namespace arduino.net
             get { return mReceivedCharsQueue; }
         }
 
-        public BlockingCollection<CaptureData> ReceivedCapturesQueue
+        public ConcurrentQueue<CaptureData> ReceivedCapturesQueue
         {
             get { return mReceivedCapturesQueue; }
         }
@@ -134,8 +134,6 @@ namespace arduino.net
 
         public void Dispose()
         {
-            mReceivedCapturesQueue.Dispose();
-
             DisposeSerial();
         }
 
@@ -215,7 +213,7 @@ namespace arduino.net
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 DisposeSerial();
             }
@@ -342,7 +340,7 @@ namespace arduino.net
 
         private void OnTargetCaptureAnswer(int id, int value)
         {
-            mReceivedCapturesQueue.Add(new CaptureData() { TimeStamp = DateTime.Now, Id = id, Value = value });
+            mReceivedCapturesQueue.Enqueue(new CaptureData() { TimeStamp = DateTime.Now, Id = id, Value = value });
 
             if (CaptureReceived == null) return;
 

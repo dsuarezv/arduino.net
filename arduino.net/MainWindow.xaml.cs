@@ -481,15 +481,41 @@ namespace arduino.net
         
         private void Debugger_CapturesWorker()
         {
+            var queue = IdeManager.Debugger.ReceivedCapturesQueue;
+            var buffer = new List<CaptureData>();
+
             try
             { 
-                foreach (var c in IdeManager.Debugger.ReceivedCapturesQueue.GetConsumingEnumerable())
+                while(true)
                 {
-                    Dispatcher.Invoke(() =>
+                    buffer.Clear();
+
+                    while (!queue.IsEmpty)
                     {
-                        IdeManager.CapturePointManager.RecordCapture(c);
-                    });
+                        CaptureData data;
+                        if (!queue.TryDequeue(out data)) break;
+
+                        buffer.Add(data);
+                    }
+
+                    if (buffer.Count > 0)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            IdeManager.CapturePointManager.RecordCaptures(buffer);
+                        });
+                    }
+
+                    Thread.Sleep(100);
                 }
+
+                //foreach (var c in IdeManager.Debugger.ReceivedCapturesQueue)
+                //{
+                //    Dispatcher.Invoke(() =>
+                //    {
+                //        IdeManager.CapturePointManager.RecordCapture(c);
+                //    });
+                //}
             }
             catch (OperationCanceledException)
             { }

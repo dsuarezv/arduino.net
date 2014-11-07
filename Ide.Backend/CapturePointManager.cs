@@ -10,7 +10,6 @@ namespace arduino.net
     public class CapturePointManager
     {
         private int mNewCapturePointIndex = 100;
-        private Debugger mDebugger;
         private ObservableCollection<CapturePointInfo> mCapturePoints = new ObservableCollection<CapturePointInfo>();
 
         public ObservableCollection<CapturePointInfo> CapturePoints
@@ -18,23 +17,36 @@ namespace arduino.net
             get { return mCapturePoints; }
         }
 
+
+        public void RecordCaptures(IList<CaptureData> data)
+        {
+            foreach (var cd in data)
+            {
+                var point = GetCapturePoint(cd.Id);
+                point.BeginBulkAdd();
+                point.AddValue(cd);
+            }
+
+            foreach (var cp in mCapturePoints) cp.EndBulkAdd();
+        }
+
         public void RecordCapture(CaptureData data)
         {
+            GetCapturePoint(data.Id).AddValue(data);
+        }
+
+        private CapturePointInfo GetCapturePoint(int id)
+        {
             foreach (var cp in mCapturePoints)
-            { 
-                if (cp.Id == data.Id)
-                {
-                    cp.AddValue(data);
-                    return;
-                }
+            {
+                if (cp.Id == id) return cp;
             }
 
             // Not found, create new anonymous control point
-
-            var newCp = new CapturePointInfo("Anonymous capture", data.Id);
-            newCp.AddValue(data);
-
+            var newCp = new CapturePointInfo("Anonymous capture", id);
             mCapturePoints.Add(newCp);
+
+            return newCp;
         }
 
         private int GetNextCaptureId()
