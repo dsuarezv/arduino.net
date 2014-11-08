@@ -61,12 +61,12 @@
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="280"/>
+                        <ColumnDefinition Width="0" Name="CapturesPadColumn"/>
                     </Grid.ColumnDefinitions>
                     
                     <TabControl Grid.Column="0" Name="OpenFilesTab" Margin="0, 0, 2, 0" Background="{StaticResource B0}" BorderBrush="{x:Null}" Padding="0"/>
                     <GridSplitter Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Stretch" Background="{StaticResource C0}" ShowsPreview="True" Width="2"/>
-                    <local:CapturePointsPad Grid.Column="1" Margin="0"/>
+                    <local:CapturePointsPad x:Name="CapturesPad" Grid.Column="1" Margin="0" Width="280" />
                 </Grid>
                 
                 <GridSplitter Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Background="{StaticResource C0}" ShowsPreview="True" Height="2"/>

@@ -505,6 +505,8 @@ namespace arduino.net
                     {
                         Dispatcher.Invoke(() =>
                         {
+                            EnsureCapturesPadIsvisible();
+
                             IdeManager.CapturePointManager.RecordCaptures(buffer);
                         });
                     }
@@ -546,6 +548,11 @@ namespace arduino.net
 
                 Thread.Sleep(50);
             }
+        }
+
+        private void EnsureCapturesPadIsvisible()
+        {
+            CapturesPadColumn.Width = new GridLength(CapturesPad.Width);
         }
     }
 }
