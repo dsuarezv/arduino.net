@@ -16,8 +16,8 @@ namespace arduino.net
         private SerialPort mSerialPort;
         private BreakPointManager mBreakPoints = new BreakPointManager();
         private RegisterManager mRegisters = new RegisterManager();
-        private ObservableCollection<TracepointInfo> mTracePoints = new ObservableCollection<TracepointInfo>();
         private ConcurrentQueue<byte> mReceivedCharsQueue = new ConcurrentQueue<byte>();
+        private ConcurrentQueue<CaptureData> mReceivedCapturesQueue = new ConcurrentQueue<CaptureData>();
         private byte[] mTraceQueryBuffer;
         private DebuggerStatus mStatus = DebuggerStatus.Stopped;
         private BreakPointInfo mLastBreakPoint;
@@ -27,6 +27,7 @@ namespace arduino.net
         public event BreakPointDelegate BreakPointHit;
         public event ByteDelegate SerialCharReceived;
         public event StatusChangedDelegate StatusChanged;
+        public event CaptureAnswerReceivedDelegate CaptureReceived;
 
         public string ComPort
         {
@@ -49,14 +50,14 @@ namespace arduino.net
             get { return mReceivedCharsQueue; }
         }
 
+        public ConcurrentQueue<CaptureData> ReceivedCapturesQueue
+        {
+            get { return mReceivedCapturesQueue; }
+        }
+
         public BreakPointManager BreakPoints
         {
             get { return mBreakPoints; }
-        }
-
-        public ObservableCollection<TracepointInfo> TracePoints
-        {
-            get { return mTracePoints; }
         }
 
         public RegisterManager RegManager
@@ -80,13 +81,39 @@ namespace arduino.net
         }
 
 
+        // __ Public API ______________________________________________________
+
 
         public string[] GetAvailableComPorts()
         {
             return SerialPort.GetPortNames();
         }
 
-        public void Attach()
+        public void Run()
+        {
+            switch (Status)
+            {
+                case DebuggerStatus.Break:
+                    TargetContinue();
+                    break;
+
+                case DebuggerStatus.Running:
+                    break;
+
+                case DebuggerStatus.Stopped:
+                    IdeManager.Debugger.Attach();
+                    IdeManager.Debugger.TargetContinue();
+                    break;
+            }
+        }
+
+        public void Stop()
+        {
+            Detach();
+        }
+
+
+        private void Attach()
         {
             if (mSerialPort != null) return;
 
@@ -96,7 +123,7 @@ namespace arduino.net
             LaunchReadingThread();
         }
 
-        public void Detach()
+        private void Detach()
         {
             SetStatus(DebuggerStatus.Stopped);
 
@@ -107,10 +134,14 @@ namespace arduino.net
 
         public void Dispose()
         {
+            DisposeSerial();
+        }
+
+        private void DisposeSerial()
+        {
             mSerialPort.Dispose();
             mSerialPort = null;
         }
-
 
         public void TouchProjectFilesAffectedByDebugging(Project p)
         {
@@ -148,7 +179,7 @@ namespace arduino.net
             return mTraceQueryBuffer;
         }
 
-        public void TargetContinue()
+        private void TargetContinue()
         {
             if (mSerialPort == null) Attach();
 
@@ -184,7 +215,7 @@ namespace arduino.net
             }
             catch
             {
-                Dispose();
+                DisposeSerial();
             }
         }
 
@@ -194,13 +225,13 @@ namespace arduino.net
             Break = 253,
             TraceQuery = 250,
             TraceAnswer = 249,
+            CaptureAnswer = 248,
             Continue = 230
         }
 
         private void ProcessPacket(BinaryReader r)
         {
             byte b = r.ReadByte();
-            mDebuggerBytesCount++;
 
             if (b != 255)
             {
@@ -208,7 +239,9 @@ namespace arduino.net
                 return;
             }
 
-            DebuggerPacketType type = (DebuggerPacketType)r.ReadByte();
+            var typeByte = r.ReadByte();
+            DebuggerPacketType type = (DebuggerPacketType)typeByte;
+            mDebuggerBytesCount += 2;
 
             switch (type)
             {
@@ -231,8 +264,19 @@ namespace arduino.net
                     OnTargetTraceAnswer(memdump);
                     break;
 
-                default: 
+                case DebuggerPacketType.CaptureAnswer:
+                    int id = r.ReadByte();
+                    int value = r.ReadInt32();
+                    mDebuggerBytesCount += 5;
+                    OnTargetCaptureAnswer(id, value);
                     break;
+
+                default: 
+                    // It was not a packet for the debugger. Send to the char receiver the bytes consumed so far.
+                    OnSerialCharReceived(b);
+                    OnSerialCharReceived(typeByte);
+                    mDebuggerBytesCount -= 2;
+                    return;
             }
         }
 
@@ -294,14 +338,22 @@ namespace arduino.net
             mTraceQueryBuffer = memdump;
         }
 
+        private void OnTargetCaptureAnswer(int id, int value)
+        {
+            mReceivedCapturesQueue.Enqueue(new CaptureData() { TimeStamp = DateTime.Now, Id = id, Value = value });
+
+            if (CaptureReceived == null) return;
+
+            CaptureReceived(this, id, value);
+        }
+
         private void OnSerialCharReceived(byte b)
         {
             mReceivedCharsQueue.Enqueue(b);
 
-            if (SerialCharReceived != null) 
-            {
-                SerialCharReceived(this, b);
-            }
+            if (SerialCharReceived == null) return;
+
+            SerialCharReceived(this, b);
         }
 
 
@@ -330,6 +382,8 @@ namespace arduino.net
 
     public delegate void StatusChangedDelegate(object sender, DebuggerStatus newState);
     
+    public delegate void CaptureAnswerReceivedDelegate(object sender, int captureId, int value);
+
 
     public enum DebuggerStatus
     { 

@@ -89,6 +89,7 @@ namespace arduino.net
 
         private void RefreshMember(byte[] parentRawValue)
         {
+            if (parentRawValue == null) return;
             if (mMember == null || mMember.MemberType == null) return;
 
             mType = mMember.MemberType;

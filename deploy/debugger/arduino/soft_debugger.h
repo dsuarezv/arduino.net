@@ -15,6 +15,7 @@ extern "C" {
 
 void DbgConnect();
 void DbgBreak(uint8_t breakpointNo) __attribute__ ((noinline));
+void DbgCaptureValue(uint8_t captureId, uint32_t value) __attribute__ ((noinline));
 extern void DbgSaveRegisters() __attribute__ ((noinline));
 
 

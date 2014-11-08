@@ -22,8 +22,9 @@
 		<SolidColorBrush x:Key="B1" Color="#FFE5E5E5"/>
         <SolidColorBrush x:Key="B1-MouseOver" Color="#FFDCDCDC"/>
         <SolidColorBrush x:Key="B1-Highlight" Color="#FFC7BEBE"/>
+        <SolidColorBrush x:Key="B1-Text" Color="#FF3d444e"/>
 
-		<SolidColorBrush x:Key="B0-Text" Color="#FF3d444e"/>
+        <SolidColorBrush x:Key="B0-Text" Color="#FF3d444e"/>
 		<SolidColorBrush x:Key="C0-Text" Color="#FFF0F0F0"/>
 
 
@@ -371,7 +372,7 @@
         
         <Style x:Key="PadMenuButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
-            <Setter Property="Foreground" Value="{StaticResource B0-Text}"/>
+            <Setter Property="Foreground" Value="{StaticResource B1-Text}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -462,6 +463,11 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+        <Style x:Key="CaptureTitleStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource B1-Text}"/>
         </Style>
 
 

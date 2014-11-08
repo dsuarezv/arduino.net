@@ -13,6 +13,7 @@ namespace arduino.net
     {
         private BuildStage mBuildStage = BuildStage.NeedsBuild;
         private ObservableCollection<CompilerMsg> mCompilerErrors = new ObservableCollection<CompilerMsg>();
+        private List<string> mIncludePaths = new List<string>();
         private Project mProject;
         private Debugger mDebugger;
         private string mBoardName;
@@ -76,6 +77,7 @@ namespace arduino.net
             SetupBoardName(boardName);
 
             mCompilerErrors.Clear();
+            mIncludePaths.Clear();
 
             var debuggerCmds = CreateDebuggerCompileCommands(tempDir, debug);
             var projectCmds = CreateProjectCompileCommands(tempDir, debug);
@@ -139,7 +141,7 @@ namespace arduino.net
                 if (!Build(boardName, debug)) return false;
             }
 
-            IdeManager.Debugger.Detach();
+            IdeManager.Debugger.Stop();
 
             var deployCmds = CreateDeployCommands(tempDir, programmerName);
 
@@ -237,9 +239,9 @@ namespace arduino.net
 
                 switch (GetFileType(sourceFile))
                 {
-                    case FileType.Code: result.Add(new DebugBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, CopyToTmp = copyToTmp }); break;
-                    case FileType.Sketch: result.Add(new InoBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, FileExtensionOnTmp = ".cpp", CopyToTmp = copyToTmp }); break;
-                    case FileType.Assembler: result.Add(new AssemblerBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, CopyToTmp = false }); break;
+                    case FileType.Code: result.Add(new DebugBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, CopyToTmp = copyToTmp, AdditionalIncludePaths = mIncludePaths }); break;
+                    case FileType.Sketch: result.Add(new InoBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, FileExtensionOnTmp = ".cpp", CopyToTmp = copyToTmp, AdditionalIncludePaths = mIncludePaths }); break;
+                    case FileType.Assembler: result.Add(new AssemblerBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, CopyToTmp = false, AdditionalIncludePaths = mIncludePaths }); break;
                     default:
                         result.Add(new CopyBuildTarget() { SourceFile = sourceFile }); break;
                 }
@@ -250,10 +252,11 @@ namespace arduino.net
         private List<BuildTarget> CreateLibraryCompileCommands(string tempDir, List<BuildTarget> projectCmds, bool debug)
         {
             var result = new List<string>();
+            var libPaths = GetLibraryPaths(GetAllLibraryIncludes(projectCmds));
 
-            foreach (var libPath in GetLibraryPaths(GetAllLibraryIncludes(projectCmds)))
+            foreach (var libPath in libPaths)
             {
-                foreach (var cppFile in Directory.GetFiles(libPath, "*.c*", SearchOption.AllDirectories))
+                foreach (var cppFile in Directory.GetFiles(libPath, "*.c*", SearchOption.TopDirectoryOnly))
                 {
                     result.Add(cppFile);
                 }
@@ -404,8 +407,30 @@ namespace arduino.net
                 {
                     var libPath = Path.GetFullPath(Path.Combine(path, libName));
 
-                    if (Directory.Exists(libPath)) result.Add(libPath);
+                    if (Directory.Exists(libPath))
+                    {
+                        result.Add(libPath);
+                        result.AddRange(GetLibrarySubPaths(libPath));
+                    }
                 }
+            }
+
+            return result;
+        }
+
+        private static IList<string> GetLibrarySubPaths(string path)
+        {
+            List<string> result = new List<string>();
+
+            var subdirs = Directory.GetDirectories(path);
+
+            foreach (var dir in subdirs)
+            { 
+                var dirName = Path.GetFileName(dir).ToLower();
+                if (dirName == "examples") continue;
+
+                result.Add(dir);
+                result.AddRange(GetLibrarySubPaths(dir));
             }
 
             return result;

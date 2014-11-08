@@ -1,0 +1,38 @@
+﻿<UserControl xmlns:net="clr-namespace:arduino.net"  
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             x:Class="arduino.net.CapturePointsPad"
+             mc:Ignorable="d" 
+             Loaded="UserControl_Loaded"
+             d:DesignHeight="300" d:DesignWidth="300"
+             x:Name="TopControl">
+    <Grid Background="{DynamicResource B1}">
+        <Expander Header="Captures" IsExpanded="True" Style="{DynamicResource PadExpanderStyle}">
+            <StackPanel Margin="10, 0">
+                
+                <StackPanel.Resources>
+                    <BooleanToVisibilityConverter x:Key="boolVisibilityConv" />
+                </StackPanel.Resources>
+                
+                <TextBlock TextWrapping="Wrap" 
+                           VerticalAlignment="Top"
+                           Foreground="{DynamicResource B1-Text}"
+                           Margin="0,5" Visibility="Collapsed">
+                    Add any captures by calling DbgCaptureValue(id, value) in your arduino sketch (DEVELOPMENT ONLY).
+                </TextBlock>
+                
+                <ListBox Name="MainListBox" BorderThickness="0" Background="Transparent" Padding="0" HorizontalContentAlignment="Stretch">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <net:CaptureMonitorControl Target="{Binding}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </Expander>
+    </Grid>
+</UserControl>

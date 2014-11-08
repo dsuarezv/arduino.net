@@ -37,19 +37,24 @@ namespace arduino.net
                 //var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
                 //var sketch = @"C:\Users\dave\Documents\develop\Arduino\ArduinoMotionSensorExample\ArduinoMotionSensorExample.ino";
 
+                CaptureMonitorFactory.RegisterCaptureAssembly(@"Ide.Wpf.DefaultCaptures.dll");
+
                 ProjectPad1.TargetTabControl = OpenFilesTab;
 
+                IdeManager.CapturePointManager = new CapturePointManager();
                 IdeManager.Debugger = new Debugger();
                 IdeManager.Debugger.BreakPointHit += Debugger_BreakPointHit;
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
                 IdeManager.WatchManager = new WatchManager(IdeManager.Debugger);
-
-                //CreateEmptyProject();
-                OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
                 
 
-                ThreadPool.QueueUserWorkItem(new WaitCallback(Debugger_SerialCharWorker));
+                //CreateEmptyProject();
+                //OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
+                OpenProject(@"C:\Users\dave\Documents\develop\Arduino\mpu6050samples\MPU6050_raw\MPU6050_raw.ino");
+                
+                Task.Factory.StartNew(Debugger_SerialCharWorker);
+                Task.Factory.StartNew(Debugger_CapturesWorker);
                 
                 UpdateBoardUi();
             }
@@ -58,6 +63,7 @@ namespace arduino.net
                 DisplayException(ex);
             }
         }
+
 
         private string Configuration_PropertyValueRequired(string propertyName)
         {
@@ -140,15 +146,11 @@ namespace arduino.net
         {
             if (!RunButton.IsEnabled) return;
 
-            // This should be moved to the debugger: Run();
-            // Only problem is the clearEditorActiveLine and SetStatus calls that belong here.
-
             switch (IdeManager.Debugger.Status)
             {
                 case DebuggerStatus.Break:
                     ClearEditorActiveLine();
-                    IdeManager.Debugger.TargetContinue();
-                    StatusControl.SetState(ActionStatus.Info, "Debugger", "Arduino running...");
+                    IdeManager.Debugger.Run();
                     break;
 
                 case DebuggerStatus.Running:
@@ -161,14 +163,14 @@ namespace arduino.net
                         var success = await LaunchDeploy();
                         if (!success) break;
                     }
+#else
+                    UpdateDwarf();
 #endif
 
                     if (IsDebugBuild())
                     {
                         IdeManager.Debugger.ComPort = Configuration.CurrentComPort;
-                        IdeManager.Debugger.Attach();
-                        IdeManager.Debugger.TargetContinue();
-                        StatusControl.SetState(ActionStatus.Info, "Debugger", "Arduino running...");
+                        IdeManager.Debugger.Run();
                     }
                     break;
             }
@@ -176,9 +178,8 @@ namespace arduino.net
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
-            IdeManager.Debugger.Detach();
+            IdeManager.Debugger.Stop();
             ClearEditorActiveLine();
-            StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger dettached from Arduino.");
         }
 
         private void SelectBoardButton_Click(object sender, RoutedEventArgs e)
@@ -329,19 +330,7 @@ namespace arduino.net
 
             if (result)
             {
-                if (debug)
-                {
-                    var elfFile = compiler.GetElfFile();
-
-                    ProjectPad1.OpenContent("Sketch dissasembly",
-                        ObjectDumper.GetSingleString(
-                            ObjectDumper.GetDisassemblyWithSource(elfFile)), ".disassembly");
-
-                    ProjectPad1.OpenContent("Symbol table",
-                        ObjectDumper.GetSingleString(
-                            ObjectDumper.GetNmSymbolTable(elfFile)), ".symboltable");
-                }
-
+                //OpenDisassemblyAfterBuild();
                 StatusControl.SetState(ActionStatus.OK, "Compiler", "Build succeeded");
             }
             else
@@ -350,6 +339,21 @@ namespace arduino.net
             }
 
             return result;
+        }
+
+        private void OpenDisassemblyAfterBuild()
+        {
+            if (!IsDebugBuild()) return;
+
+            var elfFile = IdeManager.Compiler.GetElfFile();
+
+            ProjectPad1.OpenContent("Sketch dissasembly",
+                ObjectDumper.GetSingleString(
+                    ObjectDumper.GetDisassemblyWithSource(elfFile)), ".disassembly");
+
+            ProjectPad1.OpenContent("Symbol table",
+                ObjectDumper.GetSingleString(
+                    ObjectDumper.GetNmSymbolTable(elfFile)), ".symboltable");
         }
 
         private async Task<bool> LaunchDeploy()
@@ -416,7 +420,6 @@ namespace arduino.net
         {
             Dispatcher.Invoke( () =>
             {
-                // Update UI, what buttons are enabled and disabled.
                 switch (newState)
                 { 
                     case DebuggerStatus.Stopped:
@@ -426,6 +429,7 @@ namespace arduino.net
                         RunButton.IsEnabled = true;
                         DeployButton.IsEnabled = true;
                         DebuggerCheckbox.IsEnabled = true;
+                        StatusControl.SetState(ActionStatus.Info, "Debugger", "Debugger dettached from Arduino.");
                         break;
                     case DebuggerStatus.Running:
                         ProjectPad1.SetAllDocumentsReadOnly(true);
@@ -434,6 +438,7 @@ namespace arduino.net
                         RunButton.IsEnabled = false;
                         DeployButton.IsEnabled = false;
                         DebuggerCheckbox.IsEnabled = false;
+                        StatusControl.SetState(ActionStatus.Info, "Debugger", "Arduino running...");
                         break;
                     case DebuggerStatus.Break:
                         ProjectPad1.SetAllDocumentsReadOnly(true);
@@ -470,15 +475,48 @@ namespace arduino.net
 
             UpdateDwarf();
 
-
-
             Dispatcher.Invoke(() =>
             {
                 WatchesPad1.UpdateWatches();
             });
         }
+
         
-        private void Debugger_SerialCharWorker(object state)
+        private void Debugger_CapturesWorker()
+        {
+            var queue = IdeManager.Debugger.ReceivedCapturesQueue;
+            var buffer = new List<CaptureData>();
+
+            try
+            { 
+                while(true)
+                {
+                    buffer.Clear();
+
+                    while (!queue.IsEmpty)
+                    {
+                        CaptureData data;
+                        if (!queue.TryDequeue(out data)) break;
+
+                        buffer.Add(data);
+                    }
+
+                    if (buffer.Count > 0)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            IdeManager.CapturePointManager.RecordCaptures(buffer);
+                        });
+                    }
+
+                    Thread.Sleep(100);
+                }
+            }
+            catch (OperationCanceledException)
+            { }
+        }
+
+        private void Debugger_SerialCharWorker()
         {
             const int BufLen = 100;
             var queue = IdeManager.Debugger.ReceivedCharsQueue;
@@ -488,7 +526,7 @@ namespace arduino.net
             {
                 int bufIdx = 0;
 
-                while (queue.Count > 0 && bufIdx < BufLen)
+                while (!queue.IsEmpty && bufIdx < BufLen)
                 {
                     byte b;
                     if (!queue.TryDequeue(out b)) break;
