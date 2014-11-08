@@ -384,6 +384,7 @@ namespace arduino.net
     
     public delegate void CaptureAnswerReceivedDelegate(object sender, int captureId, int value);
 
+
     public enum DebuggerStatus
     { 
         Stopped, 

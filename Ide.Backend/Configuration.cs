@@ -80,6 +80,8 @@ namespace arduino.net
             if (ToolkitPath == null) ToolkitPath = DefaultToolkitPath;
 
             LibraryPaths.Add(Path.Combine(ToolkitPath, "libraries"));
+            LibraryPaths.Add(Path.Combine(SketchBookPath, "libraries"));
+
             var configPath = Path.Combine(ToolkitPath, "hardware/arduino");
 
             mBoards = ConfigSection.LoadFromFile(Path.Combine(configPath, "boards.txt"));

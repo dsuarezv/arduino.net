@@ -50,7 +50,8 @@ namespace arduino.net
                 
 
                 //CreateEmptyProject();
-                OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
+                //OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
+                OpenProject(@"C:\Users\dave\Documents\develop\Arduino\mpu6050samples\MPU6050_raw\MPU6050_raw.ino");
                 
                 Task.Factory.StartNew(Debugger_SerialCharWorker);
                 Task.Factory.StartNew(Debugger_CapturesWorker);

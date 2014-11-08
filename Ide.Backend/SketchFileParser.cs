@@ -19,11 +19,11 @@ namespace arduino.net
         private static Regex mPrototypeRegEx = new Regex(@"(?<return_type>[\w\[\]\*]+)\s+(?<name>[&\[\]\*\w]+)\s*\((?<arguments>[&,\[\]\*\w\s]*)\)(?<attributes>\s__attribute__\s*\(\([\w,\s]+\)\))*(?=\s*\;)", RegexOptions.Multiline);
         private static Regex mCommentsRegEx = new Regex(
                                 "('.')" +
-                                "|(\"(?:[^\"\\\\]|\\\\.)*\")" +                  // double-quoted string
                                 "|(//.*?$)|(/\\*[^*]*(?:\\*(?!/)[^*]*)*\\*/)" +  // single and multi-line comment
                                 "|((^\\s*#define.*)?$)",                         // pre-processor directive
                                 RegexOptions.Multiline);
-        private static Regex mSetupFuncRegEx = new Regex(@"void\ssetup\s*\(\s*\)\s*{\s*", RegexOptions.Multiline);
+        private static Regex mStringsRegex = new Regex("(\"(?:[^\"\\\\]|\\\\.)*\")", RegexOptions.Multiline);  // double-quoted string
+        private static Regex mSetupFuncRegEx = new Regex(@"void\s+setup\s*\(\s*\)\s*{\s*", RegexOptions.Multiline);
 
 
         private string mFileName;
@@ -80,10 +80,14 @@ namespace arduino.net
         private void ProcessCode(string content)
         { 
             var noComments = RemoveComments(content);
-            var normalized = NormalizeLineEndings(noComments);
+
+            CalculateLastIncludeLine(content);
+
+            var noStrings = RemoveStrings(content);            
+            var normalized = NormalizeLineEndings(noStrings);
             
             CalculateLineNumbers(normalized);
-            CalculateLastIncludeLine(normalized);
+            
             BuildFunctionsLists(normalized);
             CalculateSetupFirstLine(normalized);
         }
@@ -97,17 +101,26 @@ namespace arduino.net
         {
             // Remove comments preserving lines
 
-            return mCommentsRegEx.Replace(content, (m) => 
-                    {
-                        var r = new StringBuilder(m.Value);
+            return mCommentsRegEx.Replace(content, new MatchEvaluator(EvaluatorThatKeepsLines));
+        }
 
-                        for (int i = 0; i < r.Length; ++i)
-                        {
-                            if (r[i] != '\r' && r[i] != '\n') r[i] = ' ';
-                        }
+        private string RemoveStrings(string content)
+        {
+            // Remove strings preserving lines.
 
-                        return r.ToString();
-                    });
+            return mStringsRegex.Replace(content, new MatchEvaluator(EvaluatorThatKeepsLines));
+        }
+
+        private string EvaluatorThatKeepsLines(Match m)
+        {
+            var r = new StringBuilder(m.Value);
+
+            for (int i = 0; i < r.Length; ++i)
+            {
+                if (r[i] != '\r' && r[i] != '\n') r[i] = ' ';
+            }
+
+            return r.ToString();            
         }
 
         private int GetLineForCharIndex(int charIndex)

@@ -125,6 +125,8 @@ namespace arduino.net
 
     public class CppBuildTarget : BuildTarget
     {
+        public List<string> AdditionalIncludePaths;
+
         public override void SetupCommand(string boardName)
         {
             var compiler = "hardware/tools/avr/bin/" + (IsCFile(EffectiveSourceFile) ? "avr-gcc" : "avr-g++");
@@ -157,12 +159,16 @@ namespace arduino.net
 
         protected virtual IList<string> GetIncludePaths(ConfigSection config)
         {
-            return new List<string>() 
+            var result = new List<string>() 
             {
                 Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]),
                 Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config["variant"]),
                 Path.GetDirectoryName(EffectiveSourceFile)
             };
+
+            if (AdditionalIncludePaths != null) result.AddRange(AdditionalIncludePaths);
+
+            return result;
         }
 
         protected virtual string GetIncludeArgument(ConfigSection config)
@@ -468,11 +474,14 @@ namespace arduino.net
         protected override IList<string> GetIncludePaths(ConfigSection config)
         {
             var includes = base.GetIncludePaths(config);
+            var includePaths = Compiler.GetLibraryPaths(GetAllIncludes());
 
-            foreach (var libPath in Compiler.GetLibraryPaths(GetAllIncludes()))
+            foreach (var libPath in includePaths)
             {
                 includes.Add(libPath);
             }
+
+            AdditionalIncludePaths.AddRange(includePaths);
 
             return includes;
         }
