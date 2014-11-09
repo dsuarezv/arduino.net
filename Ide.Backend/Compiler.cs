@@ -21,6 +21,12 @@ namespace arduino.net
         private DateTime mLastSuccessfulCompilationDate = DateTime.MinValue;
         private DateTime mLastSuccessfulDeploymentDate = DateTime.MinValue;
 
+
+        public bool IsOperationRunning
+        {
+            get { return mIsOperationRunning; }
+        }
+
         public bool IsDirty
         {
             get { return mBuildStage != BuildStage.ReadyToRun; }

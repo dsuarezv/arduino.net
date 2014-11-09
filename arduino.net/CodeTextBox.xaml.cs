@@ -73,6 +73,7 @@ namespace arduino.net
             mMainTextBox.PaintLine += MainTextBox_PaintLine;
             mMainTextBox.KeyDown += MainTextBox_KeyDown;
             mMainTextBox.KeyPress += MainTextBox_KeyPress;
+            mMainTextBox.KeyUp += mMainTextBox_KeyUp;
             mMainTextBox.TextChanged += MainTextBox_TextChanged;
 
             mMainTextBox.ToolTipNeeded += MainTextBox_ToolTipNeeded;
@@ -90,7 +91,7 @@ namespace arduino.net
             IdeManager.Debugger.BreakPoints.BreakPointMoved += Debugger_BreakPointMoved;
         }
 
-
+        
         public void OpenFile(string fileName)
         {
             if (!CheckChanges()) return;
@@ -310,8 +311,13 @@ namespace arduino.net
         // __ Keyboard shortcuts ______________________________________________
 
 
+        private bool mMofidifierKeyPressed = false;
+
+
         private void MainTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
+            mMofidifierKeyPressed = e.Control || e.Alt;
+
             if (e.Control)
             { 
                 switch (e.KeyCode)
@@ -344,8 +350,15 @@ namespace arduino.net
             }
         }
 
+        void mMainTextBox_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            mMofidifierKeyPressed = e.Control || e.Alt;
+        }        
+
         private void MainTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
         {
+            if (mMofidifierKeyPressed) return;
+
             if (!CanEdit()) e.Handled = true;
         }
 
