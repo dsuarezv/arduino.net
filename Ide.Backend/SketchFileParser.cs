@@ -15,8 +15,8 @@ namespace arduino.net
         
         
         private static Regex mIncludeRegex = new Regex("^\\s*#include\\s*[<\\\"](?<file>\\S+)[\\\">]", RegexOptions.Multiline);
-        private static Regex mFunctionRegEx = new Regex(@"(?<return_type>[\w\[\]\*]+)\s+(?<name>[&\[\]\*\w]+)\s*\((?<arguments>[&,\[\]\*\w\s]*)\)(?=\s*\{)", RegexOptions.Multiline);
-        private static Regex mPrototypeRegEx = new Regex(@"(?<return_type>[\w\[\]\*]+)\s+(?<name>[&\[\]\*\w]+)\s*\((?<arguments>[&,\[\]\*\w\s]*)\)(?<attributes>\s__attribute__\s*\(\([\w,\s]+\)\))*(?=\s*\;)", RegexOptions.Multiline);
+        private static Regex mFunctionRegEx = new Regex(@"(?<static>static\s+)?(?<return_type>[\w\[\]\*]+)\s+(?<name>[&\[\]\*\w]+)\s*\((?<arguments>[&,\[\]\*\w\s]*)\)(?=\s*\{)", RegexOptions.Multiline);
+        private static Regex mPrototypeRegEx = new Regex(@"(?<static>static\s+)?(?<return_type>[\w\[\]\*]+)\s+(?<name>[&\[\]\*\w]+)\s*\((?<arguments>[&,\[\]\*\w\s]*)\)(?<attributes>\s__attribute__\s*\(\([\w,\s]+\)\))*(?=\s*\;)", RegexOptions.Multiline);
         private static Regex mCommentsRegEx = new Regex(
                                 "('.')" +
                                 "|(//.*?$)|(/\\*[^*]*(?:\\*(?!/)[^*]*)*\\*/)" +  // single and multi-line comment
@@ -81,6 +81,7 @@ namespace arduino.net
         { 
             var noComments = RemoveComments(content);
 
+            CalculateLineNumbers(noComments);
             CalculateLastIncludeLine(content);
 
             var noStrings = RemoveStrings(content);            
@@ -135,6 +136,8 @@ namespace arduino.net
 
         private void CalculateLineNumbers(string content)
         {
+            mLineEnds.Clear();
+
             int currentEndLine = 0;
 
             while ( (currentEndLine = content.IndexOf("\n", currentEndLine + 1)) > -1 )

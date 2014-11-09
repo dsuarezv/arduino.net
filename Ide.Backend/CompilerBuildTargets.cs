@@ -456,9 +456,8 @@ namespace arduino.net
                 if (Debugger != null && mParser.HasSetupFunction)
                 { 
                     // Inserting this as the first line in the setup() function effectively prevents user code from 
-                    // being executed first. If there is a watchdog reset (soft reset) in place, the watchdog 
-                    // registers should be set first-thing, and this would enter a reset loop. May brick a bootloader 
-                    // arduino (needs a programmer to fix).
+                    // being executed first. If there was a watchdog reset (soft reset), the watchdog 
+                    // registers should be set first-thing (otherwise the watchdog will keep reseting forever).
 
                     return new string[] {
                         "SOFTDEBUGGER_CONNECT",
