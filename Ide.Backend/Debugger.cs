@@ -29,6 +29,7 @@ namespace arduino.net
         public event StatusChangedDelegate StatusChanged;
         public event CaptureAnswerReceivedDelegate CaptureReceived;
 
+
         public string ComPort
         {
             get 
