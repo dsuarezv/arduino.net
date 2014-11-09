@@ -14,6 +14,7 @@ using System.Drawing;
 
 using FastColoredTextBoxNS;
 using System.Drawing.Text;
+using Microsoft.Win32;
 
 namespace arduino.net
 {
@@ -124,8 +125,17 @@ namespace arduino.net
         {
             if (mFileName == null) 
             {
-                // Display a SaveAs dialog box and set the name to that.
-                return;
+                var s = new SaveFileDialog()
+                {
+                    AddExtension = true,
+                    Title = "Save as...",
+                    DefaultExt = ".ino",
+                    Filter = "Sketch files|*.ino;*.pde|All files|*.*"
+                };
+
+                if (!(bool)s.ShowDialog()) return;
+
+                mFileName = s.FileName;
             }
 
             SaveFileAs(mFileName);
@@ -204,10 +214,26 @@ namespace arduino.net
 
         private bool CheckChanges()
         {
-            // TODO: add "Save changes?" prompt here.
             // returns true is operation can proceed (either changes were saved or discarded)
             // or false if not (pending changes dialog was cancelled)
-            return true;
+
+            if (!mMainTextBox.IsChanged) return true;
+
+            var fileName = (mFileName == null) ? "File" : Path.GetFileName(mFileName);
+
+            var r = MessageBox.Show(fileName + " has changes, do you want to save them?", "Save changes", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+
+            if (r == MessageBoxResult.Yes)
+            {
+                SaveFile();
+                return true;
+            }
+            else if (r == MessageBoxResult.No)
+            {
+                return true;
+            }
+           
+            return false;
         }
 
         private void MainTextBox_ToolTipNeeded(object sender, ToolTipNeededEventArgs e)

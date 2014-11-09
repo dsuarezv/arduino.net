@@ -105,6 +105,8 @@ namespace arduino.net
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if (!ProjectPad1.CloseProject()) e.Cancel = true;
+
             Configuration.Save();
             SessionSettings.Save();
         }        
