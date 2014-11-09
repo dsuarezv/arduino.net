@@ -186,8 +186,9 @@ namespace arduino.net
         public void SetActiveLine(int lineNumber)
         {
             mActiveLine = lineNumber;
+            if (mActiveLine == -1) return;
 
-            mMainTextBox.Invalidate();
+            mMainTextBox.Navigate(mActiveLine - 1);
         }
 
         public void ClearActiveLine()

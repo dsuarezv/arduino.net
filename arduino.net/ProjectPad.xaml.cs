@@ -276,7 +276,6 @@ namespace arduino.net
             var editor = GetEditor(fileName);
             if (editor == null) return null;
 
-            editor.SetCursorAt(lineNumber - 1, 0);
             editor.FocusEditor();
             editor.SetActiveLine(lineNumber);
 
