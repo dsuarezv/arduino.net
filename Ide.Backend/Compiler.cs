@@ -11,6 +11,7 @@ namespace arduino.net
 {
     public class Compiler
     {
+        private bool mIsOperationRunning = false;
         private BuildStage mBuildStage = BuildStage.NeedsBuild;
         private ObservableCollection<CompilerMsg> mCompilerErrors = new ObservableCollection<CompilerMsg>();
         private List<string> mIncludePaths = new List<string>();
@@ -66,42 +67,53 @@ namespace arduino.net
 
         public bool Build(string boardName, bool debug)
         {
-            if (IsBuildUpToDate())
+            if (mIsOperationRunning) return false;
+
+            try
             {
-                Logger.LogCompiler("Build is up-to-date.");
+                mIsOperationRunning = true;
+
+                if (IsBuildUpToDate())
+                {
+                    Logger.LogCompiler("Build is up-to-date.");
+                    return true;
+                }
+
+                var tempDir = CreateTempDirectory();
+
+                SetupBoardName(boardName);
+
+                mCompilerErrors.Clear();
+                mIncludePaths.Clear();
+
+                var debuggerCmds = CreateDebuggerCompileCommands(tempDir, debug);
+                var projectCmds = CreateProjectCompileCommands(tempDir, debug);
+                var librariesCmds = CreateLibraryCompileCommands(tempDir, projectCmds, debug);
+                var coreCmds = CreateCoreCompileCommands(tempDir);
+                var coreLibCmds = CreateCoreLibraryCommands(tempDir, coreCmds);
+                var linkCmds = CreateLinkCommand(tempDir, projectCmds, debuggerCmds, librariesCmds);
+                var elfCmds = CreateImageCommands(tempDir);
+
+                if (!RunCommands(projectCmds, tempDir)) return false;
+                if (!RunCommands(debuggerCmds, tempDir)) return false;
+                if (!RunCommands(librariesCmds, tempDir)) return false;
+                if (!RunCommands(coreCmds, tempDir)) return false;
+                if (!RunCommands(coreLibCmds, tempDir)) return false;
+                if (!RunCommands(linkCmds, tempDir)) return false;
+                if (!RunCommands(elfCmds, tempDir)) return false;
+                if (!VerifySize(tempDir, true)) return false;
+
+                mLastSuccessfulCompilationDate = DateTime.Now;
+                mBuildStage = BuildStage.NeedsDeploy;
+
+                BuildDwarf();
+
                 return true;
             }
-
-            var tempDir = CreateTempDirectory();
-
-            SetupBoardName(boardName);
-
-            mCompilerErrors.Clear();
-            mIncludePaths.Clear();
-
-            var debuggerCmds = CreateDebuggerCompileCommands(tempDir, debug);
-            var projectCmds = CreateProjectCompileCommands(tempDir, debug);
-            var librariesCmds = CreateLibraryCompileCommands(tempDir, projectCmds, debug);
-            var coreCmds = CreateCoreCompileCommands(tempDir);
-            var coreLibCmds = CreateCoreLibraryCommands(tempDir, coreCmds);
-            var linkCmds = CreateLinkCommand(tempDir, projectCmds, debuggerCmds, librariesCmds);
-            var elfCmds = CreateImageCommands(tempDir);
-
-            if (!RunCommands(projectCmds, tempDir)) return false;
-            if (!RunCommands(debuggerCmds, tempDir)) return false;
-            if (!RunCommands(librariesCmds, tempDir)) return false;
-            if (!RunCommands(coreCmds, tempDir)) return false;
-            if (!RunCommands(coreLibCmds, tempDir)) return false;
-            if (!RunCommands(linkCmds, tempDir)) return false;
-            if (!RunCommands(elfCmds, tempDir)) return false;
-            if (!VerifySize(tempDir, true)) return false;
-
-            mLastSuccessfulCompilationDate = DateTime.Now;
-            mBuildStage = BuildStage.NeedsDeploy;
-
-            BuildDwarf();
-
-            return true;
+            finally
+            {
+                mIsOperationRunning = false;
+            }
         }
 
         public void Clean()
@@ -123,38 +135,49 @@ namespace arduino.net
 
         public bool Deploy(string boardName, string programmerName, bool debug)
         {
-            if (IsDeployUpToDate()) 
+            if (mIsOperationRunning) return false;
+
+            try
             {
-                Logger.LogCompiler("Deploy: No changes since last deployment.");
+                mIsOperationRunning = true;
+
+                if (IsDeployUpToDate()) 
+                {
+                    Logger.LogCompiler("Deploy: No changes since last deployment.");
+                    return true;
+                }
+
+                if (!VerifySize(null, false)) throw new Exception("Sketch size is larger than supported Arduino memory. Remove some code to get it below the maximum and try again.");
+
+                var tempDir = CreateTempDirectory();
+                var hexFile = GetHexFile(tempDir);
+
+                SetupBoardName(boardName);
+
+                if (!File.Exists(hexFile))
+                {
+                    if (!Build(boardName, debug)) return false;
+                }
+
+                IdeManager.Debugger.Stop();
+
+                var deployCmds = CreateDeployCommands(tempDir, programmerName);
+
+                if (!RunCommands(deployCmds, tempDir)) return false;
+
+                // Successful deploy. Post actions.
+
+                mLastSuccessfulDeploymentDate = DateTime.Now;
+                mBuildStage = BuildStage.ReadyToRun;
+                SessionSettings.Save();
+                BuildDwarf();
+
                 return true;
             }
-
-            if (!VerifySize(null, false)) throw new Exception("Sketch size is larger than supported Arduino memory. Remove some code to get it below the maximum and try again.");
-
-            var tempDir = CreateTempDirectory();
-            var hexFile = GetHexFile(tempDir);
-
-            SetupBoardName(boardName);
-
-            if (!File.Exists(hexFile))
+            finally
             {
-                if (!Build(boardName, debug)) return false;
+                mIsOperationRunning = false;
             }
-
-            IdeManager.Debugger.Stop();
-
-            var deployCmds = CreateDeployCommands(tempDir, programmerName);
-
-            if (!RunCommands(deployCmds, tempDir)) return false;
-
-            // Successful deploy. Post actions.
-
-            mLastSuccessfulDeploymentDate = DateTime.Now;
-            mBuildStage = BuildStage.ReadyToRun;
-            SessionSettings.Save();
-            BuildDwarf();
-
-            return true;
         }
         
         public void BuildDwarf()
