@@ -170,14 +170,6 @@ namespace arduino.net
             
         }
 
-        public void SetCursorAt(int lineNumber, int charNumber)
-        {
-            var s = mMainTextBox.Selection;
-
-            s.Start = new Place(charNumber, lineNumber);
-            s.End = s.Start;
-        }
-
         public void FocusEditor()
         {
             mMainTextBox.Focus();
@@ -186,9 +178,15 @@ namespace arduino.net
         public void SetActiveLine(int lineNumber)
         {
             mActiveLine = lineNumber;
-            if (mActiveLine == -1) return;
-
-            mMainTextBox.Navigate(mActiveLine - 1);
+            
+            if (mActiveLine > -1)
+            {
+                mMainTextBox.Navigate(mActiveLine - 1);
+            }
+            else
+            {
+                mMainTextBox.Invalidate();
+            }
         }
 
         public void ClearActiveLine()
