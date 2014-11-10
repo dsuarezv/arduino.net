@@ -82,9 +82,9 @@ namespace arduino.net
             var noComments = RemoveComments(content);
 
             CalculateLineNumbers(noComments);
-            CalculateLastIncludeLine(content);
+            CalculateLastIncludeLine(noComments);
 
-            var noStrings = RemoveStrings(content);            
+            var noStrings = RemoveStrings(noComments);
             var normalized = NormalizeLineEndings(noStrings);
             
             CalculateLineNumbers(normalized);

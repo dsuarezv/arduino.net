@@ -45,6 +45,7 @@
     <Compile Include="CmdRunner.cs" />
     <Compile Include="Compiler.cs" />
     <Compile Include="Debugger.cs" />
+    <Compile Include="DeployBuildTargets.cs" />
     <Compile Include="DwarfLocation.cs" />
     <Compile Include="DwarfObjects.cs" />
     <Compile Include="DwarfTextParser.cs" />

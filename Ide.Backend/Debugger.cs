@@ -130,7 +130,7 @@ namespace arduino.net
 
             if (mSerialPort == null) return;
 
-            mSerialPort.Close();
+            DisposeSerial();
         }
 
         public void Dispose()
@@ -140,6 +140,8 @@ namespace arduino.net
 
         private void DisposeSerial()
         {
+            if (mSerialPort == null) return;
+
             mSerialPort.Dispose();
             mSerialPort = null;
         }
@@ -189,7 +191,7 @@ namespace arduino.net
             mDebuggerBytesCount += 2;
             SetStatus(DebuggerStatus.Running);
         }
-                
+
 
         // __ Reading impl ____________________________________________________
 
