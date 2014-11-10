@@ -452,7 +452,6 @@ namespace arduino.net
             if (hasAddedContent)
             {
                 result.Add(string.Format("#line 1 \"{0}\"", EscapePath(SourceFile)));
-                result.Add(line);
             }
 
             result.AddRange(ProcessLineForBreakpoints(lineNumber, line, breakpoints));
