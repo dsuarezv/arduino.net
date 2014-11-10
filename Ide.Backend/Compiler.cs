@@ -353,8 +353,14 @@ namespace arduino.net
         private List<BuildTarget> CreateDeployCommands(string tempDir, string programmerName)
         {
             var result = new List<BuildTarget>();
-            
-            result.Add(new DeployBuildTarget(programmerName) { SourceFile = GetHexFile(tempDir) });
+
+            var deployCmd = programmerName == null ?
+                new BootLoaderDeployBuildTarget(mDebugger) :
+                new DeployBuildTarget(programmerName);
+
+            deployCmd.SourceFile = GetHexFile(tempDir);
+
+            result.Add(deployCmd);
 
             return result;
         }
@@ -397,7 +403,7 @@ namespace arduino.net
 
         private void ProcessOutputLine(string line)
         {
-            Logger.LogCompiler("    " + line);
+            Logger.LogCompilerDirect("    " + line);
 
             var msg = CompilerMsg.GetMsgForLine(line);
             if (msg == null) return;

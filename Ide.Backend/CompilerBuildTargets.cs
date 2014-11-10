@@ -336,7 +336,7 @@ namespace arduino.net
             }
         }
 
-        protected virtual string[] ProcessLine(int lineNumber, string line, List<BreakPointInfo> breakpoints)
+        protected virtual IList<string> ProcessLine(int lineNumber, string line, List<BreakPointInfo> breakpoints)
         {
             if (lineNumber == 1 && Debugger != null)
             {
@@ -350,7 +350,7 @@ namespace arduino.net
             return ProcessLineForBreakpoints(lineNumber, line, breakpoints);
         }
 
-        protected string[] ProcessLineForBreakpoints(int lineNumber, string line, List<BreakPointInfo> breakpoints)
+        protected IList<string> ProcessLineForBreakpoints(int lineNumber, string line, List<BreakPointInfo> breakpoints)
         {
             if (breakpoints != null)
             { 
@@ -388,12 +388,12 @@ namespace arduino.net
 
         public IList<string> GetAllIncludes()
         {
-            ParseIno();
+            AnalizeSketchFile();
 
             return mParser.IncludedFiles;
         }
 
-        private void ParseIno()
+        private void AnalizeSketchFile()
         {
             if (mParser != null) return;
 
@@ -403,38 +403,18 @@ namespace arduino.net
 
         protected override void ProcessFile(List<BreakPointInfo> breakpoints)
         {
-            // First pass: analyze
+            AnalizeSketchFile();
 
-            ParseIno();
-
-            // Second pass: edit through ProcessLine
             base.ProcessFile(breakpoints);
         }
 
-        protected override string[] ProcessLine(int lineNumber, string line, List<BreakPointInfo> breakpoints)
+        protected override IList<string> ProcessLine(int lineNumber, string line, List<BreakPointInfo> breakpoints)
         {
-            if (lineNumber == 1)
+            var result = new List<string>();
+            bool hasAddedContent = false;
+
+            if (lineNumber == mParser.LastIncludeLineNumber + 1)
             {
-                if (Debugger != null)
-                {
-                    return new string[] {
-                        "#include \"soft_debugger.h\"",
-                        string.Format("#line {0} \"{1}\"", lineNumber, EscapePath(SourceFile)),
-                        line
-                    };
-                }
-                else
-                {
-                    return new string[] {
-                        string.Format("#line {0} \"{1}\"", lineNumber, EscapePath(SourceFile)),
-                        line 
-                    };
-                }
-            }
-            else if (lineNumber == mParser.LastIncludeLineNumber + 2)
-            {
-                var result = new List<string>();
-                
                 result.Add("#include \"Arduino.h\"");
                 foreach (var prototype in mParser.UniqueFunctionDeclarations) result.Add(prototype + ";");
 
@@ -446,12 +426,17 @@ namespace arduino.net
                     result.Add("}");
                 }
 
-                result.Add("#line " + lineNumber);
-                result.Add(line);
-
-                return result.ToArray<string>();
+                hasAddedContent = true;
             }
-            else if (lineNumber == mParser.SetupFunctionFirstLine + 1)
+
+            if (lineNumber == 1)
+            {
+                if (Debugger != null) result.Add("#include \"soft_debugger.h\"");
+
+                hasAddedContent = true;
+            }
+
+            if (lineNumber == mParser.SetupFunctionFirstLine + 1)
             {
                 if (Debugger != null && mParser.HasSetupFunction)
                 { 
@@ -459,15 +444,20 @@ namespace arduino.net
                     // being executed first. If there was a watchdog reset (soft reset), the watchdog 
                     // registers should be set first-thing (otherwise the watchdog will keep reseting forever).
 
-                    return new string[] {
-                        "SOFTDEBUGGER_CONNECT",
-                        "#line " + lineNumber,
-                        line
-                    };
+                    result.Add("SOFTDEBUGGER_CONNECT");
+                    hasAddedContent = true;
                 }
             }
 
-            return ProcessLineForBreakpoints(lineNumber, line, breakpoints);
+            if (hasAddedContent)
+            {
+                result.Add(string.Format("#line 1 \"{0}\"", EscapePath(SourceFile)));
+                result.Add(line);
+            }
+
+            result.AddRange(ProcessLineForBreakpoints(lineNumber, line, breakpoints));
+
+            return result;
         }
 
         protected override IList<string> GetIncludePaths(ConfigSection config)
@@ -503,42 +493,5 @@ namespace arduino.net
             CalculateEffectiveSourceFile(tempDir);
             ProcessFile(brs);
         }
-    }
-
-
-    public class DeployBuildTarget: BuildTarget
-    {
-        private string mProgrammerName;
-
-        public DeployBuildTarget(string programmerName)
-        {
-            CopyToTmp = false;
-            DisableTargetDateCheck = true;
-            mProgrammerName = programmerName;
-        }
-
-        public override void SetupSources(string tempDir)
-        {
-            EffectiveSourceFile = SourceFile;
-        }
-
-        public override void SetupCommand(string boardName)
-        {
-            var communication = Configuration.Programmers.GetSection(mProgrammerName)["communication"];
-            var protocol = Configuration.Programmers.GetSection(mProgrammerName)["protocol"];
-            var mcu = Configuration.Boards.GetSection(boardName).GetSection("build")["mcu"];
-
-            BuildCommand = new Command()
-            {
-                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avrdude"),
-                Arguments = string.Format("-C\"{0}\" -v -v -v -v -p{1} -c{2} -P{3} -Uflash:w:{4}:i ",
-                    Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/etc/avrdude.conf"),
-                    mcu,
-                    protocol,   // usbasp
-                    communication,   // usb
-                    EffectiveSourceFile
-                    )
-            };
-        }
-    }
+    }    
 }
