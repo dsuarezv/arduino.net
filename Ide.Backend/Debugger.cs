@@ -140,6 +140,8 @@ namespace arduino.net
 
         private void DisposeSerial()
         {
+            if (mSerialPort == null) return;
+
             mSerialPort.Dispose();
             mSerialPort = null;
         }
