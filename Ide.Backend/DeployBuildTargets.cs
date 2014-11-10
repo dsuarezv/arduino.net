@@ -83,7 +83,7 @@ namespace arduino.net
             BuildCommand = new Command()
             {
                 Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avrdude"),
-                Arguments = string.Format("-C\"{0}\" -v -v -v -v -p{1} -carduino -P{2} -b{3} -D {4} -Uflash:w:{5}:i ",
+                Arguments = string.Format("-C\"{0}\" -v -p{1} -carduino -P{2} -b{3} -D {4} -Uflash:w:{5}:i ",
                     Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/etc/avrdude.conf"),
                     mcu,
                     comPort, 
