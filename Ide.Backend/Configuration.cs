@@ -10,6 +10,7 @@ namespace arduino.net
     public class Configuration
     {
         public const string AppName = "arduino.net";
+        public const string NullProgrammerName = "none";
         public static readonly string DefaultToolkitPath = Path.Combine(GetExecutablePath(), "../");
 
 
@@ -91,11 +92,19 @@ namespace arduino.net
 
             mBoards = ConfigSection.LoadFromFile(Path.Combine(configPath, "boards.txt"));
             mProgrammers = ConfigSection.LoadFromFile(Path.Combine(configPath, "programmers.txt"));
+
+            AddNullProgrammer();
         }
 
         public static void Save()
         {
             mBaseConfig.SaveToFile(GetPreferencesFile());
+        }
+
+        private static void AddNullProgrammer()
+        {
+            var s = mProgrammers.GetSection(NullProgrammerName);
+            s["name"] = "Use built-in bootloader";
         }
 
         private static string GetPreferencesFile()
