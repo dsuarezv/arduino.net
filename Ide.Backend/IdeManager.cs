@@ -19,6 +19,13 @@ namespace arduino.net
         public static CapturePointManager CapturePointManager;
 
 
+        public static void Reset()
+        {
+            if (Debugger != null) Debugger.Reset();
+            if (WatchManager != null) WatchManager.Reset();
+            if (CapturePointManager != null) CapturePointManager.Reset();
+        }
+
         public static void GoToFileAndLine(string fileName, int lineNumber)
         {
             if (GoToLineRequested == null) return;

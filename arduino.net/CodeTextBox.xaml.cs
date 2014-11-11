@@ -155,7 +155,8 @@ namespace arduino.net
         {
             if (!CheckChanges()) return false;
 
-            mMainTextBox.Text = "";
+            mMainTextBox.Dispose();
+            mMainTextBox = null;
             mFileName = null;
 
             return true;
