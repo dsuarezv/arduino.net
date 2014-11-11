@@ -354,7 +354,7 @@ namespace arduino.net
         {
             var result = new List<BuildTarget>();
 
-            var deployCmd = programmerName == null ?
+            var deployCmd = (programmerName == null || programmerName == Configuration.NullProgrammerName) ?
                 new BootLoaderDeployBuildTarget(mDebugger) :
                 new DeployBuildTarget(programmerName);
 
