@@ -196,7 +196,7 @@ namespace arduino.net
 
             var editor = ti.Content as CodeTextBox;
             if (editor == null) return true;
-
+            
             var result = editor.CloseFile();
             if (result)
             {
