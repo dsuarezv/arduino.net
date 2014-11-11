@@ -105,6 +105,8 @@ namespace arduino.net
                 if (!CloseAllProjectFiles()) return;
             }
 
+            IdeManager.Reset();
+
             Project p = new Project(sketchFile);
 
             IdeManager.CurrentProject = p;

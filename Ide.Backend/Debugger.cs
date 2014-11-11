@@ -113,6 +113,11 @@ namespace arduino.net
             Detach();
         }
 
+        public void Reset()
+        {
+            mBreakPoints.Clear();
+        }
+
 
         private void Attach()
         {

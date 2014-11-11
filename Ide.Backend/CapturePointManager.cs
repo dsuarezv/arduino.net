@@ -17,6 +17,10 @@ namespace arduino.net
             get { return mCapturePoints; }
         }
 
+        public void Reset()
+        {
+            mCapturePoints.Clear();
+        }
 
         public void RecordCaptures(IList<CaptureData> data)
         {
