@@ -33,10 +33,6 @@ namespace arduino.net
                 Configuration.PropertyValueRequired += Configuration_PropertyValueRequired;
                 Configuration.Initialize();
 
-                //var sketch = @"C:\Users\dave\Documents\develop\Arduino\Debugger\Debugger.ino";
-                //var sketch = @"C:\Users\dave\Documents\develop\ardupilot\ArduCopter\ArduCopter.pde";
-                //var sketch = @"C:\Users\dave\Documents\develop\Arduino\ArduinoMotionSensorExample\ArduinoMotionSensorExample.ino";
-
                 CaptureMonitorFactory.RegisterCaptureAssembly(@"Ide.Wpf.DefaultCaptures.dll");
 
                 ProjectPad1.TargetTabControl = OpenFilesTab;
@@ -52,6 +48,7 @@ namespace arduino.net
                 //CreateEmptyProject();
                 //OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
                 OpenProject(@"C:\Users\dave\Documents\develop\Arduino\mpu6050samples\MPU6050_raw\MPU6050_raw.ino");
+
                 
                 Task.Factory.StartNew(Debugger_SerialCharWorker);
                 Task.Factory.StartNew(Debugger_CapturesWorker);

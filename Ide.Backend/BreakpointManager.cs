@@ -77,6 +77,11 @@ namespace arduino.net
             SessionSettings.Save();
         }
 
+        public void Clear()
+        {
+            mBreakPoints.Clear();
+        }
+
         public List<BreakPointInfo> GetBreakpointsForFile(string fileName)
         {
             List<BreakPointInfo> result = new List<BreakPointInfo>();
@@ -113,6 +118,8 @@ namespace arduino.net
 
         void IPersistenceListener.RestorePersistedObject(object obj)
         {
+            mBreakPoints.Clear();
+
             var breakpoints = obj as List<BreakPointInfo>;
             if (breakpoints == null) return;
 

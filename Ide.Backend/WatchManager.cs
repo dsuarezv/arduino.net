@@ -37,6 +37,11 @@ namespace arduino.net
             }
         }
 
+        public void Reset()
+        {
+            mSymbols.Clear();
+        }
+
         public SymbolInfo GetInmmediateValue(string name, DwarfTree dwarf)
         {
             var symbol = new SymbolInfo(mDebugger, name) { IsRoot = true };
