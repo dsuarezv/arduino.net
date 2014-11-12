@@ -131,14 +131,14 @@ namespace arduino.net
         {
             var compiler = "hardware/tools/avr/bin/" + (IsCFile(EffectiveSourceFile) ? "avr-gcc" : "avr-g++");
 
-            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
+            var config = Configuration.Instance.Boards.GetSection(boardName).GetSection("build");
             var usbvid = config["vid"];
             var usbpid = config["pid"];
             var includePaths = GetIncludeArgument(config);
 
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, compiler),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, compiler),
                 Arguments = string.Format("-c -g {8} -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
                     config["mcu"],
                     config["f_cpu"],
@@ -161,8 +161,8 @@ namespace arduino.net
         {
             var result = new List<string>() 
             {
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]),
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config["variant"]),
+                Path.Combine(Configuration.Instance.ToolkitPath, "hardware/arduino/cores/" + config["core"]),
+                Path.Combine(Configuration.Instance.ToolkitPath, "hardware/arduino/variants/" + config["variant"]),
                 Path.GetDirectoryName(EffectiveSourceFile)
             };
 
@@ -193,14 +193,14 @@ namespace arduino.net
         {
             var compiler = "hardware/tools/avr/bin/avr-gcc";
 
-            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
+            var config = Configuration.Instance.Boards.GetSection(boardName).GetSection("build");
             var usbvid = config["vid"];
             var usbpid = config["pid"];
             var includePaths = GetIncludeArgument(config);
 
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, compiler),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, compiler),
 
                 Arguments = string.Format("-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
                     config["mcu"],
@@ -229,7 +229,7 @@ namespace arduino.net
 
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-ar"),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, "hardware/tools/avr/bin/avr-ar"),
                 Arguments = string.Format("rcs \"{0}\" {1}",
                     TargetFile, sb)
             };
@@ -253,11 +253,11 @@ namespace arduino.net
         {
             DisableTargetDateCheck = true;
 
-            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
+            var config = Configuration.Instance.Boards.GetSection(boardName).GetSection("build");
 
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-gcc"),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, "hardware/tools/avr/bin/avr-gcc"),
                 Arguments = string.Format("-Os -Wl,--gc-sections -mmcu={0} -o {1} {2} -L{3} -lm",
                     config["mcu"],
                     TargetFile,
@@ -274,7 +274,7 @@ namespace arduino.net
         {
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-objcopy"),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, "hardware/tools/avr/bin/avr-objcopy"),
                 Arguments = string.Format("-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0 {0} {1}",
                     EffectiveSourceFile,
                     TargetFile)
@@ -289,7 +289,7 @@ namespace arduino.net
         {
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-objcopy"),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, "hardware/tools/avr/bin/avr-objcopy"),
                 Arguments = string.Format("-O ihex -R .eeprom {0} {1}",
                     EffectiveSourceFile,
                     TargetFile)
@@ -370,7 +370,7 @@ namespace arduino.net
         {
             var includePaths = base.GetIncludePaths(config);
 
-            if (Debugger != null) includePaths.Add(Path.Combine(Configuration.ToolkitPath, "debugger/" + config["core"]));
+            if (Debugger != null) includePaths.Add(Path.Combine(Configuration.Instance.ToolkitPath, "debugger/" + config["core"]));
 
             return includePaths;
         }

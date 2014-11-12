@@ -214,7 +214,7 @@ namespace arduino.net
 
         private bool VerifySize(string tempDir, bool printOutput)
         {
-            int maxSize = Int32.Parse(Configuration.Boards.GetSection(mBoardName).GetSection("upload")["maximum_size"]);
+            int maxSize = Int32.Parse(Configuration.Instance.Boards.GetSection(mBoardName).GetSection("upload")["maximum_size"]);
             int elfSize = ObjectDumper.GetSize(GetElfFile(tempDir));
             bool result = maxSize > elfSize;
             
@@ -250,8 +250,8 @@ namespace arduino.net
         {
             if (!debug) return new List<BuildTarget>();
             
-            var config = Configuration.Boards.GetSection(mBoardName).GetSection("build");
-            var sourceDir = Path.Combine(Configuration.ToolkitPath, "debugger/" + config["core"]);
+            var config = Configuration.Instance.Boards.GetSection(mBoardName).GetSection("build");
+            var sourceDir = Path.Combine(Configuration.Instance.ToolkitPath, "debugger/" + config["core"]);
 
             var fileList = Project.GetCodeFilesOnPath(sourceDir);
             return GetCommandsForFiles(tempDir, debug, fileList, false);
@@ -438,7 +438,7 @@ namespace arduino.net
             {
                 var libName = Path.GetFileNameWithoutExtension(inc);
 
-                foreach (var path in Configuration.LibraryPaths)
+                foreach (var path in Configuration.Instance.LibraryPaths)
                 {
                     var libPath = Path.GetFullPath(Path.Combine(path, libName));
 
@@ -540,9 +540,9 @@ namespace arduino.net
 
         private string GetBoardCoreDirectory()
         {
-            var config = Configuration.Boards.GetSection(mBoardName).GetSection("build");
+            var config = Configuration.Instance.Boards.GetSection(mBoardName).GetSection("build");
 
-            return Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]);
+            return Path.Combine(Configuration.Instance.ToolkitPath, "hardware/arduino/cores/" + config["core"]);
         }
     }
 

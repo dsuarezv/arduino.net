@@ -27,16 +27,16 @@ namespace arduino.net
 
         public override void SetupCommand(string boardName)
         {
-            var communication = Configuration.Programmers.GetSection(mProgrammerName)["communication"];
-            var protocol = Configuration.Programmers.GetSection(mProgrammerName)["protocol"];
-            var mcu = Configuration.Boards.GetSection(boardName).GetSection("build")["mcu"];
+            var communication = Configuration.Instance.Programmers.GetSection(mProgrammerName)["communication"];
+            var protocol = Configuration.Instance.Programmers.GetSection(mProgrammerName)["protocol"];
+            var mcu = Configuration.Instance.Boards.GetSection(boardName).GetSection("build")["mcu"];
             var verify = true;
 
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avrdude"),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, "hardware/tools/avr/bin/avrdude"),
                 Arguments = string.Format("-C\"{0}\" -v -v -v -v -p{1} -c{2} -P{3} {5} -Uflash:w:{4}:i ",
-                    Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/etc/avrdude.conf"),
+                    Path.Combine(Configuration.Instance.ToolkitPath, "hardware/tools/avr/etc/avrdude.conf"),
                     mcu,
                     protocol,   // usbasp
                     communication,   // usb
@@ -59,12 +59,12 @@ namespace arduino.net
 
         public override void SetupCommand(string boardName)
         {
-            var comPort = Configuration.CurrentComPort;
-            var baudRate = Configuration.Boards.GetSection(boardName).GetSection("upload")["speed"];
-            var mcu = Configuration.Boards.GetSection(boardName).GetSection("build")["mcu"];
+            var comPort = Configuration.Instance.CurrentComPort;
+            var baudRate = Configuration.Instance.Boards.GetSection(boardName).GetSection("upload")["speed"];
+            var mcu = Configuration.Instance.Boards.GetSection(boardName).GetSection("build")["mcu"];
             var verify = true;
 
-            if (Configuration.IsWindows)
+            if (Configuration.Instance.IsWindows)
             {
                 comPort = "\\\\.\\" + comPort.ToUpper();
             }
@@ -82,9 +82,9 @@ namespace arduino.net
 
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avrdude"),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, "hardware/tools/avr/bin/avrdude"),
                 Arguments = string.Format("-C\"{0}\" -v -p{1} -carduino -P{2} -b{3} -D {4} -Uflash:w:{5}:i ",
-                    Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/etc/avrdude.conf"),
+                    Path.Combine(Configuration.Instance.ToolkitPath, "hardware/tools/avr/etc/avrdude.conf"),
                     mcu,
                     comPort, 
                     baudRate,
@@ -112,7 +112,7 @@ namespace arduino.net
 
         private void DtrReset()
         {
-            var comPort = Configuration.CurrentComPort;
+            var comPort = Configuration.Instance.CurrentComPort;
 
             using (var serial = new SerialPort(comPort))
             { 

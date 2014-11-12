@@ -62,7 +62,7 @@ namespace arduino.net
             {
                 Dock = System.Windows.Forms.DockStyle.Fill,
                 Font = FontManager.GetSourceCodeFont(),
-                AutoIndent = Configuration.EditorAutoIndent,
+                AutoIndent = Configuration.Instance.EditorAutoIndent,
                 ReservedCountOfLineNumberChars = 5,
                 BackColor = backColor,
                 IndentBackColor = backColor,

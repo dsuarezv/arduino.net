@@ -124,7 +124,7 @@ namespace arduino.net
         public static string GetDefaultNewProjectFullName()
         {
             var projectName = GetDefaultNewProjectName();
-            var sketchFolder = Path.Combine(Configuration.SketchBookPath, projectName);
+            var sketchFolder = Path.Combine(Configuration.Instance.SketchBookPath, projectName);
 
             return GetNewProjectFile(sketchFolder);
         }

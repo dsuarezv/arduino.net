@@ -9,82 +9,98 @@ namespace arduino.net
 {
     public class Configuration
     {
+        private static Configuration mInstance;
+
+
+        public static Configuration Instance
+        {
+            get
+            {
+                if (mInstance == null) mInstance = new Configuration();
+
+                return mInstance;
+            }
+        }
+
+
         public const string AppName = "arduino.net";
         public const string NullProgrammerName = "none";
-        public static readonly string DefaultToolkitPath = Path.Combine(GetExecutablePath(), "../");
+        public readonly string DefaultToolkitPath = Path.Combine(GetExecutablePath(), "../");
 
 
-        private static ConfigSection mBaseConfig;
-        private static ConfigSection mBoards;
-        private static ConfigSection mProgrammers;
+        private ConfigSection mBaseConfig;
+        private ConfigSection mBoards;
+        private ConfigSection mProgrammers;
 
 
-        public static event Func<string, string> PropertyValueRequired;
+        public event Func<string, string> PropertyValueRequired;
 
-
-        public static string ToolkitPath
+        
+        public string ToolkitPath
         {
             get { return CheckProperty("ToolkitPath", "editor", "toolkitpath"); }
             set { mBaseConfig.GetSection("editor")["toolkitpath"] = value; }
         }
 
-        public static string SketchBookPath
+        public string SketchBookPath
         {
             get { return CheckProperty("SketchBookPath", "editor", "sketchbookfolder"); }
             set { mBaseConfig.GetSection("editor")["sketchbookfolder"] = value; }
         }
 
-        public static string LastProject
+        public string LastProject
         {
             get { return GetProperty("editor", "lastproject"); }
             set { mBaseConfig.GetSection("editor")["lastproject"] = value; }
         }        
 
-        public static string CurrentBoard
+        public string CurrentBoard
         {
             get { return CheckProperty("CurrentBoard", "target", "board"); }
             set { mBaseConfig.GetSection("target")["board"] = value; }
         }
 
-        public static string CurrentProgrammer
+        public string CurrentProgrammer
         {
             get { return CheckProperty("CurrentProgrammer", "target", "programmer"); }
             set { mBaseConfig.GetSection("target")["programmer"] = value; }
         }
 
-        public static string CurrentComPort
+        public string CurrentComPort
         {
             get { return CheckProperty("CurrentComPort", "target", "serialport"); }
             set { mBaseConfig.GetSection("target")["serialport"] = value; }
         }
 
-        public static bool IsWindows
+        public bool IsWindows
         {
             get { return true; }  // TODO: Implement for other platforms
         }
 
-        public static string EditorFontName = "Consolas";
-        public static float EditorFontSize = 11f;
-        public static bool EditorAutoIndent = true;
 
-        public static IList<string> LibraryPaths = new List<string>();
+        public string EditorFontName = "Consolas";
+        public float EditorFontSize = 11f;
+        public bool EditorAutoIndent = true;
 
-        public static string ToolsPath
+        public IList<string> LibraryPaths = new List<string>();
+
+        public string ToolsPath
         { 
             get { return Path.Combine(ToolkitPath, "hardware/tools/avr/bin/"); }
         }
 
-        public static ConfigSection Boards
+        public ConfigSection Boards
         {
             get { return mBoards; }
         }
 
-        public static ConfigSection Programmers
+        public ConfigSection Programmers
         {
             get { return mProgrammers; }
         }
 
-        public static void Initialize()
+
+        public Configuration()
         {
             mBaseConfig = ConfigSection.LoadFromFile(GetPreferencesFile());
 
@@ -101,23 +117,24 @@ namespace arduino.net
             AddNullProgrammer();
         }
 
-        public static void Save()
+
+        public void Save()
         {
             mBaseConfig.SaveToFile(GetPreferencesFile());
         }
 
-        private static void AddNullProgrammer()
+        private void AddNullProgrammer()
         {
             var s = mProgrammers.GetSection(NullProgrammerName);
             s["name"] = "Use built-in bootloader";
         }
 
-        private static string GetPreferencesFile()
+        private string GetPreferencesFile()
         {
             return Path.Combine(GetPreferencesDirectory(), "preferences.txt");
         }
 
-        private static string GetPreferencesDirectory()
+        private string GetPreferencesDirectory()
         {
             var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppName);
 
@@ -131,13 +148,13 @@ namespace arduino.net
             return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
 
-        private static string GetProperty(string section, string entry)
+        private string GetProperty(string section, string entry)
         {
             var val = mBaseConfig.GetSection(section)[entry];
             return val;
         }
 
-        private static string CheckProperty(string name, string section, string entry)
+        private string CheckProperty(string name, string section, string entry)
         {
             var val = mBaseConfig.GetSection(section)[entry];
 
