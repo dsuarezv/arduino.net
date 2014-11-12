@@ -377,7 +377,7 @@ namespace arduino.net
 
         protected override string GetOptimizationSetting()
         {
-            return "-O0";  // In debug, disable optimization. Most debug info is lost if enabled.
+            return Debugger == null ? "-Os" : "-O0";  // In debug, disable optimization. Most debug info is lost if enabled.
         }
     }
 
