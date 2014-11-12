@@ -419,7 +419,7 @@ namespace arduino.net
         private void DebuggerCheckbox_CheckedChanged()
         {
             IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsBuild);
-            IdeManager.Debugger.TouchProjectFilesAffectedByDebugging(IdeManager.CurrentProject);
+            IdeManager.Compiler.Clean();
         }
 
         private void Debugger_StatusChanged(object sender, DebuggerStatus newState)
