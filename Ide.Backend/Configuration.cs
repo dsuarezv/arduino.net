@@ -34,6 +34,11 @@ namespace arduino.net
             set { mBaseConfig.GetSection("editor")["sketchbookfolder"] = value; }
         }
 
+        public static string LastProject
+        {
+            get { return GetProperty("editor", "lastproject"); }
+            set { mBaseConfig.GetSection("editor")["lastproject"] = value; }
+        }        
 
         public static string CurrentBoard
         {
@@ -124,6 +129,12 @@ namespace arduino.net
         private static string GetExecutablePath()
         {
             return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        }
+
+        private static string GetProperty(string section, string entry)
+        {
+            var val = mBaseConfig.GetSection(section)[entry];
+            return val;
         }
 
         private static string CheckProperty(string name, string section, string entry)

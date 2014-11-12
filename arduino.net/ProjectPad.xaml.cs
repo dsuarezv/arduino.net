@@ -111,7 +111,10 @@ namespace arduino.net
 
             IdeManager.CurrentProject = p;
             IdeManager.Compiler = new Compiler(p, IdeManager.Debugger);
-            
+
+            Configuration.LastProject = sketchFile;
+            Configuration.Save();
+
             OpenAllProjectFiles();
 
             SessionSettings.Initialize(p.GetSettingsFileName());

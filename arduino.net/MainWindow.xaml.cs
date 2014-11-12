@@ -43,12 +43,8 @@ namespace arduino.net
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
                 IdeManager.WatchManager = new WatchManager(IdeManager.Debugger);
-                
 
-                //CreateEmptyProject();
-                //OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
-                OpenProject(@"C:\Users\dave\Documents\develop\Arduino\mpu6050samples\MPU6050_raw\MPU6050_raw.ino");
-
+                LoadLastProject();
                 
                 Task.Factory.StartNew(Debugger_SerialCharWorker);
                 Task.Factory.StartNew(Debugger_CapturesWorker);
@@ -61,6 +57,16 @@ namespace arduino.net
             }
         }
 
+
+        private void LoadLastProject()
+        {
+            var lastProject = Configuration.LastProject;
+
+            if (lastProject == null)
+                CreateEmptyProject();
+            else
+                OpenProject(lastProject);
+        }
 
         private string Configuration_PropertyValueRequired(string propertyName)
         {
@@ -90,6 +96,7 @@ namespace arduino.net
 
         private void CreateEmptyProject()
         {
+            // TODO: show initial project wizard that lets the user choose the new project directory.
             ProjectPad1.OpenProject(Project.GetDefaultNewProjectFullName());
         }
 
