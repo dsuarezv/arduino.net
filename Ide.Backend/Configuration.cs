@@ -9,8 +9,6 @@ namespace arduino.net
 {
     public class Configuration
     {
-        
-
         public const string AppName = "arduino.net";
         public const string NullProgrammerName = "none";
         public readonly string DefaultToolkitPath = Path.Combine(GetExecutablePath(), "../");
@@ -36,15 +34,35 @@ namespace arduino.net
         }
 
 
-        public bool VerboseBuildOutput { get; set; }
+        public bool VerboseBuildOutput 
+        {
+            get { return GetBoolProperty("build", "verbose_build_output"); }
+            set { SetBoolProperty("build", "verbose_build_output", value); }
+        }
 
-        public bool VerboseDeployOutput { get; set; }
+        public bool VerboseDeployOutput
+        {
+            get { return GetBoolProperty("build", "verbose_deploy_output"); }
+            set { SetBoolProperty("build", "verbose_deploy_output", value); }
+        }
         
-        public bool VerifyCodeAfterUpload { get; set; }
+        public bool VerifyCodeAfterUpload
+        {
+            get { return GetBoolProperty("build", "verifyupload"); }
+            set { SetBoolProperty("build", "verifyupload", value); }
+        }
 
-        public bool CheckRebuildBeforeRun { get; set; }
+        public bool CheckRebuildBeforeRun
+        {
+            get { return GetBoolProperty("build", "check_rebuild_before_run"); }
+            set { SetBoolProperty("build", "check_rebuild_before_run", value); }
+        }
 
-        public bool ShowDisassembly { get; set; }
+        public bool ShowDisassembly
+        {
+            get { return GetBoolProperty("build", "show_disassembly"); }
+            set { SetBoolProperty("build", "show_disassembly", value); }
+        }
 
         public string ToolkitPath
         {
@@ -62,7 +80,7 @@ namespace arduino.net
         {
             get { return GetProperty("editor", "lastproject"); }
             set { mBaseConfig.GetSection("editor")["lastproject"] = value; }
-        }        
+        }
 
         public string CurrentBoard
         {
@@ -162,6 +180,20 @@ namespace arduino.net
         {
             var val = mBaseConfig.GetSection(section)[entry];
             return val;
+        }
+
+        private bool GetBoolProperty(string section, string entry)
+        {
+            var val = mBaseConfig.GetSection(section)[entry];
+            if (val == null) return false;
+
+            return (val.ToLower() == "true") ? true : false;
+        }
+
+        private void SetBoolProperty(string section, string entry, bool value)
+        {
+            var strVal = value ? "true" : "false";
+            mBaseConfig.GetSection(section)[entry] = strVal;
         }
 
         private string CheckProperty(string name, string section, string entry)

@@ -35,6 +35,8 @@ namespace arduino.net
             var bindings = BindingOperations.GetSourceUpdatingBindings(this);
 
             foreach (var be in bindings) be.UpdateSource();
+
+            DialogResult = true;
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
