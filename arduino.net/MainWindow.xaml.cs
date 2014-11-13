@@ -162,15 +162,18 @@ namespace arduino.net
                     break;
 
                 case DebuggerStatus.Stopped:
-#if !SHORTCUT
-                    if (IdeManager.Compiler.IsDirty)
+                    if (Configuration.Instance.CheckRebuildBeforeRun)
                     {
-                        var success = await LaunchDeploy();
-                        if (!success) break;
+                        if (IdeManager.Compiler.IsDirty)
+                        {
+                            var success = await LaunchDeploy();
+                            if (!success) break;
+                        }
                     }
-#else
-                    UpdateDwarf();
-#endif
+                    else
+                    {
+                        UpdateDwarf();
+                    }
 
                     if (IsDebugBuild())
                     {
@@ -341,7 +344,8 @@ namespace arduino.net
 
             if (result)
             {
-                //OpenDisassemblyAfterBuild();
+                if (Configuration.Instance.ShowDisassembly) OpenDisassemblyAfterBuild();
+
                 StatusControl.SetState(ActionStatus.OK, "Compiler", "Build succeeded");
             }
             else
@@ -362,9 +366,9 @@ namespace arduino.net
                 ObjectDumper.GetSingleString(
                     ObjectDumper.GetDisassemblyWithSource(elfFile)), ".disassembly");
 
-            ProjectPad1.OpenContent("Symbol table",
-                ObjectDumper.GetSingleString(
-                    ObjectDumper.GetNmSymbolTable(elfFile)), ".symboltable");
+            //ProjectPad1.OpenContent("Symbol table",
+            //    ObjectDumper.GetSingleString(
+            //        ObjectDumper.GetNmSymbolTable(elfFile)), ".symboltable");
         }
 
         private async Task<bool> LaunchDeploy()

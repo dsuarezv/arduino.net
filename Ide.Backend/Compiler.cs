@@ -388,11 +388,17 @@ namespace arduino.net
 
             if (cmd.TargetIsUpToDate)
             {
-                Logger.LogCompiler("  {0} is up to date.", Path.GetFileName(cmd.TargetFile));
+                if (Configuration.Instance.VerboseBuildOutput)
+                { 
+                    Logger.LogCompiler("  {0} is up to date.", Path.GetFileName(cmd.TargetFile));
+                }
             }
             else
-            { 
-                Logger.LogCompiler("Building {0}: {1}", Path.GetFileName(cmd.TargetFile), cmd);
+            {
+                if (Configuration.Instance.VerboseBuildOutput)
+                { 
+                    Logger.LogCompiler("Building {0}: {1}", Path.GetFileName(cmd.TargetFile), cmd);
+                }
             }
             
             if (cmd.BuildCommand == null) return true;
@@ -403,12 +409,16 @@ namespace arduino.net
 
         private void ProcessOutputLine(string line)
         {
-            Logger.LogCompilerDirect("    " + line);
+            bool verbose = Configuration.Instance.VerboseBuildOutput;
+
+            if (verbose) Logger.LogCompilerDirect("    " + line);
 
             var msg = CompilerMsg.GetMsgForLine(line);
             if (msg == null) return;
 
             mCompilerErrors.Add(msg);
+
+            if (!verbose && msg.Type == "Error") Logger.LogCompilerDirect(msg.ToString());
         }
 
 
