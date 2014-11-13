@@ -9,7 +9,20 @@ namespace arduino.net
 {
     public class Configuration
     {
+        
+
+        public const string AppName = "arduino.net";
+        public const string NullProgrammerName = "none";
+        public readonly string DefaultToolkitPath = Path.Combine(GetExecutablePath(), "../");
+
+
+        private ConfigSection mBaseConfig;
+        private ConfigSection mBoards;
+        private ConfigSection mProgrammers;
         private static Configuration mInstance;
+
+        
+        public event Func<string, string> PropertyValueRequired;
 
 
         public static Configuration Instance
@@ -23,19 +36,16 @@ namespace arduino.net
         }
 
 
-        public const string AppName = "arduino.net";
-        public const string NullProgrammerName = "none";
-        public readonly string DefaultToolkitPath = Path.Combine(GetExecutablePath(), "../");
+        public bool VerboseBuildOutput { get; set; }
 
-
-        private ConfigSection mBaseConfig;
-        private ConfigSection mBoards;
-        private ConfigSection mProgrammers;
-
-
-        public event Func<string, string> PropertyValueRequired;
-
+        public bool VerboseDeployOutput { get; set; }
         
+        public bool VerifyCodeAfterUpload { get; set; }
+
+        public bool CheckRebuildBeforeRun { get; set; }
+
+        public bool ShowDisassembly { get; set; }
+
         public string ToolkitPath
         {
             get { return CheckProperty("ToolkitPath", "editor", "toolkitpath"); }

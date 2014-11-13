@@ -202,6 +202,12 @@ namespace arduino.net
             SelectProgrammer();
         }
 
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var sw = new GlobalSettingsDialog();
+            sw.ShowDialog();
+        }
+
         private void ClearEditorActiveLine()
         {
             var dbg = IdeManager.Debugger;
