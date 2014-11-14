@@ -69,15 +69,19 @@ namespace arduino.net
                 return;
             }
 
-            if (FileExtensionOnTmp != null)
+            EffectiveSourceFile = GetEffectiveSourceFile(SourceFile, tempDir, FileExtensionOnTmp);
+        }
+
+        public static string GetEffectiveSourceFile(string sourceFile, string tempDir, string fileExtensionOnTmp)
+        {
+            if (fileExtensionOnTmp != null)
             {
-                var newFileName = Path.GetFileNameWithoutExtension(SourceFile) + FileExtensionOnTmp;
-                EffectiveSourceFile = Path.Combine(tempDir, newFileName);
-                return;
+                var newFileName = Path.GetFileNameWithoutExtension(sourceFile) + fileExtensionOnTmp;
+                return Path.Combine(tempDir, newFileName);
             }
 
-            var newFileName2 = Path.GetFileName(SourceFile);
-            EffectiveSourceFile = Path.Combine(tempDir, newFileName2);
+            var newFileName2 = Path.GetFileName(sourceFile);
+            return Path.Combine(tempDir, newFileName2);
         }
 
         protected void CopySourceToTemp()
@@ -433,7 +437,7 @@ namespace arduino.net
             {
                 if (Debugger != null) result.Add("#include \"soft_debugger.h\"");
 
-                hasAddedContent = true;
+                if (mParser.LastIncludeLineNumber == -1) hasAddedContent = true;
             }
 
             if (lineNumber == mParser.SetupFunctionFirstLine + 1)
@@ -451,7 +455,7 @@ namespace arduino.net
 
             if (hasAddedContent)
             {
-                result.Add(string.Format("#line 1 \"{0}\"", EscapePath(SourceFile)));
+                result.Add(string.Format("#line {0} \"{1}\"", lineNumber, EscapePath(SourceFile)));
             }
 
             result.AddRange(ProcessLineForBreakpoints(lineNumber, line, breakpoints));

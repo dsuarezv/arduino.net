@@ -11,6 +11,8 @@ namespace arduino.net
 {
     public class Compiler
     {
+        private const string SketchFileExtensionOnTmp = ".cpp";
+
         private bool mIsOperationRunning = false;
         private BuildStage mBuildStage = BuildStage.NeedsBuild;
         private ObservableCollection<CompilerMsg> mCompilerErrors = new ObservableCollection<CompilerMsg>();
@@ -269,7 +271,7 @@ namespace arduino.net
                 switch (GetFileType(sourceFile))
                 {
                     case FileType.Code: result.Add(new DebugBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, CopyToTmp = copyToTmp, AdditionalIncludePaths = mIncludePaths }); break;
-                    case FileType.Sketch: result.Add(new InoBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, FileExtensionOnTmp = ".cpp", CopyToTmp = copyToTmp, AdditionalIncludePaths = mIncludePaths }); break;
+                    case FileType.Sketch: result.Add(new InoBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, FileExtensionOnTmp = SketchFileExtensionOnTmp, CopyToTmp = copyToTmp, AdditionalIncludePaths = mIncludePaths }); break;
                     case FileType.Assembler: result.Add(new AssemblerBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, CopyToTmp = false, AdditionalIncludePaths = mIncludePaths }); break;
                     default:
                         result.Add(new CopyBuildTarget() { SourceFile = sourceFile }); break;
@@ -500,6 +502,15 @@ namespace arduino.net
             string dirName = string.Format("build-{0}.tmp", mProject.SketchFile);
 
             return Path.Combine(tempDir, dirName);
+        }
+
+        public string GetSketchTransformedFile(string tempDir = null)
+        {
+            if (tempDir == null) tempDir = GetTempDirectory();
+
+            var sketchFile = mProject.GetSketchFileName();
+
+            return InoBuildTarget.GetEffectiveSourceFile(sketchFile, tempDir, SketchFileExtensionOnTmp);
         }
 
         public string GetElfFile(string tempDir = null)
