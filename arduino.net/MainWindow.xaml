@@ -30,9 +30,10 @@
                 <local:StatusHeaderControl x:Name="StatusControl" Margin="272,0,285,0"/>
                 <CheckBox x:Name="DebuggerCheckbox" Content="Debugger" HorizontalAlignment="Left" Margin="156,60,0,0" Template="{DynamicResource HeaderCheckbox}" Width="79" Checked="DebuggerCheckbox_Checked" Unchecked="DebuggerCheckbox_Unchecked" Height="16" VerticalAlignment="Top"/>
                 
-                <Button Name="SelectBoardButton" Content="Board" Click="SelectBoardButton_Click" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="280" Style="{DynamicResource HeaderSelectionButtonStyle}" />
-                <Button Name="SelectSerialButton" Content="Serial" Click="SelectSerialButton_Click" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="280" Style="{DynamicResource HeaderSelectionButtonStyle}" Margin="0,25,0,0" />
-                <Button Name="SelectProgrammerButton" Content="Progr" Click="SelectProgrammerButton_Click" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="280" Style="{DynamicResource HeaderSelectionButtonStyle}" Margin="0,50,0,0" />
+                <Button Name="SelectBoardButton" Content="Board" Click="SelectBoardButton_Click" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="280" Style="{DynamicResource HeaderSelectionButtonStyle}" Margin="0,-1,0,0" />
+                <Button Name="SelectSerialButton" Content="Serial" Click="SelectSerialButton_Click" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="280" Style="{DynamicResource HeaderSelectionButtonStyle}" Margin="0,18,0,0" />
+                <Button Name="SelectProgrammerButton" Content="Progr" Click="SelectProgrammerButton_Click" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="280" Style="{DynamicResource HeaderSelectionButtonStyle}" Margin="0,37,0,0" />
+                <Button Name="SettingsButton" Content="Settings" Click="SettingsButton_Click" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="95" Style="{DynamicResource HeaderSelectionButtonStyle}" Margin="0,56,0,0" />
             </Grid>
         </Border>
 

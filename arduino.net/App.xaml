@@ -82,6 +82,31 @@
         </ControlTemplate>
 
 
+        <ControlTemplate x:Key="B0-Checkbox" TargetType="{x:Type CheckBox}">
+            <Grid x:Name="grid" Margin="0,0,-3.5,0">
+                <TextBlock x:Name="textBlock" HorizontalAlignment="Stretch" Margin="20.125,0,0,0" TextWrapping="Wrap" VerticalAlignment="Stretch" Height="Auto" Width="Auto" Foreground="{DynamicResource C0}"><InlineUIContainer>
+        				<ContentPresenter x:Name="contentPresenter"/>
+        			</InlineUIContainer></TextBlock>
+                <Ellipse x:Name="ellipse" Fill="Transparent" HorizontalAlignment="Left" Height="16" Margin="0" Stroke="{DynamicResource C1}" VerticalAlignment="Top" Width="16" StrokeThickness="2"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Fill" TargetName="ellipse" Value="{DynamicResource C2}"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" TargetName="textBlock" Value="{StaticResource C0-Highlight}"/>
+                    <Setter Property="Stroke" TargetName="ellipse" Value="{DynamicResource C1-Highlight}"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" TargetName="textBlock" Value="{StaticResource C0-Disabled}"/>
+                    <Setter Property="Stroke" TargetName="ellipse" Value="{DynamicResource C1-Disabled}"/>
+                    <Setter Property="Fill" TargetName="ellipse" Value="{DynamicResource C1-Disabled}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+
+
         <!-- TabSelector styling -->
         
 

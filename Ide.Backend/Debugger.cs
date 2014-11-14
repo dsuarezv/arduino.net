@@ -175,10 +175,17 @@ namespace arduino.net
 
         public byte[] GetTargetMemDump(Int32 address, byte size)
         {
+            if (mSerialPort == null) return null;
+
             mTraceQueryBuffer = null;
 
             SendTraceQuery(address, size);
 
+            return WaitForMemoryDumpAnswer();
+        }
+
+        private byte[] WaitForMemoryDumpAnswer()
+        {
             while (mTraceQueryBuffer == null)
             {
                 Thread.Sleep(50);

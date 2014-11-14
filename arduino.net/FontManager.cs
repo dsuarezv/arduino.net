@@ -16,14 +16,14 @@ namespace arduino.net
 
         public static Font GetSourceCodeFont()
         {
-            if (Configuration.EditorFontName == "Internal" && File.Exists(InternalFontFile))
+            if (Configuration.Instance.EditorFontName == "Internal" && File.Exists(InternalFontFile))
             {
                 var p = new PrivateFontCollection();
                 p.AddFontFile(InternalFontFile);
-                return new Font(p.Families[0], Configuration.EditorFontSize);
+                return new Font(p.Families[0], Configuration.Instance.EditorFontSize);
             }
                 
-            return new Font(Configuration.EditorFontName, Configuration.EditorFontSize);
+            return new Font(Configuration.Instance.EditorFontName, Configuration.Instance.EditorFontSize);
         }
 
     }

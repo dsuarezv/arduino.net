@@ -70,7 +70,7 @@ namespace arduino.net
 
         private static List<string> RunAvrSize(string arguments)
         {
-            string sizeCommand = Path.Combine(Configuration.ToolsPath, SizeCommand);
+            string sizeCommand = Path.Combine(Configuration.Instance.ToolsPath, SizeCommand);
 
             var cmd = new Command() { Program = sizeCommand, Arguments = arguments };
             CmdRunner.Run(cmd);
@@ -79,7 +79,7 @@ namespace arduino.net
 
         private static List<string> RunNm(string arguments)
         {
-            string nmCommand = Path.Combine(Configuration.ToolsPath, NmCommand);
+            string nmCommand = Path.Combine(Configuration.Instance.ToolsPath, NmCommand);
 
             var cmd = new Command() { Program = nmCommand, Arguments = arguments };
             CmdRunner.Run(cmd);
@@ -88,7 +88,7 @@ namespace arduino.net
 
         private static List<string> RunObjectDump(string arguments)
         {
-            string objDumpCommand = Path.Combine(Configuration.ToolsPath, ObjDumpCommand);
+            string objDumpCommand = Path.Combine(Configuration.Instance.ToolsPath, ObjDumpCommand);
 
             var cmd = new Command() { Program = objDumpCommand, Arguments = arguments };
             CmdRunner.Run(cmd);

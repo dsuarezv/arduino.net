@@ -1,0 +1,22 @@
+﻿<Window x:Class="arduino.net.GlobalSettingsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings" Height="431" Width="495" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False" Loaded="Window_Loaded">
+    <Grid Background="{DynamicResource B0}">
+        <Label Content="Sketchbook folder" HorizontalAlignment="Left" Margin="7,10,0,0" VerticalAlignment="Top"/>
+        <TextBox Height="23" Margin="10,36,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="{Binding SketchBookPath, UpdateSourceTrigger=Explicit}"/>
+        <Label Content="Arduino SDK folder" HorizontalAlignment="Left" Margin="7,62,0,0" VerticalAlignment="Top"/>
+        <TextBox Height="23" Margin="10,88,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="{Binding ToolkitPath, UpdateSourceTrigger=Explicit}"/>
+
+        <CheckBox Content="Show verbose output during compilation" HorizontalAlignment="Left" Margin="10,133,0,0" VerticalAlignment="Top" Template="{DynamicResource B0-Checkbox}" IsChecked="{Binding VerboseBuildOutput, UpdateSourceTrigger=Explicit}"/>
+        <CheckBox Content="Show verbose output during upload" HorizontalAlignment="Left" Margin="10,162,0,0" VerticalAlignment="Top" Template="{DynamicResource B0-Checkbox}" IsChecked="{Binding VerboseDeployOutput, UpdateSourceTrigger=Explicit}"/>
+        <CheckBox Content="Verify code after upload" HorizontalAlignment="Left" Margin="10,192,0,0" VerticalAlignment="Top" Template="{DynamicResource B0-Checkbox}" IsChecked="{Binding VerifyCodeAfterUpload, UpdateSourceTrigger=Explicit}"/>
+        <CheckBox Content="Show disassembly after compilation in debug mode" HorizontalAlignment="Left" Margin="10,222,0,0" VerticalAlignment="Top" Template="{DynamicResource B0-Checkbox}" IsChecked="{Binding ShowDisassembly, UpdateSourceTrigger=Explicit}"/>
+        <CheckBox Content="Check if rebuild is needed before run" HorizontalAlignment="Left" Margin="10,252,0,0" VerticalAlignment="Top" Template="{DynamicResource B0-Checkbox}" IsChecked="{Binding CheckRebuildBeforeRun, UpdateSourceTrigger=Explicit}"/>
+        
+        
+        <Button Content="Ok" IsDefault="True" HorizontalAlignment="Right" Margin="0,0,120,10" VerticalAlignment="Bottom" Width="100" Height="32" Style="{DynamicResource RegularButtonStyle}" Click="OkButton_Click"/>
+        <Button Content="Cancel" IsCancel="True" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="100" Height="32" Style="{DynamicResource RegularButtonStyle}" Click="CancelButton_Click"/>
+
+    </Grid>
+</Window>

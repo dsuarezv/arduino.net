@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,8 +31,7 @@ namespace arduino.net
         {
             try
             {
-                Configuration.PropertyValueRequired += Configuration_PropertyValueRequired;
-                Configuration.Initialize();
+                Configuration.Instance.PropertyValueRequired += Configuration_PropertyValueRequired;
 
                 CaptureMonitorFactory.RegisterCaptureAssembly(@"Ide.Wpf.DefaultCaptures.dll");
 
@@ -43,12 +43,8 @@ namespace arduino.net
                 IdeManager.Debugger.TargetConnected += Debugger_TargetConnected;
                 IdeManager.Debugger.StatusChanged += Debugger_StatusChanged;
                 IdeManager.WatchManager = new WatchManager(IdeManager.Debugger);
-                
 
-                //CreateEmptyProject();
-                //OpenProject(@"C:\Users\dave\Documents\develop\Arduino\sketch_oct27\sketch_oct27.ino");
-                OpenProject(@"C:\Users\dave\Documents\develop\Arduino\mpu6050samples\MPU6050_raw\MPU6050_raw.ino");
-
+                LoadLastProject();
                 
                 Task.Factory.StartNew(Debugger_SerialCharWorker);
                 Task.Factory.StartNew(Debugger_CapturesWorker);
@@ -61,6 +57,16 @@ namespace arduino.net
             }
         }
 
+
+        private void LoadLastProject()
+        {
+            var lastProject = Configuration.Instance.LastProject;
+
+            if (lastProject == null)
+                CreateEmptyProject();
+            else
+                OpenProject(lastProject);
+        }
 
         private string Configuration_PropertyValueRequired(string propertyName)
         {
@@ -90,6 +96,7 @@ namespace arduino.net
 
         private void CreateEmptyProject()
         {
+            // TODO: show initial project wizard that lets the user choose the new project directory.
             ProjectPad1.OpenProject(Project.GetDefaultNewProjectFullName());
         }
 
@@ -104,7 +111,7 @@ namespace arduino.net
         {
             if (!ProjectPad1.CloseProject()) e.Cancel = true;
 
-            Configuration.Save();
+            Configuration.Instance.Save();
             SessionSettings.Save();
         }        
 
@@ -156,19 +163,22 @@ namespace arduino.net
                     break;
 
                 case DebuggerStatus.Stopped:
-#if !SHORTCUT
-                    if (IdeManager.Compiler.IsDirty)
+                    if (Configuration.Instance.CheckRebuildBeforeRun)
                     {
-                        var success = await LaunchDeploy();
-                        if (!success) break;
+                        if (IdeManager.Compiler.IsDirty)
+                        {
+                            var success = await LaunchDeploy();
+                            if (!success) break;
+                        }
                     }
-#else
-                    UpdateDwarf();
-#endif
+                    else
+                    {
+                        UpdateDwarf();
+                    }
 
                     if (IsDebugBuild())
                     {
-                        IdeManager.Debugger.ComPort = Configuration.CurrentComPort;
+                        IdeManager.Debugger.ComPort = Configuration.Instance.CurrentComPort;
                         IdeManager.Debugger.Run();
                     }
                     break;
@@ -196,6 +206,12 @@ namespace arduino.net
             SelectProgrammer();
         }
 
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var sw = new GlobalSettingsDialog();
+            sw.ShowDialog();
+        }
+
         private void ClearEditorActiveLine()
         {
             var dbg = IdeManager.Debugger;
@@ -219,12 +235,12 @@ namespace arduino.net
 
         private bool SelectSerial()
         {
-            var c = Configuration.CurrentComPort;
+            var c = Configuration.Instance.CurrentComPort;
             var ports = ComportAdapter.Get(IdeManager.Debugger.GetAvailableComPorts());
             var selected = GetConfigValue("Select serial port", ports, ref c, "img/comports");
             if (selected != null)
             {
-                Configuration.CurrentComPort = c;
+                Configuration.Instance.CurrentComPort = c;
                 IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsDeploy);
                 UpdateBoardUi();
             }
@@ -234,11 +250,11 @@ namespace arduino.net
 
         private bool SelectProgrammer()
         {
-            var c = Configuration.CurrentProgrammer;
-            var selected = GetConfigValue("Select programmer", Configuration.Programmers, ref c, "img/programmers");
+            var c = Configuration.Instance.CurrentProgrammer;
+            var selected = GetConfigValue("Select programmer", Configuration.Instance.Programmers, ref c, "img/programmers");
             if (selected != null) 
             {
-                Configuration.CurrentProgrammer = c;
+                Configuration.Instance.CurrentProgrammer = c;
                 IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsDeploy);
                 UpdateBoardUi();
             }
@@ -248,11 +264,11 @@ namespace arduino.net
 
         private bool SelectBoard()
         {
-            var c = Configuration.CurrentBoard;
-            var selected = GetConfigValue("Select board", Configuration.Boards, ref c, "img/boards");
+            var c = Configuration.Instance.CurrentBoard;
+            var selected = GetConfigValue("Select board", Configuration.Instance.Boards, ref c, "img/boards");
             if (selected != null) 
             {
-                Configuration.CurrentBoard = c;
+                Configuration.Instance.CurrentBoard = c;
                 IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsBuild);
                 UpdateBoardUi();
             }
@@ -271,9 +287,9 @@ namespace arduino.net
 
         private void UpdateBoardUi()
         {
-            var board = Configuration.Boards.GetSection(Configuration.CurrentBoard)["name"];
-            var progr = Configuration.Programmers.GetSection(Configuration.CurrentProgrammer)["name"];
-            var comport = Configuration.CurrentComPort;
+            var board = Configuration.Instance.Boards.GetSection(Configuration.Instance.CurrentBoard)["name"];
+            var progr = Configuration.Instance.Programmers.GetSection(Configuration.Instance.CurrentProgrammer)["name"];
+            var comport = Configuration.Instance.CurrentComPort;
 
             SelectBoardButton.Content = string.Format("Board: {0}", board ?? "None. Click to select");
             SelectProgrammerButton.Content = string.Format("Programmer: {0}", progr ?? "None (bootloader on serial port)");
@@ -282,7 +298,7 @@ namespace arduino.net
 
         private bool IsBoardConfigured()
         {
-            if (Configuration.CurrentBoard != null) return true;
+            if (Configuration.Instance.CurrentBoard != null) return true;
 
             MessageBox.Show("You have to configure the type of Arduino board you are using.", "Attention", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
@@ -291,7 +307,7 @@ namespace arduino.net
 
         private bool IsDeploymentConfigured()
         {
-            if (Configuration.CurrentComPort != null || Configuration.CurrentProgrammer != null) return true;
+            if (Configuration.Instance.CurrentComPort != null || Configuration.Instance.CurrentProgrammer != null) return true;
 
             MessageBox.Show("You have to configure a deployment option, either bootloader through a serial port, or a programmer.", "Attention", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
@@ -300,7 +316,7 @@ namespace arduino.net
 
         private bool IsSerialConfigured()
         {
-            if (Configuration.CurrentComPort != null) return true;
+            if (Configuration.Instance.CurrentComPort != null) return true;
 
             MessageBox.Show("You have to configure the serial port that connects to your Arduino.", "Attention", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
@@ -325,11 +341,12 @@ namespace arduino.net
             ProjectPad1.SaveAllDocuments();
 
             var compiler = IdeManager.Compiler;
-            bool result = await compiler.BuildAsync(Configuration.CurrentBoard, debug);
+            bool result = await compiler.BuildAsync(Configuration.Instance.CurrentBoard, debug);
 
             if (result)
             {
-                //OpenDisassemblyAfterBuild();
+                if (Configuration.Instance.ShowDisassembly) OpenDisassemblyAfterBuild();
+
                 StatusControl.SetState(ActionStatus.OK, "Compiler", "Build succeeded");
             }
             else
@@ -350,9 +367,17 @@ namespace arduino.net
                 ObjectDumper.GetSingleString(
                     ObjectDumper.GetDisassemblyWithSource(elfFile)), ".disassembly");
 
-            ProjectPad1.OpenContent("Symbol table",
-                ObjectDumper.GetSingleString(
-                    ObjectDumper.GetNmSymbolTable(elfFile)), ".symboltable");
+            var transformedFile = IdeManager.Compiler.GetSketchTransformedFile();
+            if (!File.Exists(transformedFile)) return;
+
+            using (var f = File.OpenText(transformedFile))
+            {
+                ProjectPad1.OpenContent("Transformed Sketch", f.ReadToEnd(), ".cpp");
+            }
+
+            //ProjectPad1.OpenContent("Symbol table",
+            //    ObjectDumper.GetSingleString(
+            //        ObjectDumper.GetNmSymbolTable(elfFile)), ".symboltable");
         }
 
         private async Task<bool> LaunchDeploy()
@@ -364,7 +389,7 @@ namespace arduino.net
             if (!buildSuccess) return false;
 
             StatusControl.SetState(ActionStatus.InProgress, "Deploy", "Deploying...");
-            bool success = await IdeManager.Compiler.DeployAsync(Configuration.CurrentBoard, Configuration.CurrentProgrammer, IsDebugBuild());
+            bool success = await IdeManager.Compiler.DeployAsync(Configuration.Instance.CurrentBoard, Configuration.Instance.CurrentProgrammer, IsDebugBuild());
 
             if (success)
             {
@@ -412,7 +437,7 @@ namespace arduino.net
         private void DebuggerCheckbox_CheckedChanged()
         {
             IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsBuild);
-            IdeManager.Debugger.TouchProjectFilesAffectedByDebugging(IdeManager.CurrentProject);
+            IdeManager.Compiler.Clean();
         }
 
         private void Debugger_StatusChanged(object sender, DebuggerStatus newState)

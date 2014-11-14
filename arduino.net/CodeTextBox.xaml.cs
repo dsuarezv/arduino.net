@@ -62,7 +62,7 @@ namespace arduino.net
             {
                 Dock = System.Windows.Forms.DockStyle.Fill,
                 Font = FontManager.GetSourceCodeFont(),
-                AutoIndent = Configuration.EditorAutoIndent,
+                AutoIndent = Configuration.Instance.EditorAutoIndent,
                 ReservedCountOfLineNumberChars = 5,
                 BackColor = backColor,
                 IndentBackColor = backColor,
@@ -124,6 +124,8 @@ namespace arduino.net
 
         public void SaveFile()
         {
+            if (mReadOnly) return;
+
             if (mFileName == null) 
             {
                 var s = new SaveFileDialog()
@@ -211,6 +213,7 @@ namespace arduino.net
             mReadOnly = readOnly;
 
             mMainTextBox.ReadOnly = readOnly;
+            mMainTextBox.IsChanged = false;
         }
 
 

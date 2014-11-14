@@ -21,6 +21,7 @@ namespace arduino.net
         public int LineNumber { get; private set; }
         public int ColumnNumber { get; private set; }
 
+        private string Line;
         
         public static CompilerMsg GetMsgForLine(string line)
         {
@@ -35,18 +36,26 @@ namespace arduino.net
 
         private static CompilerMsg GetLineMatch(Regex regex, string line, string type)
         {
+            
+
             var m = regex.Match(line);
 
             if (!m.Success) return null;
             
             return new CompilerMsg()
             {
+                Line = line,
                 Type = type,
                 LineNumber = m.Groups["line"].GetIntValue() - 1,
                 FileName = m.Groups["file"].Value,
                 Message = m.Groups["msg"].Value,
                 ColumnNumber = m.Groups["column"].GetIntValue()
             };
+        }
+
+        public override string ToString()
+        {
+            return Line;
         }
     }
 }

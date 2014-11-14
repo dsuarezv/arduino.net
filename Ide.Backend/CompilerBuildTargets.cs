@@ -69,15 +69,19 @@ namespace arduino.net
                 return;
             }
 
-            if (FileExtensionOnTmp != null)
+            EffectiveSourceFile = GetEffectiveSourceFile(SourceFile, tempDir, FileExtensionOnTmp);
+        }
+
+        public static string GetEffectiveSourceFile(string sourceFile, string tempDir, string fileExtensionOnTmp)
+        {
+            if (fileExtensionOnTmp != null)
             {
-                var newFileName = Path.GetFileNameWithoutExtension(SourceFile) + FileExtensionOnTmp;
-                EffectiveSourceFile = Path.Combine(tempDir, newFileName);
-                return;
+                var newFileName = Path.GetFileNameWithoutExtension(sourceFile) + fileExtensionOnTmp;
+                return Path.Combine(tempDir, newFileName);
             }
 
-            var newFileName2 = Path.GetFileName(SourceFile);
-            EffectiveSourceFile = Path.Combine(tempDir, newFileName2);
+            var newFileName2 = Path.GetFileName(sourceFile);
+            return Path.Combine(tempDir, newFileName2);
         }
 
         protected void CopySourceToTemp()
@@ -131,14 +135,14 @@ namespace arduino.net
         {
             var compiler = "hardware/tools/avr/bin/" + (IsCFile(EffectiveSourceFile) ? "avr-gcc" : "avr-g++");
 
-            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
+            var config = Configuration.Instance.Boards.GetSection(boardName).GetSection("build");
             var usbvid = config["vid"];
             var usbpid = config["pid"];
             var includePaths = GetIncludeArgument(config);
 
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, compiler),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, compiler),
                 Arguments = string.Format("-c -g {8} -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
                     config["mcu"],
                     config["f_cpu"],
@@ -161,8 +165,8 @@ namespace arduino.net
         {
             var result = new List<string>() 
             {
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]),
-                Path.Combine(Configuration.ToolkitPath, "hardware/arduino/variants/" + config["variant"]),
+                Path.Combine(Configuration.Instance.ToolkitPath, "hardware/arduino/cores/" + config["core"]),
+                Path.Combine(Configuration.Instance.ToolkitPath, "hardware/arduino/variants/" + config["variant"]),
                 Path.GetDirectoryName(EffectiveSourceFile)
             };
 
@@ -193,14 +197,14 @@ namespace arduino.net
         {
             var compiler = "hardware/tools/avr/bin/avr-gcc";
 
-            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
+            var config = Configuration.Instance.Boards.GetSection(boardName).GetSection("build");
             var usbvid = config["vid"];
             var usbpid = config["pid"];
             var includePaths = GetIncludeArgument(config);
 
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, compiler),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, compiler),
 
                 Arguments = string.Format("-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu={0} -DF_CPU={1} -MMD -DUSB_VID={2} -DUSB_PID={3} -DARDUINO={4} {5} \"{6}\" -o \"{7}\"",
                     config["mcu"],
@@ -229,7 +233,7 @@ namespace arduino.net
 
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-ar"),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, "hardware/tools/avr/bin/avr-ar"),
                 Arguments = string.Format("rcs \"{0}\" {1}",
                     TargetFile, sb)
             };
@@ -253,11 +257,11 @@ namespace arduino.net
         {
             DisableTargetDateCheck = true;
 
-            var config = Configuration.Boards.GetSection(boardName).GetSection("build");
+            var config = Configuration.Instance.Boards.GetSection(boardName).GetSection("build");
 
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-gcc"),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, "hardware/tools/avr/bin/avr-gcc"),
                 Arguments = string.Format("-Os -Wl,--gc-sections -mmcu={0} -o {1} {2} -L{3} -lm",
                     config["mcu"],
                     TargetFile,
@@ -274,7 +278,7 @@ namespace arduino.net
         {
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-objcopy"),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, "hardware/tools/avr/bin/avr-objcopy"),
                 Arguments = string.Format("-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0 {0} {1}",
                     EffectiveSourceFile,
                     TargetFile)
@@ -289,7 +293,7 @@ namespace arduino.net
         {
             BuildCommand = new Command()
             {
-                Program = Path.Combine(Configuration.ToolkitPath, "hardware/tools/avr/bin/avr-objcopy"),
+                Program = Path.Combine(Configuration.Instance.ToolkitPath, "hardware/tools/avr/bin/avr-objcopy"),
                 Arguments = string.Format("-O ihex -R .eeprom {0} {1}",
                     EffectiveSourceFile,
                     TargetFile)
@@ -370,14 +374,14 @@ namespace arduino.net
         {
             var includePaths = base.GetIncludePaths(config);
 
-            if (Debugger != null) includePaths.Add(Path.Combine(Configuration.ToolkitPath, "debugger/" + config["core"]));
+            if (Debugger != null) includePaths.Add(Path.Combine(Configuration.Instance.ToolkitPath, "debugger/" + config["core"]));
 
             return includePaths;
         }
 
         protected override string GetOptimizationSetting()
         {
-            return "-O0";  // In debug, disable optimization. Most debug info is lost if enabled.
+            return Debugger == null ? "-Os" : "-O0";  // In debug, disable optimization. Most debug info is lost if enabled.
         }
     }
 
@@ -433,7 +437,7 @@ namespace arduino.net
             {
                 if (Debugger != null) result.Add("#include \"soft_debugger.h\"");
 
-                hasAddedContent = true;
+                if (mParser.LastIncludeLineNumber == -1) hasAddedContent = true;
             }
 
             if (lineNumber == mParser.SetupFunctionFirstLine + 1)
@@ -451,7 +455,7 @@ namespace arduino.net
 
             if (hasAddedContent)
             {
-                result.Add(string.Format("#line 1 \"{0}\"", EscapePath(SourceFile)));
+                result.Add(string.Format("#line {0} \"{1}\"", lineNumber, EscapePath(SourceFile)));
             }
 
             result.AddRange(ProcessLineForBreakpoints(lineNumber, line, breakpoints));

@@ -117,11 +117,12 @@ namespace arduino.net
             if (pointerValue == 0) return "<null>";
 
             return string.Format("0x{0:x}", pointerValue);
-                
         }
 
         public override string GetTypeRepresentation()
         {
+            if (PointedSymbolType == null) return "<null pointer type>";
+
             return PointedSymbolType.Name + "*";
         }
     }

@@ -81,6 +81,9 @@
     <Compile Include="CapturePointsPad.xaml.cs">
       <DependentUpon>CapturePointsPad.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GlobalSettingsDialog.xaml.cs">
+      <DependentUpon>GlobalSettingsDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SelectionAdapters.cs" />
     <Compile Include="FontManager.cs" />
     <Compile Include="MemoryDumpPad.xaml.cs">
@@ -125,6 +128,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CodeTextBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GlobalSettingsDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

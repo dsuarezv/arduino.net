@@ -11,6 +11,8 @@ namespace arduino.net
 {
     public class Compiler
     {
+        private const string SketchFileExtensionOnTmp = ".cpp";
+
         private bool mIsOperationRunning = false;
         private BuildStage mBuildStage = BuildStage.NeedsBuild;
         private ObservableCollection<CompilerMsg> mCompilerErrors = new ObservableCollection<CompilerMsg>();
@@ -214,7 +216,7 @@ namespace arduino.net
 
         private bool VerifySize(string tempDir, bool printOutput)
         {
-            int maxSize = Int32.Parse(Configuration.Boards.GetSection(mBoardName).GetSection("upload")["maximum_size"]);
+            int maxSize = Int32.Parse(Configuration.Instance.Boards.GetSection(mBoardName).GetSection("upload")["maximum_size"]);
             int elfSize = ObjectDumper.GetSize(GetElfFile(tempDir));
             bool result = maxSize > elfSize;
             
@@ -250,8 +252,8 @@ namespace arduino.net
         {
             if (!debug) return new List<BuildTarget>();
             
-            var config = Configuration.Boards.GetSection(mBoardName).GetSection("build");
-            var sourceDir = Path.Combine(Configuration.ToolkitPath, "debugger/" + config["core"]);
+            var config = Configuration.Instance.Boards.GetSection(mBoardName).GetSection("build");
+            var sourceDir = Path.Combine(Configuration.Instance.ToolkitPath, "debugger/" + config["core"]);
 
             var fileList = Project.GetCodeFilesOnPath(sourceDir);
             return GetCommandsForFiles(tempDir, debug, fileList, false);
@@ -269,7 +271,7 @@ namespace arduino.net
                 switch (GetFileType(sourceFile))
                 {
                     case FileType.Code: result.Add(new DebugBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, CopyToTmp = copyToTmp, AdditionalIncludePaths = mIncludePaths }); break;
-                    case FileType.Sketch: result.Add(new InoBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, FileExtensionOnTmp = ".cpp", CopyToTmp = copyToTmp, AdditionalIncludePaths = mIncludePaths }); break;
+                    case FileType.Sketch: result.Add(new InoBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, Debugger = debugger, FileExtensionOnTmp = SketchFileExtensionOnTmp, CopyToTmp = copyToTmp, AdditionalIncludePaths = mIncludePaths }); break;
                     case FileType.Assembler: result.Add(new AssemblerBuildTarget() { SourceFile = sourceFile, TargetFile = targetFile, CopyToTmp = false, AdditionalIncludePaths = mIncludePaths }); break;
                     default:
                         result.Add(new CopyBuildTarget() { SourceFile = sourceFile }); break;
@@ -388,11 +390,17 @@ namespace arduino.net
 
             if (cmd.TargetIsUpToDate)
             {
-                Logger.LogCompiler("  {0} is up to date.", Path.GetFileName(cmd.TargetFile));
+                if (Configuration.Instance.VerboseBuildOutput)
+                { 
+                    Logger.LogCompiler("  {0} is up to date.", Path.GetFileName(cmd.TargetFile));
+                }
             }
             else
-            { 
-                Logger.LogCompiler("Building {0}: {1}", Path.GetFileName(cmd.TargetFile), cmd);
+            {
+                if (Configuration.Instance.VerboseBuildOutput)
+                { 
+                    Logger.LogCompiler("Building {0}: {1}", Path.GetFileName(cmd.TargetFile), cmd);
+                }
             }
             
             if (cmd.BuildCommand == null) return true;
@@ -403,12 +411,16 @@ namespace arduino.net
 
         private void ProcessOutputLine(string line)
         {
-            Logger.LogCompilerDirect("    " + line);
+            bool verbose = Configuration.Instance.VerboseBuildOutput;
+
+            if (verbose) Logger.LogCompilerDirect("    " + line);
 
             var msg = CompilerMsg.GetMsgForLine(line);
             if (msg == null) return;
 
             mCompilerErrors.Add(msg);
+
+            if (!verbose && msg.Type == "Error") Logger.LogCompilerDirect(msg.ToString());
         }
 
 
@@ -438,7 +450,7 @@ namespace arduino.net
             {
                 var libName = Path.GetFileNameWithoutExtension(inc);
 
-                foreach (var path in Configuration.LibraryPaths)
+                foreach (var path in Configuration.Instance.LibraryPaths)
                 {
                     var libPath = Path.GetFullPath(Path.Combine(path, libName));
 
@@ -492,6 +504,15 @@ namespace arduino.net
             return Path.Combine(tempDir, dirName);
         }
 
+        public string GetSketchTransformedFile(string tempDir = null)
+        {
+            if (tempDir == null) tempDir = GetTempDirectory();
+
+            var sketchFile = mProject.GetSketchFileName();
+
+            return InoBuildTarget.GetEffectiveSourceFile(sketchFile, tempDir, SketchFileExtensionOnTmp);
+        }
+
         public string GetElfFile(string tempDir = null)
         {
             if (tempDir == null) tempDir = GetTempDirectory();
@@ -540,9 +561,9 @@ namespace arduino.net
 
         private string GetBoardCoreDirectory()
         {
-            var config = Configuration.Boards.GetSection(mBoardName).GetSection("build");
+            var config = Configuration.Instance.Boards.GetSection(mBoardName).GetSection("build");
 
-            return Path.Combine(Configuration.ToolkitPath, "hardware/arduino/cores/" + config["core"]);
+            return Path.Combine(Configuration.Instance.ToolkitPath, "hardware/arduino/cores/" + config["core"]);
         }
     }
 
