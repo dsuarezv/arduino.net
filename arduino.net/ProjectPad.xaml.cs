@@ -173,7 +173,7 @@ namespace arduino.net
             editor.OpenFile(fileName);
         }
 
-        public void OpenContent(string title, string content, string ext = null)
+        public void OpenContent(string title, string content, string ext = null, bool readOnly = true)
         {
             var ti = GetTabForFileName(title);
 
@@ -190,6 +190,7 @@ namespace arduino.net
             }
 
             editor.OpenContent(content, ext);
+            editor.SetReadOnly(readOnly);
         }
 
         private bool CloseFile(string fileName)

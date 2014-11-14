@@ -124,6 +124,8 @@ namespace arduino.net
 
         public void SaveFile()
         {
+            if (mReadOnly) return;
+
             if (mFileName == null) 
             {
                 var s = new SaveFileDialog()
@@ -211,6 +213,7 @@ namespace arduino.net
             mReadOnly = readOnly;
 
             mMainTextBox.ReadOnly = readOnly;
+            mMainTextBox.IsChanged = false;
         }
 
 

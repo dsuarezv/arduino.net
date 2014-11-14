@@ -363,16 +363,16 @@ namespace arduino.net
 
             var elfFile = IdeManager.Compiler.GetElfFile();
 
-            //ProjectPad1.OpenContent("Sketch dissasembly",
-            //    ObjectDumper.GetSingleString(
-            //        ObjectDumper.GetDisassemblyWithSource(elfFile)), ".disassembly");
+            ProjectPad1.OpenContent("Sketch dissasembly",
+                ObjectDumper.GetSingleString(
+                    ObjectDumper.GetDisassemblyWithSource(elfFile)), ".disassembly");
 
             var transformedFile = IdeManager.Compiler.GetSketchTransformedFile();
             if (!File.Exists(transformedFile)) return;
 
             using (var f = File.OpenText(transformedFile))
             {
-                ProjectPad1.OpenContent("TransformedFile", f.ReadToEnd(), ".cpp");
+                ProjectPad1.OpenContent("Transformed Sketch", f.ReadToEnd(), ".cpp");
             }
 
             //ProjectPad1.OpenContent("Symbol table",
