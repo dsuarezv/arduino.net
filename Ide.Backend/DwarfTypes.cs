@@ -78,6 +78,34 @@ namespace arduino.net
         }
     }
 
+    public class DwarfTypeDefType: DwarfBaseType
+    {
+        private int mTypeId;
+
+        public DwarfBaseType TypeDefType;
+
+        public override void FillAttributes(DwarfParserNode node)
+        {
+            base.FillAttributes(node);
+
+            mTypeId = node.GetAttr("type").GetReferenceValue();
+        }
+
+        public override void SetupReferences(DwarfTextParser parser, Dictionary<int, DwarfObject> index)
+        {
+            base.SetupReferences(parser, index);
+
+            TypeDefType = GetTypeFromIndex(index, mTypeId);
+
+            if (TypeDefType == null) return;
+            ByteSize = TypeDefType.ByteSize;
+        }
+
+        public override string GetValueRepresentation(IDebugger debugger, byte[] rawValue)
+        {
+            return TypeDefType.GetValueRepresentation(debugger, rawValue);
+        }
+    }
 
     public class DwarfPointerType: DwarfBaseType
     {
