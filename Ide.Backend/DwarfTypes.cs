@@ -20,21 +20,23 @@ namespace arduino.net
         {
             base.FillAttributes(node);
             ByteSize = node.GetAttr("byte_size").GetIntValue();
-            Encoding = node.GetAttr("encoding").GetIntValue();
-
-            if (Name == null) 
-            {
-                // Special case: apparently "int" is not an indirect string, like everything else.
-                var n = node.GetAttr("name").RawValue;
-                if (n != null) Name = n.Trim(' ', '\t');
-            }
+            Encoding = node.GetAttr("encoding").GetEncodingValue();
         }
 
         public virtual string GetValueRepresentation(IDebugger debugger, byte[] rawValue)
         {
-            long intValue = GetIntFromBytes(rawValue);
-
-            return GetValueRepresentation(intValue);
+            switch (Encoding)
+            {
+                case 1: return "<linear address>";                          // linear machine address
+                case 2: return GetBoolValue(rawValue).ToString();  // boolean
+                case 3: return "<complex float>";                           // complex floating point number
+                case 4: return GetFloatValue(rawValue).ToString(); // float
+                case 5: 
+                case 6: return GetIntRepresentation(rawValue, true);        // signed binary integer
+                case 7: 
+                case 8: return GetIntRepresentation(rawValue, false);       // unsigned binary character
+                default: return "<unknown encoding>";
+            }
         }
 
         public virtual string GetTypeRepresentation()
@@ -42,16 +44,51 @@ namespace arduino.net
             return Name;
         }
 
-        private string GetValueRepresentation(long intValue)
+        private string GetCharRepresentation(byte[] value, bool signed)
         {
-            switch (ByteSize)
+            if (value == null || value.Length != 1) return "<invalid char>";
+                
+            return new string((char)value[0], 1);
+        }
+
+        private string GetIntRepresentation(byte[] value, bool signed)
+        {
+            long intValue = GetIntValue(value);
+
+            if (signed)
+            { 
+                switch (ByteSize)
+                {
+                    case 1: return ((sbyte)intValue).ToString();
+                    case 2: return ((Int16)intValue).ToString();
+                    case 4: return ((Int32)intValue).ToString();
+                }
+            }
+            else
             {
-                case 1: return ((byte)intValue).ToString();
-                case 2: return ((Int16)intValue).ToString();
-                case 4: return ((Int32)intValue).ToString();
+                switch (ByteSize)
+                {
+                    case 1: return ((byte)intValue).ToString();
+                    case 2: return ((UInt16)intValue).ToString();
+                    case 4: return ((UInt32)intValue).ToString();
+                }
             }
 
             return intValue.ToString();
+        }
+
+        protected float GetFloatValue(byte[] value)
+        {
+            if (value.Length != 4 || ByteSize != 4) return -1f;
+
+            return BitConverter.ToSingle(value, 0);
+        }
+
+        protected bool GetBoolValue(byte[] value)
+        {
+            if (ByteSize != 1 || value.Length != 1) return false;  // TODO: throw?
+
+            return value[0] > 0;
         }
 
         public static DwarfBaseType GetTypeFromIndex(Dictionary<int, DwarfObject> index, int key)
@@ -64,7 +101,7 @@ namespace arduino.net
         }
 
 
-        protected long GetIntFromBytes(byte[] value)
+        protected long GetIntValue(byte[] value)
         {
             int numBytes = (ByteSize == -1) ? value.Length : ByteSize;
             long intValue = 0;
@@ -141,7 +178,7 @@ namespace arduino.net
 
         public override string GetValueRepresentation(IDebugger debugger, byte[] rawValue)
         {
-            var pointerValue = GetIntFromBytes(rawValue);
+            var pointerValue = GetIntValue(rawValue);
             if (pointerValue == 0) return "<null>";
 
             return string.Format("0x{0:x}", pointerValue);
@@ -230,7 +267,7 @@ namespace arduino.net
             if (MemberType == null) return null;
 
             // Create a new Location Program to get the pointer value
-            var pointerValue = GetIntFromBytes(rawValue);
+            var pointerValue = GetIntValue(rawValue);
             if (pointerValue == 0) return null;
 
             var program = new List<string>();
