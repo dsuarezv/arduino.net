@@ -149,7 +149,7 @@ namespace arduino.net
 
             switch (node.TagType)
             {
-                case "typedef": break;
+                case "typedef": result = SetupNewObject(node, new DwarfTypeDefType()); break;
                 case "compile_unit": result = CreateCompileUnit(node); break;
                 case "base_type": result = SetupNewObject(node, new DwarfBaseType()); break;
                 case "const_type": result = SetupNewObject(node, new DwarfConstType()); break;

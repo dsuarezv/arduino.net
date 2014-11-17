@@ -437,7 +437,8 @@ namespace arduino.net
         private void DebuggerCheckbox_CheckedChanged()
         {
             IdeManager.Compiler.MarkAsDirty(BuildStage.NeedsBuild);
-            IdeManager.Compiler.Clean();
+            
+            if (Configuration.Instance.CheckRebuildBeforeRun) IdeManager.Compiler.Clean();
         }
 
         private void Debugger_StatusChanged(object sender, DebuggerStatus newState)

@@ -211,6 +211,7 @@ namespace arduino.net
 
         private static Regex RegExpr = new Regex(@"<[ ]*([0-9a-fA-F]+)> + DW_AT_([a-z_]+)\s*: *(.+)", RegexOptions.Compiled);
         private static Regex IndirectStringRegEx = new Regex(@"\(indirect string, offset: 0x[0-9a-fA-F]+\): (.+)", RegexOptions.Compiled);
+        private static Regex EncodingRegEx = new Regex(@"(?<encoding>[1-8])\s+\([a-z ]+\)");
 
         public int Id;
         public string Name;
@@ -249,6 +250,16 @@ namespace arduino.net
             if (m.Success) val = m.Groups[1].Value;
 
             return val.Trim(' ', '\t');
+        }
+
+        public int GetEncodingValue()
+        {
+            if (RawValue == null) return -1;
+
+            var m = EncodingRegEx.Match(RawValue);
+            if (!m.Success) return -1;
+
+            return m.Groups["encoding"].GetIntValue();
         }
 
         public int GetIntValue()
