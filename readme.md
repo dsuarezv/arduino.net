@@ -70,13 +70,14 @@ This is a software debugger, meaning that it will insert some code in your progr
 
 It will insert a call to DbgConnect() in your setup() function or generate one if none exists in your code. This call will setup the serial port and wait for the PC side to issue a "Run" command. 
 
-When you insert a breakpoint, a call to DbgBreak(uint8_t breakpointId) is inserted in the source before the existing code in that line. This call will save all the registers on the Arduino and send them through the serial port to the PC side, together with a signal indicating the a breakpoint is hit. The PC side of the debugger will use the registers information to find the current function and will also use them later to inspect variables if required. The registers are restored to their original state in th Arduino when the "Run" button is clicked. 
+When you insert a breakpoint, a call to DbgBreak(uint8_t breakpointId) is inserted in the source before the existing code in that line. This call will save all the registers on the Arduino and send them through the serial port to the PC side, together with a signal indicating the breakpoint is hit. The PC side of the debugger will use the registers information to find the current function and will also use them later to inspect variables if required. The registers are restored to their original state in the Arduino when the "Run" button is clicked. 
 
-Because there is some debuger code running in the Arduino, it may consume precious RAM memory when a brekapoint is it and the debugger is processing commands from the PC side. You can find the code of the debugger in the Arduino side inside the "debugger" directory. This code is only included in debug builds.
+Because there is some debugger code running in the Arduino, it may consume precious RAM memory when a brekapoint is hit and the debugger is processing commands from the PC side. You can find the code of the debugger in the Arduino side inside the "debugger" directory, in case you want to see exactly what's going on.This code is only included in debug builds.
 
 ## Known limitations
 
-* (software debugger) (being a realtime platform, putting breakpoints in the code may disrupt the operation of some programs. For instance, reading a sensor using a FIFO you may get FIFO overflows if you set a breakpoint in the middle of the reading loop, because the Arduino is stopped, but the sensor keeps producing data.)
+* (software debugger) 
+* (being a realtime platform, putting breakpoints in the code may disrupt the operation of some programs. For instance, reading a sensor using a FIFO you may get FIFO overflows if you set a breakpoint in the middle of the reading loop, because the Arduino is stopped, but the sensor keeps producing data.)
 * (code optimization is disabled for debug builds. This has an impact in the size of the code and quite possibly in the RAM used by the program)
 * (breakpoints can only be set inside functions. Putting them outside a function will throw a compiler error, since a function is being called in the middle of nowhere)
 * (sketches with multiple pde/ino files)
