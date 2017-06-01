@@ -135,7 +135,7 @@ namespace arduino.net
             if (ToolkitPath == null) ToolkitPath = DefaultToolkitPath;
 
             LibraryPaths.Add(Path.Combine(ToolkitPath, "libraries"));
-            LibraryPaths.Add(Path.Combine(SketchBookPath, "libraries"));
+            if (SketchBookPath != null) LibraryPaths.Add(Path.Combine(SketchBookPath, "libraries"));
 
             var configPath = Path.Combine(ToolkitPath, "hardware/arduino");
 
